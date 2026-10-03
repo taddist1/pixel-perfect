@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as JobsRouteImport } from './routes/jobs'
+import { Route as SeekersRouteImport } from './routes/seekers'
 import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticated/account'
 import { Route as AuthenticatedPostJobRouteImport } from './routes/_authenticated/post-job'
 
@@ -35,6 +36,11 @@ const JobsRoute = JobsRouteImport.update({
   path: '/jobs',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SeekersRoute = SeekersRouteImport.update({
+  id: '/seekers',
+  path: '/seekers',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedAccountRoute = AuthenticatedAccountRouteImport.update({
   id: '/account',
   path: '/account',
@@ -50,6 +56,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/jobs': typeof JobsRoute
+  '/seekers': typeof SeekersRoute
   '/account': typeof AuthenticatedAccountRoute
   '/post-job': typeof AuthenticatedPostJobRoute
 }
@@ -57,6 +64,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/jobs': typeof JobsRoute
+  '/seekers': typeof SeekersRoute
   '/account': typeof AuthenticatedAccountRoute
   '/post-job': typeof AuthenticatedPostJobRoute
 }
@@ -66,20 +74,22 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/jobs': typeof JobsRoute
+  '/seekers': typeof SeekersRoute
   '/_authenticated/account': typeof AuthenticatedAccountRoute
   '/_authenticated/post-job': typeof AuthenticatedPostJobRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/jobs' | '/account' | '/post-job'
+  fullPaths: '/' | '/auth' | '/jobs' | '/seekers' | '/account' | '/post-job'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/jobs' | '/account' | '/post-job'
+  to: '/' | '/auth' | '/jobs' | '/seekers' | '/account' | '/post-job'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
     | '/jobs'
+    | '/seekers'
     | '/_authenticated/account'
     | '/_authenticated/post-job'
   fileRoutesById: FileRoutesById
@@ -89,6 +99,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   JobsRoute: typeof JobsRoute
+  SeekersRoute: typeof SeekersRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -119,6 +130,13 @@ declare module '@tanstack/react-router' {
       path: '/jobs'
       fullPath: '/jobs'
       preLoaderRoute: typeof JobsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/seekers': {
+      id: '/seekers'
+      path: '/seekers'
+      fullPath: '/seekers'
+      preLoaderRoute: typeof SeekersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/account': {
@@ -156,6 +174,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   JobsRoute: JobsRoute,
+  SeekersRoute: SeekersRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
