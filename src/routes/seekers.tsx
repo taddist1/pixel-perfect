@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { whatsappUrl } from "@/lib/whatsapp";
 
 const T = "الكفاءات المتاحة — قهوتي";
 const D = "تصفح الباحثين عن عمل في قطاع المقاهي والمطاعم حسب المدينة: بارستا، ندلاء، تقنيو آلات القهوة ومهن مساندة.";
@@ -28,10 +29,12 @@ type Seeker = {
   profession: string | null;
   experience_years: number | null;
   avatar_url: string | null;
+  phone: string | null;
 };
 
 function Seekers() {
   const [city, setCity] = useState("الكل");
+  const [search, setSearch] = useState("");
   const [rows, setRows] = useState<Seeker[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -45,6 +48,11 @@ function Seekers() {
     });
   }, [city]);
 
+  const term = search.trim();
+  const filtered = rows.filter((s) =>
+    !term || [s.full_name ?? "", s.profession ?? "", s.city ?? ""].join(" ").includes(term)
+  );
+
   return (
     <div className="min-h-screen">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-5 py-5">
@@ -54,22 +62,30 @@ function Seekers() {
 
       <main className="mx-auto max-w-6xl px-5 pb-16 pt-6">
         <h1 className="text-3xl font-black md:text-4xl">الكفاءات المتاحة</h1>
-        <p className="mt-2 text-muted-foreground">باحثون عن عمل في قطاع المقاهي والمطاعم. تواصل معهم عبر الوظائف المنشورة.</p>
+        <p className="mt-2 text-muted-foreground">باحثون عن عمل في قطاع المقاهي والمطاعم. تواصل معهم مباشرة عبر واتساب.</p>
 
-        <select value={city} onChange={(e) => setCity(e.target.value)}
-          className="mt-6 rounded-full border bg-card px-4 py-2 text-sm font-bold">
-          {cities.map((c) => <option key={c}>{c}</option>)}
-        </select>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <select value={city} onChange={(e) => setCity(e.target.value)}
+            className="rounded-full border bg-card px-4 py-2 text-sm font-bold">
+            {cities.map((c) => <option key={c}>{c}</option>)}
+          </select>
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="🔍 ابحث بالاسم أو المهنة…"
+            className="flex-1 min-w-48 rounded-full border bg-card px-5 py-2 text-sm"
+          />
+        </div>
 
         {loading ? (
           <p className="mt-10 text-center text-muted-foreground">جارٍ التحميل…</p>
-        ) : rows.length === 0 ? (
+        ) : filtered.length === 0 ? (
           <div className="mt-10 rounded-2xl border p-10 text-center text-muted-foreground">
-            لا توجد كفاءات مسجلة حالياً{city !== "الكل" ? ` في ${city}` : ""}. كن أول من يسجل!
+            لا توجد كفاءات مطابقة حالياً{city !== "الكل" ? ` في ${city}` : ""}. كن أول من يسجل!
           </div>
         ) : (
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {rows.map((s) => (
+            {filtered.map((s) => (
               <div key={s.id} className="rounded-2xl border bg-card p-5">
                 <div className="flex items-center gap-3">
                   {s.avatar_url ? (
@@ -90,6 +106,16 @@ function Seekers() {
                     <span className="rounded-full bg-accent/20 px-3 py-1">خبرة {s.experience_years} سنة</span>
                   )}
                 </div>
+                {s.phone && (
+                  <a
+                    href={whatsappUrl(s.phone, `سلام ${s.full_name ?? ""}، شفت ملفك في منصة قهوتي وعندي فرصة عمل ليك.`)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-4 block rounded-full bg-primary px-4 py-2 text-center text-sm font-bold text-primary-foreground"
+                  >
+                    تواصل عبر واتساب
+                  </a>
+                )}
               </div>
             ))}
           </div>
