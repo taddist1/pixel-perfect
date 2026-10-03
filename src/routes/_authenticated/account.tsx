@@ -37,7 +37,9 @@ function Account() {
     e.preventDefault();
     if (!p) return;
     const { error } = await supabase.from("profiles").upsert({ id: user.id, ...p, updated_at: new Date().toISOString() });
-    setMsg(error ? "وقع خطأ، حاول مرة أخرى" : "تم الحفظ ✓");
+    if (error) return setMsg("وقع خطأ، حاول مرة أخرى");
+    setMsg("تم الحفظ ✓");
+    nav({ to: p.account_type === "owner" ? "/post-job" : "/jobs" });
   }
 
   if (!p) return <div className="p-10 text-center">...</div>;
@@ -82,7 +84,7 @@ function Account() {
             <input className={input} type="number" min={0} placeholder="سنوات الخبرة" value={p.experience_years ?? ""} onChange={(e) => set("experience_years", e.target.value ? Number(e.target.value) : null)} />
           </div>
         )}
-        <button className="w-full rounded-xl bg-primary py-3 font-black text-primary-foreground">حفظ</button>
+        <button className="w-full rounded-xl bg-primary py-3 font-black text-primary-foreground">{p.account_type === "owner" ? "حفظ ونشر وظيفة ←" : "حفظ وتصفح الوظائف ←"}</button>
         {msg && <p className="text-center text-sm">{msg}</p>}
       </form>
     </div>
