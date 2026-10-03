@@ -105,6 +105,7 @@ export type Database = {
           experience_years: number | null
           full_name: string | null
           id: string | null
+          phone: string | null
           profession: string | null
         }
         Insert: {
@@ -114,6 +115,7 @@ export type Database = {
           experience_years?: number | null
           full_name?: string | null
           id?: string | null
+          phone?: string | null
           profession?: string | null
         }
         Update: {
@@ -123,6 +125,7 @@ export type Database = {
           experience_years?: number | null
           full_name?: string | null
           id?: string | null
+          phone?: string | null
           profession?: string | null
         }
         Relationships: []

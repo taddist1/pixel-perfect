@@ -15,6 +15,13 @@
       "when": 1791064572603,
       "tag": "0001_public_seekers_view",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791065357228,
+      "tag": "0002_add_phone_to_public_seekers",
+      "breakpoints": true
     }
   ]
 }
