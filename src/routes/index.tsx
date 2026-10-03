@@ -74,6 +74,12 @@ function Index() {
         <div className="flex items-center gap-3">
           <Link to="/videos" className="rounded-full border border-border px-4 py-1.5 text-sm font-bold">الفيديوهات</Link>
           <Link to="/blog" className="rounded-full border border-border px-4 py-1.5 text-sm font-bold">المدونة</Link>
+          {isAdmin && (
+            <>
+              <Link to="/admin/videos" className="rounded-full border border-accent px-4 py-1.5 text-sm font-bold text-accent">إدارة الفيديوهات</Link>
+              <Link to="/admin/articles" className="rounded-full border border-accent px-4 py-1.5 text-sm font-bold text-accent">مولّد المقالات</Link>
+            </>
+          )}
           <Link to="/account" className="rounded-full bg-primary px-4 py-1.5 text-sm font-bold text-primary-foreground">حسابي</Link>
           <select value={city} onChange={(e) => setCity(e.target.value)}
             className="rounded-full border bg-card px-3 py-1.5 text-sm">
