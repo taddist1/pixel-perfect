@@ -1,0 +1,21 @@
+import { createServerFn } from "@tanstack/react-start";
+import { getRequest } from "@tanstack/react-start/server";
+import { z } from "zod";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+
+export const generateDraft = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ topic: z.string().trim().min(5).max(300) }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { data: isAdmin } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
+    if (!isAdmin) throw new Error("هاد الميزة خاصة بالمسؤولين.");
+    const { generateArticleDraft } = await import("./article-ai.server");
+    const draft = await generateArticleDraft(data.topic, getRequest().signal);
+    const { data: row, error } = await context.supabase
+      .from("article_drafts")
+      .insert({ topic: data.topic, ...draft })
+      .select()
+      .single();
+    if (error) throw new Error("تولّدات المسودة ولكن ما تسجلاتش: " + error.message);
+    return row;
+  });
