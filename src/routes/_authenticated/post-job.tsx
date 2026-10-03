@@ -10,7 +10,7 @@ export const Route = createFileRoute("/_authenticated/post-job")({
 
 function PostJob() {
   const nav = useNavigate();
-  const [f, setF] = useState({ title: "", business_name: "", city: cities[0], role: professions[0], schedule: schedules[0], salary: "", description: "", phone: "" });
+  const [f, setF] = useState({ title: "", business_name: "", city: cities[0]!, role: professions[0]!, schedule: schedules[0]!, salary: "", description: "", phone: "" });
   const [msg, setMsg] = useState("");
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => setF({ ...f, [k]: e.target.value });
   const input = "w-full rounded-xl border bg-card px-4 py-3";
