@@ -54,6 +54,16 @@ function AdminArticles() {
     qc.invalidateQueries({ queryKey: ["drafts"] });
   };
 
+  const togglePublish = async (id: string, publish: boolean) => {
+    setErr("");
+    try {
+      await pub({ data: { id, publish } });
+      qc.invalidateQueries({ queryKey: ["drafts"] });
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "وقع خطأ");
+    }
+  };
+
   return (
     <main dir="rtl" className="mx-auto max-w-3xl px-4 py-10">
       <Link to="/" className="text-sm text-muted-foreground">← الرئيسية</Link>
