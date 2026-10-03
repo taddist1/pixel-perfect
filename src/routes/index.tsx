@@ -36,6 +36,7 @@ function Index() {
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [jobsCount, setJobsCount] = useState(0);
   const [videos, setVideos] = useState<Tables<"educational_videos">[]>([]);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     supabase.from("public_seekers").select("profession").then(({ data }) => {
