@@ -46,7 +46,7 @@ function Index() {
   }, []);
 
   const totalSeekers = Object.values(counts).reduce((a, b) => a + b, 0);
-  const countFor = (match: string) => {
+  const countFor = (match: string): number => {
     if (!match) return Math.max(0, totalSeekers - roles.slice(0, 3).reduce((a, r) => a + countFor(r.match), 0));
     return Object.entries(counts).filter(([p]) => p.includes(match)).reduce((a, [, n]) => a + n, 0);
   };
