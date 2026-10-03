@@ -56,6 +56,7 @@ function Index() {
       <header className="mx-auto flex max-w-6xl items-center justify-between px-5 py-5">
         <span className="text-2xl font-black text-primary">قهوتي</span>
         <div className="flex items-center gap-3">
+          <Link to="/blog" className="rounded-full border border-border px-4 py-1.5 text-sm font-bold">المدونة</Link>
           <Link to="/account" className="rounded-full bg-primary px-4 py-1.5 text-sm font-bold text-primary-foreground">حسابي</Link>
           <select value={city} onChange={(e) => setCity(e.target.value)}
             className="rounded-full border bg-card px-3 py-1.5 text-sm">
