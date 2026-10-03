@@ -36,6 +36,7 @@ function Index() {
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [jobsCount, setJobsCount] = useState(0);
   const [videos, setVideos] = useState<Tables<"educational_videos">[]>([]);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     supabase.from("public_seekers").select("profession").then(({ data }) => {
@@ -52,6 +53,12 @@ function Index() {
     supabase.from("educational_videos").select("*").eq("is_published", true).order("created_at", { ascending: false }).limit(3).then(({ data }) => {
       setVideos(data ?? []);
     });
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) return;
+      supabase.from("user_roles").select("role").eq("user_id", user.id).eq("role", "admin").then(({ data }) => {
+        setIsAdmin((data?.length ?? 0) > 0);
+      });
+    });
   }, []);
 
   const totalSeekers = Object.values(counts).reduce((a, b) => a + b, 0);
@@ -67,6 +74,12 @@ function Index() {
         <div className="flex items-center gap-3">
           <Link to="/videos" className="rounded-full border border-border px-4 py-1.5 text-sm font-bold">الفيديوهات</Link>
           <Link to="/blog" className="rounded-full border border-border px-4 py-1.5 text-sm font-bold">المدونة</Link>
+          {isAdmin && (
+            <>
+              <Link to="/admin/videos" className="rounded-full border border-accent px-4 py-1.5 text-sm font-bold text-accent">إدارة الفيديوهات</Link>
+              <Link to="/admin/articles" className="rounded-full border border-accent px-4 py-1.5 text-sm font-bold text-accent">مولّد المقالات</Link>
+            </>
+          )}
           <Link to="/account" className="rounded-full bg-primary px-4 py-1.5 text-sm font-bold text-primary-foreground">حسابي</Link>
           <select value={city} onChange={(e) => setCity(e.target.value)}
             className="rounded-full border bg-card px-3 py-1.5 text-sm">
