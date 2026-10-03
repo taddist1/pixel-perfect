@@ -28,7 +28,7 @@ const SYSTEM = `أنت كاتب محتوى لمنصة "قهوتي" المغرب�
 {"title":"...","seo_title":"...","seo_description":"...","content":"..."}`;
 
 export async function generateArticleDraft(topic: string, signal?: AbortSignal): Promise<ArticleDraft> {
-  const apiKey = process.env.LOVABLE_API_KEY;
+  const apiKey = process.env['LOVABLE_API_KEY'];
   if (!apiKey) throw new Error("مفتاح الذكاء الاصطناعي غير مُعدّ.");
   const provider = createOpenAI({
     baseURL: GATEWAY,
