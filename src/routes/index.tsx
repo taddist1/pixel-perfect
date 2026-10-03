@@ -69,7 +69,7 @@ function Index() {
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {roles.map((r) => (
               <div key={r.t} className="rounded-2xl border border-primary-foreground/20 p-5">
-                <div className="text-4xl font-black text-accent">{r.n}</div>
+                <div className="text-4xl font-black text-primary-foreground">{r.n}</div>
                 <div className="mt-3 text-lg font-bold">{r.t}</div>
                 <div className="text-sm opacity-75">{r.d}</div>
               </div>
