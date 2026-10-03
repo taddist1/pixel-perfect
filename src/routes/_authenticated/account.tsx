@@ -16,8 +16,12 @@ function Account() {
   const [p, setP] = useState<P | null>(null);
   const [avatar, setAvatar] = useState<string>();
   const [msg, setMsg] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
+    supabase.from("user_roles").select("role").eq("user_id", user.id).eq("role", "admin").then(({ data }) => {
+      setIsAdmin((data?.length ?? 0) > 0);
+    });
     supabase.from("profiles").select("*").eq("id", user.id).maybeSingle().then(({ data }) => {
       const v = (data ?? { full_name: null, city: null, phone: null, account_type: null, profession: null, experience_years: null, avatar_url: null }) as P;
       setP(v);
