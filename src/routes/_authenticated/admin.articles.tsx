@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { generateDraft } from "@/lib/articles.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/articles")({
-  head: () => ({ meta: [{ title: "مولّد المقالات — إدارة قهوتي" }, { name: "description", content: "أداة داخلية لتوليد مسودات مقالات بالدارجة." }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: "مولّد المقالات — إدارة قهوتي" }, { name: "description", content: "أداة داخلية لتوليد مسودات مقالات بالدارجة." }, { name: "robots", content: "noindex" }, { property: "og:title", content: "مولّد المقالات — إدارة قهوتي" }, { property: "og:description", content: "أداة داخلية لتوليد مسودات مقالات بالدارجة." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: AdminArticles,
 });
 
@@ -56,7 +56,10 @@ function AdminArticles() {
   return (
     <main dir="rtl" className="mx-auto max-w-3xl px-4 py-10">
       <Link to="/" className="text-sm text-muted-foreground">← الرئيسية</Link>
-      <h1 className="mt-4 text-3xl font-black">مولّد المقالات</h1>
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-3xl font-black">مولّد المقالات</h1>
+        <Link to="/admin/videos" className="rounded-md border border-border px-4 py-2 text-sm font-bold">إدارة الفيديوهات</Link>
+      </div>
       <p className="mt-1 text-muted-foreground">كتب موضوع المقال، والذكاء الاصطناعي غادي يكتب مسودة بالدارجة مع عنوان ووصف SEO.</p>
 
       <form onSubmit={submit} className="mt-6 space-y-3 rounded-2xl border border-border bg-card p-5">
