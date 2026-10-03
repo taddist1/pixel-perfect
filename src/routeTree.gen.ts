@@ -14,11 +14,13 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as JobsRouteImport } from './routes/jobs'
 import { Route as SeekersRouteImport } from './routes/seekers'
+import { Route as VideosRouteImport } from './routes/videos'
 import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticated/account'
 import { Route as AuthenticatedPostJobRouteImport } from './routes/_authenticated/post-job'
 import { Route as BlogIndexRouteImport } from './routes/blog.index'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as AuthenticatedAdminArticlesRouteImport } from './routes/_authenticated/admin.articles'
+import { Route as AuthenticatedAdminVideosRouteImport } from './routes/_authenticated/admin.videos'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -42,6 +44,11 @@ const JobsRoute = JobsRouteImport.update({
 const SeekersRoute = SeekersRouteImport.update({
   id: '/seekers',
   path: '/seekers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VideosRoute = VideosRouteImport.update({
+  id: '/videos',
+  path: '/videos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAccountRoute = AuthenticatedAccountRouteImport.update({
@@ -70,28 +77,38 @@ const AuthenticatedAdminArticlesRoute =
     path: '/admin/articles',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminVideosRoute =
+  AuthenticatedAdminVideosRouteImport.update({
+    id: '/admin/videos',
+    path: '/admin/videos',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/jobs': typeof JobsRoute
   '/seekers': typeof SeekersRoute
+  '/videos': typeof VideosRoute
   '/account': typeof AuthenticatedAccountRoute
   '/post-job': typeof AuthenticatedPostJobRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/blog/': typeof BlogIndexRoute
   '/admin/articles': typeof AuthenticatedAdminArticlesRoute
+  '/admin/videos': typeof AuthenticatedAdminVideosRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/jobs': typeof JobsRoute
   '/seekers': typeof SeekersRoute
+  '/videos': typeof VideosRoute
   '/account': typeof AuthenticatedAccountRoute
   '/post-job': typeof AuthenticatedPostJobRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/blog': typeof BlogIndexRoute
   '/admin/articles': typeof AuthenticatedAdminArticlesRoute
+  '/admin/videos': typeof AuthenticatedAdminVideosRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -100,11 +117,13 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/jobs': typeof JobsRoute
   '/seekers': typeof SeekersRoute
+  '/videos': typeof VideosRoute
   '/_authenticated/account': typeof AuthenticatedAccountRoute
   '/_authenticated/post-job': typeof AuthenticatedPostJobRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/blog/': typeof BlogIndexRoute
   '/_authenticated/admin/articles': typeof AuthenticatedAdminArticlesRoute
+  '/_authenticated/admin/videos': typeof AuthenticatedAdminVideosRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -113,22 +132,26 @@ export interface FileRouteTypes {
     | '/auth'
     | '/jobs'
     | '/seekers'
+    | '/videos'
     | '/account'
     | '/post-job'
     | '/blog/$slug'
     | '/blog/'
     | '/admin/articles'
+    | '/admin/videos'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
     | '/jobs'
     | '/seekers'
+    | '/videos'
     | '/account'
     | '/post-job'
     | '/blog/$slug'
     | '/blog'
     | '/admin/articles'
+    | '/admin/videos'
   id:
     | '__root__'
     | '/'
@@ -136,11 +159,13 @@ export interface FileRouteTypes {
     | '/auth'
     | '/jobs'
     | '/seekers'
+    | '/videos'
     | '/_authenticated/account'
     | '/_authenticated/post-job'
     | '/blog/$slug'
     | '/blog/'
     | '/_authenticated/admin/articles'
+    | '/_authenticated/admin/videos'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -149,6 +174,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   JobsRoute: typeof JobsRoute
   SeekersRoute: typeof SeekersRoute
+  VideosRoute: typeof VideosRoute
   BlogSlugRoute: typeof BlogSlugRoute
   BlogIndexRoute: typeof BlogIndexRoute
 }
@@ -190,6 +216,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SeekersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/videos': {
+      id: '/videos'
+      path: '/videos'
+      fullPath: '/videos'
+      preLoaderRoute: typeof VideosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/account': {
       id: '/_authenticated/account'
       path: '/account'
@@ -225,6 +258,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminArticlesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/videos': {
+      id: '/_authenticated/admin/videos'
+      path: '/admin/videos'
+      fullPath: '/admin/videos'
+      preLoaderRoute: typeof AuthenticatedAdminVideosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -232,12 +272,14 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAccountRoute: typeof AuthenticatedAccountRoute
   AuthenticatedPostJobRoute: typeof AuthenticatedPostJobRoute
   AuthenticatedAdminArticlesRoute: typeof AuthenticatedAdminArticlesRoute
+  AuthenticatedAdminVideosRoute: typeof AuthenticatedAdminVideosRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAccountRoute: AuthenticatedAccountRoute,
   AuthenticatedPostJobRoute: AuthenticatedPostJobRoute,
   AuthenticatedAdminArticlesRoute: AuthenticatedAdminArticlesRoute,
+  AuthenticatedAdminVideosRoute: AuthenticatedAdminVideosRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -249,6 +291,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   JobsRoute: JobsRoute,
   SeekersRoute: SeekersRoute,
+  VideosRoute: VideosRoute,
   BlogSlugRoute: BlogSlugRoute,
   BlogIndexRoute: BlogIndexRoute,
 }

@@ -47,6 +47,42 @@ export type Database = {
         }
         Relationships: []
       }
+      educational_videos: {
+        Row: {
+          category: string
+          created_at: string
+          created_by: string | null
+          description: string
+          id: string
+          is_published: boolean
+          title: string
+          youtube_id: string
+          youtube_url: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          id?: string
+          is_published?: boolean
+          title: string
+          youtube_id: string
+          youtube_url: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          id?: string
+          is_published?: boolean
+          title?: string
+          youtube_id?: string
+          youtube_url?: string
+        }
+        Relationships: []
+      }
       jobs: {
         Row: {
           business_name: string

@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Educational videos are stored as validated YouTube IDs and URLs in `educational_videos`; public reads only published rows, while database policies restrict management to admins, because media stays on YouTube and permissions must remain server-enforced.
