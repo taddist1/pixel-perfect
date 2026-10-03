@@ -97,7 +97,36 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      public_seekers: {
+        Row: {
+          avatar_url: string | null
+          city: string | null
+          created_at: string | null
+          experience_years: number | null
+          full_name: string | null
+          id: string | null
+          profession: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          city?: string | null
+          created_at?: string | null
+          experience_years?: number | null
+          full_name?: string | null
+          id?: string | null
+          profession?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          city?: string | null
+          created_at?: string | null
+          experience_years?: number | null
+          full_name?: string | null
+          id?: string | null
+          profession?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never

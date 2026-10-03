@@ -8,6 +8,13 @@
       "when": 1791063645666,
       "tag": "0000_profiles_jobs_avatars",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791064572603,
+      "tag": "0001_public_seekers_view",
+      "breakpoints": true
     }
   ]
 }
