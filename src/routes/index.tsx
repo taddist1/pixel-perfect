@@ -62,7 +62,10 @@ function Index() {
 
       <section className="bg-primary py-16 text-primary-foreground">
         <div className="mx-auto max-w-6xl px-5">
-          <h2 className="text-3xl font-black">الكفاءات المتاحة في {city}</h2>
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <h2 className="text-3xl font-black">الكفاءات المتاحة في {city}</h2>
+            <Link to="/seekers" className="rounded-full bg-accent px-5 py-2 text-sm font-black text-accent-foreground">تصفح الكفاءات ←</Link>
+          </div>
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {roles.map((r) => (
               <div key={r.t} className="rounded-2xl border border-primary-foreground/20 p-5">
