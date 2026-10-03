@@ -88,7 +88,10 @@ function AdminArticles() {
           <div key={d.id} className="rounded-2xl border border-border bg-card p-5">
             <button onClick={() => setOpenId(openId === d.id ? null : d.id)} className="w-full text-right">
               <h3 className="text-lg font-black">{d.title}</h3>
-              <p className="text-xs text-muted-foreground">الموضوع: {d.topic}</p>
+              <p className="text-xs text-muted-foreground">
+                الموضوع: {d.topic}
+                {d.is_published && <span className="mr-2 rounded-full bg-primary px-2 py-0.5 text-primary-foreground">منشور ✓</span>}
+              </p>
             </button>
             {openId === d.id && (
               <div className="mt-4 space-y-3">
