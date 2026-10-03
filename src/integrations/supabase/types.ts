@@ -14,7 +14,87 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      jobs: {
+        Row: {
+          business_name: string
+          city: string
+          created_at: string
+          description: string | null
+          id: string
+          owner_id: string
+          phone: string | null
+          role: string
+          salary: string | null
+          schedule: string
+          title: string
+        }
+        Insert: {
+          business_name: string
+          city: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          owner_id?: string
+          phone?: string | null
+          role: string
+          salary?: string | null
+          schedule?: string
+          title: string
+        }
+        Update: {
+          business_name?: string
+          city?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          owner_id?: string
+          phone?: string | null
+          role?: string
+          salary?: string | null
+          schedule?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          account_type: Database["public"]["Enums"]["account_type"] | null
+          avatar_url: string | null
+          city: string | null
+          created_at: string
+          experience_years: number | null
+          full_name: string | null
+          id: string
+          phone: string | null
+          profession: string | null
+          updated_at: string
+        }
+        Insert: {
+          account_type?: Database["public"]["Enums"]["account_type"] | null
+          avatar_url?: string | null
+          city?: string | null
+          created_at?: string
+          experience_years?: number | null
+          full_name?: string | null
+          id: string
+          phone?: string | null
+          profession?: string | null
+          updated_at?: string
+        }
+        Update: {
+          account_type?: Database["public"]["Enums"]["account_type"] | null
+          avatar_url?: string | null
+          city?: string | null
+          created_at?: string
+          experience_years?: number | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          profession?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +103,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      account_type: "owner" | "seeker"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +230,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      account_type: ["owner", "seeker"],
+    },
   },
 } as const

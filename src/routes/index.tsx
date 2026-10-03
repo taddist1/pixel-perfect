@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 
 const T = "قهوتي — منصة توظيف وخدمات المقاهي والمطاعم في المغرب";
@@ -32,6 +32,7 @@ function Index() {
       <header className="mx-auto flex max-w-6xl items-center justify-between px-5 py-5">
         <span className="text-2xl font-black text-primary">قهوتي</span>
         <div className="flex items-center gap-3">
+          <Link to="/account" className="rounded-full bg-primary px-4 py-1.5 text-sm font-bold text-primary-foreground">حسابي</Link>
           <select value={city} onChange={(e) => setCity(e.target.value)}
             className="rounded-full border bg-card px-3 py-1.5 text-sm">
             {cities.map((c) => <option key={c}>{c}</option>)}
@@ -48,14 +49,14 @@ function Index() {
         </h1>
         <p className="mt-5 max-w-xl text-lg text-muted-foreground">{D}</p>
         <div className="mt-8 grid gap-4 sm:grid-cols-2 md:max-w-2xl">
-          <button className="rounded-2xl bg-primary p-6 text-right text-primary-foreground transition hover:-translate-y-1">
+          <Link to="/post-job" className="rounded-2xl bg-primary p-6 text-right text-primary-foreground transition hover:-translate-y-1">
             <div className="text-xl font-black">أنا صاحب مشروع</div>
             <div className="mt-1 text-sm opacity-80">أنشر وظيفة أو اطلب تقني إصلاح</div>
-          </button>
-          <button className="rounded-2xl border-2 border-primary bg-card p-6 text-right transition hover:-translate-y-1">
+          </Link>
+          <Link to="/jobs" className="rounded-2xl border-2 border-primary bg-card p-6 text-right transition hover:-translate-y-1">
             <div className="text-xl font-black">أبحث عن عمل</div>
             <div className="mt-1 text-sm text-muted-foreground">فرص قريبة منك وتقييم يبني سمعتك</div>
-          </button>
+          </Link>
         </div>
       </section>
 
