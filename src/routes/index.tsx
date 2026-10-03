@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const T = "قهوتي — منصة توظيف وخدمات المقاهي والمطاعم في المغرب";
 const D = "اعثر على بارستا، نادل أو تقني إصلاح آلات القهوة في مدينتك. تسجيل مجاني 100% في كل مدن المغرب.";
@@ -18,15 +19,38 @@ export const Route = createFileRoute("/")({
 
 const cities = ["الدار البيضاء", "الرباط", "مراكش", "فاس", "طنجة", "أكادير", "مكناس", "وجدة", "تطوان", "العيون"];
 const roles = [
-  { t: "تقني آلات القهوة", d: "إصلاح وصيانة عاجلة قريبة منك", n: 48 },
-  { t: "بارستا", d: "دوام كامل، جزئي أو ورديات", n: 132 },
-  { t: "سرباي / نادل", d: "عمّال خدمة بسمعة موثّقة", n: 210 },
-  { t: "مهن مساندة", d: "تحميص، نظافة، توصيل، حراسة", n: 87 },
+  { t: "تقني آلات القهوة", d: "إصلاح وصيانة عاجلة قريبة منك", match: "تقني" },
+  { t: "بارستا", d: "دوام كامل، جزئي أو ورديات", match: "باريستا" },
+  { t: "سرباي / نادل", d: "عمّال خدمة بسمعة موثّقة", match: "نادل" },
+  { t: "مهن مساندة", d: "تحميص، نظافة، توصيل، حراسة", match: "" },
 ];
 
 function Index() {
   const [city, setCity] = useState(cities[0]);
   const [lang, setLang] = useState<"ar" | "fr">("ar");
+  const [counts, setCounts] = useState<Record<string, number>>({});
+  const [jobsCount, setJobsCount] = useState(0);
+
+  useEffect(() => {
+    supabase.from("public_seekers").select("profession").then(({ data }) => {
+      const c: Record<string, number> = {};
+      for (const r of data ?? []) {
+        const p = (r.profession ?? "").trim();
+        if (p) c[p] = (c[p] ?? 0) + 1;
+      }
+      setCounts(c);
+    });
+    supabase.from("jobs").select("id", { count: "exact", head: true }).then(({ count }) => {
+      setJobsCount(count ?? 0);
+    });
+  }, []);
+
+  const totalSeekers = Object.values(counts).reduce((a, b) => a + b, 0);
+  const countFor = (match: string): number => {
+    if (!match) return Math.max(0, totalSeekers - roles.slice(0, 3).reduce((a, r) => a + countFor(r.match), 0));
+    return Object.entries(counts).filter(([p]) => p.includes(match)).reduce((a, [, n]) => a + n, 0);
+  };
+
   return (
     <div className="min-h-screen">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-5 py-5">
@@ -55,7 +79,9 @@ function Index() {
           </Link>
           <Link to="/jobs" className="rounded-2xl border-2 border-primary bg-card p-6 text-right transition hover:-translate-y-1">
             <div className="text-xl font-black">أبحث عن عمل</div>
-            <div className="mt-1 text-sm text-muted-foreground">فرص قريبة منك وتقييم يبني سمعتك</div>
+            <div className="mt-1 text-sm text-muted-foreground">
+              {jobsCount > 0 ? `${jobsCount} وظيفة منشورة الآن` : "فرص قريبة منك وتقييم يبني سمعتك"}
+            </div>
           </Link>
         </div>
       </section>
@@ -69,7 +95,7 @@ function Index() {
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {roles.map((r) => (
               <div key={r.t} className="rounded-2xl border border-primary-foreground/20 p-5">
-                <div className="text-4xl font-black text-primary-foreground">{r.n}</div>
+                <div className="text-4xl font-black text-primary-foreground">{countFor(r.match)}</div>
                 <div className="mt-3 text-lg font-bold">{r.t}</div>
                 <div className="text-sm opacity-75">{r.d}</div>
               </div>
@@ -80,7 +106,7 @@ function Index() {
 
       <section className="mx-auto grid max-w-6xl gap-6 px-5 py-16 md:grid-cols-3">
         {[["مجاني 100%", "لا رسوم على التسجيل أو التوثيق أو التقديم."],
-          ["مشاريع موثّقة", "كل إعلان يُراجع قبل النشر بشارة توثيق."],
+          ["تواصل مباشر", "زر واتساب على كل وظيفة وكل كفاءة — بلا وسيط."],
           ["12 جهة · 75 إقليم", "من الدار البيضاء إلى أصغر مدينة مغربية."]].map(([a, b]) => (
           <div key={a}><h3 className="text-xl font-black text-primary">{a}</h3><p className="mt-2 text-muted-foreground">{b}</p></div>
         ))}
