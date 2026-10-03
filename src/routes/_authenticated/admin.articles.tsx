@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { generateDraft } from "@/lib/articles.functions";
+import { generateDraft, setDraftPublished } from "@/lib/articles.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/articles")({
   head: () => ({ meta: [{ title: "مولّد المقالات — إدارة قهوتي" }, { name: "description", content: "أداة داخلية لتوليد مسودات مقالات بالدارجة." }, { name: "robots", content: "noindex" }, { property: "og:title", content: "مولّد المقالات — إدارة قهوتي" }, { property: "og:description", content: "أداة داخلية لتوليد مسودات مقالات بالدارجة." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
@@ -13,6 +13,7 @@ export const Route = createFileRoute("/_authenticated/admin/articles")({
 function AdminArticles() {
   const qc = useQueryClient();
   const gen = useServerFn(generateDraft);
+  const pub = useServerFn(setDraftPublished);
   const [topic, setTopic] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
