@@ -100,7 +100,15 @@ function AdminArticles() {
                   <p className="mt-1"><b>وصف SEO:</b> {d.seo_description}</p>
                 </div>
                 <div className="whitespace-pre-wrap leading-8">{d.content}</div>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
+                  {d.is_published ? (
+                    <>
+                      <Link to="/blog/$slug" params={{ slug: d.slug! }} className="rounded-full bg-primary px-4 py-1.5 text-sm font-bold text-primary-foreground">شوف المقال فالمدونة ←</Link>
+                      <button onClick={() => togglePublish(d.id, false)} className="rounded-full border border-border px-4 py-1.5 text-sm font-bold">سحب من المدونة</button>
+                    </>
+                  ) : (
+                    <button onClick={() => togglePublish(d.id, true)} className="rounded-full bg-primary px-4 py-1.5 text-sm font-bold text-primary-foreground">انشر فالمدونة</button>
+                  )}
                   <button onClick={() => navigator.clipboard.writeText(`${d.title}\n\n${d.content}`)} className="rounded-full border border-border px-4 py-1.5 text-sm font-bold">نسخ</button>
                   <button onClick={() => remove(d.id)} className="rounded-full bg-accent px-4 py-1.5 text-sm font-bold text-accent-foreground">حذف</button>
                 </div>
