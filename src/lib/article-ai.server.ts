@@ -41,7 +41,7 @@ export async function generateArticleDraft(topic: string, signal?: AbortSignal):
     model: provider.responses(MODEL),
     system: SYSTEM,
     prompt: `موضوع المقال: ${topic}`,
-    abortSignal: signal,
+    ...(signal ? { abortSignal: signal } : {}),
     onError: ({ error }) => { streamError = error; },
     providerOptions: {
       openai: {
