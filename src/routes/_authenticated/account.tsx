@@ -16,8 +16,12 @@ function Account() {
   const [p, setP] = useState<P | null>(null);
   const [avatar, setAvatar] = useState<string>();
   const [msg, setMsg] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
+    supabase.from("user_roles").select("role").eq("user_id", user.id).eq("role", "admin").then(({ data }) => {
+      setIsAdmin((data?.length ?? 0) > 0);
+    });
     supabase.from("profiles").select("*").eq("id", user.id).maybeSingle().then(({ data }) => {
       const v = (data ?? { full_name: null, city: null, phone: null, account_type: null, profession: null, experience_years: null, avatar_url: null }) as P;
       setP(v);
@@ -57,6 +61,15 @@ function Account() {
         </div>
       </div>
       <h1 className="mt-8 text-3xl font-black">ملفي الشخصي</h1>
+      {isAdmin && (
+        <div className="mt-4 rounded-2xl border-2 border-accent bg-card p-4">
+          <p className="text-sm font-black text-accent">لوحة الإدارة</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Link to="/admin/articles" className="rounded-full bg-primary px-4 py-2 text-sm font-bold text-primary-foreground">مولّد المقالات</Link>
+            <Link to="/admin/videos" className="rounded-full bg-primary px-4 py-2 text-sm font-bold text-primary-foreground">إدارة الفيديوهات</Link>
+          </div>
+        </div>
+      )}
       <form onSubmit={save} className="mt-6 space-y-4 rounded-3xl border bg-card p-6">
         <label className="flex items-center gap-4">
           <div className="h-20 w-20 overflow-hidden rounded-full bg-muted">{avatar && <img src={avatar} alt="الصورة الشخصية" className="h-full w-full object-cover" />}</div>
