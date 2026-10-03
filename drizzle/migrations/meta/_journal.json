@@ -36,6 +36,13 @@
       "when": 1791067105011,
       "tag": "0004_create_educational_videos",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791067962993,
+      "tag": "0005_publish_article_drafts",
+      "breakpoints": true
     }
   ]
 }

@@ -20,8 +20,11 @@ export type Database = {
           content: string
           created_at: string
           id: string
+          is_published: boolean
+          published_at: string | null
           seo_description: string
           seo_title: string
+          slug: string | null
           title: string
           topic: string
         }
@@ -30,8 +33,11 @@ export type Database = {
           content: string
           created_at?: string
           id?: string
+          is_published?: boolean
+          published_at?: string | null
           seo_description: string
           seo_title: string
+          slug?: string | null
           title: string
           topic: string
         }
@@ -40,8 +46,11 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          is_published?: boolean
+          published_at?: string | null
           seo_description?: string
           seo_title?: string
+          slug?: string | null
           title?: string
           topic?: string
         }
