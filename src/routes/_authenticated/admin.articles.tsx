@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { generateDraft } from "@/lib/articles.functions";
+import { generateDraft, setDraftPublished } from "@/lib/articles.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/articles")({
   head: () => ({ meta: [{ title: "مولّد المقالات — إدارة قهوتي" }, { name: "description", content: "أداة داخلية لتوليد مسودات مقالات بالدارجة." }, { name: "robots", content: "noindex" }, { property: "og:title", content: "مولّد المقالات — إدارة قهوتي" }, { property: "og:description", content: "أداة داخلية لتوليد مسودات مقالات بالدارجة." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
@@ -13,6 +13,7 @@ export const Route = createFileRoute("/_authenticated/admin/articles")({
 function AdminArticles() {
   const qc = useQueryClient();
   const gen = useServerFn(generateDraft);
+  const pub = useServerFn(setDraftPublished);
   const [topic, setTopic] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
@@ -53,6 +54,16 @@ function AdminArticles() {
     qc.invalidateQueries({ queryKey: ["drafts"] });
   };
 
+  const togglePublish = async (id: string, publish: boolean) => {
+    setErr("");
+    try {
+      await pub({ data: { id, publish } });
+      qc.invalidateQueries({ queryKey: ["drafts"] });
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "وقع خطأ");
+    }
+  };
+
   return (
     <main dir="rtl" className="mx-auto max-w-3xl px-4 py-10">
       <Link to="/" className="text-sm text-muted-foreground">← الرئيسية</Link>
@@ -77,7 +88,10 @@ function AdminArticles() {
           <div key={d.id} className="rounded-2xl border border-border bg-card p-5">
             <button onClick={() => setOpenId(openId === d.id ? null : d.id)} className="w-full text-right">
               <h3 className="text-lg font-black">{d.title}</h3>
-              <p className="text-xs text-muted-foreground">الموضوع: {d.topic}</p>
+              <p className="text-xs text-muted-foreground">
+                الموضوع: {d.topic}
+                {d.is_published && <span className="mr-2 rounded-full bg-primary px-2 py-0.5 text-primary-foreground">منشور ✓</span>}
+              </p>
             </button>
             {openId === d.id && (
               <div className="mt-4 space-y-3">
@@ -86,7 +100,15 @@ function AdminArticles() {
                   <p className="mt-1"><b>وصف SEO:</b> {d.seo_description}</p>
                 </div>
                 <div className="whitespace-pre-wrap leading-8">{d.content}</div>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
+                  {d.is_published ? (
+                    <>
+                      <Link to="/blog/$slug" params={{ slug: d.slug! }} className="rounded-full bg-primary px-4 py-1.5 text-sm font-bold text-primary-foreground">شوف المقال فالمدونة ←</Link>
+                      <button onClick={() => togglePublish(d.id, false)} className="rounded-full border border-border px-4 py-1.5 text-sm font-bold">سحب من المدونة</button>
+                    </>
+                  ) : (
+                    <button onClick={() => togglePublish(d.id, true)} className="rounded-full bg-primary px-4 py-1.5 text-sm font-bold text-primary-foreground">انشر فالمدونة</button>
+                  )}
                   <button onClick={() => navigator.clipboard.writeText(`${d.title}\n\n${d.content}`)} className="rounded-full border border-border px-4 py-1.5 text-sm font-bold">نسخ</button>
                   <button onClick={() => remove(d.id)} className="rounded-full bg-accent px-4 py-1.5 text-sm font-bold text-accent-foreground">حذف</button>
                 </div>
