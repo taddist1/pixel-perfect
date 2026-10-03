@@ -16,6 +16,8 @@ import { Route as JobsRouteImport } from './routes/jobs'
 import { Route as SeekersRouteImport } from './routes/seekers'
 import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticated/account'
 import { Route as AuthenticatedPostJobRouteImport } from './routes/_authenticated/post-job'
+import { Route as BlogIndexRouteImport } from './routes/blog.index'
+import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -51,6 +53,16 @@ const AuthenticatedPostJobRoute = AuthenticatedPostJobRouteImport.update({
   path: '/post-job',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const BlogIndexRoute = BlogIndexRouteImport.update({
+  id: '/blog/',
+  path: '/blog/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogSlugRoute = BlogSlugRouteImport.update({
+  id: '/blog/$slug',
+  path: '/blog/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -59,6 +71,8 @@ export interface FileRoutesByFullPath {
   '/seekers': typeof SeekersRoute
   '/account': typeof AuthenticatedAccountRoute
   '/post-job': typeof AuthenticatedPostJobRoute
+  '/blog/$slug': typeof BlogSlugRoute
+  '/blog/': typeof BlogIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -67,6 +81,8 @@ export interface FileRoutesByTo {
   '/seekers': typeof SeekersRoute
   '/account': typeof AuthenticatedAccountRoute
   '/post-job': typeof AuthenticatedPostJobRoute
+  '/blog/$slug': typeof BlogSlugRoute
+  '/blog': typeof BlogIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -77,12 +93,30 @@ export interface FileRoutesById {
   '/seekers': typeof SeekersRoute
   '/_authenticated/account': typeof AuthenticatedAccountRoute
   '/_authenticated/post-job': typeof AuthenticatedPostJobRoute
+  '/blog/$slug': typeof BlogSlugRoute
+  '/blog/': typeof BlogIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/jobs' | '/seekers' | '/account' | '/post-job'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/jobs'
+    | '/seekers'
+    | '/account'
+    | '/post-job'
+    | '/blog/$slug'
+    | '/blog/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/jobs' | '/seekers' | '/account' | '/post-job'
+  to:
+    | '/'
+    | '/auth'
+    | '/jobs'
+    | '/seekers'
+    | '/account'
+    | '/post-job'
+    | '/blog/$slug'
+    | '/blog'
   id:
     | '__root__'
     | '/'
@@ -92,6 +126,8 @@ export interface FileRouteTypes {
     | '/seekers'
     | '/_authenticated/account'
     | '/_authenticated/post-job'
+    | '/blog/$slug'
+    | '/blog/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -100,6 +136,8 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   JobsRoute: typeof JobsRoute
   SeekersRoute: typeof SeekersRoute
+  BlogSlugRoute: typeof BlogSlugRoute
+  BlogIndexRoute: typeof BlogIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -153,6 +191,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPostJobRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/blog/': {
+      id: '/blog/'
+      path: '/blog'
+      fullPath: '/blog/'
+      preLoaderRoute: typeof BlogIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog/$slug': {
+      id: '/blog/$slug'
+      path: '/blog/$slug'
+      fullPath: '/blog/$slug'
+      preLoaderRoute: typeof BlogSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -175,6 +227,8 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   JobsRoute: JobsRoute,
   SeekersRoute: SeekersRoute,
+  BlogSlugRoute: BlogSlugRoute,
+  BlogIndexRoute: BlogIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
