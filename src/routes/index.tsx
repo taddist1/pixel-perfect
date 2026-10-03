@@ -53,6 +53,12 @@ function Index() {
     supabase.from("educational_videos").select("*").eq("is_published", true).order("created_at", { ascending: false }).limit(3).then(({ data }) => {
       setVideos(data ?? []);
     });
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) return;
+      supabase.from("user_roles").select("role").eq("user_id", user.id).eq("role", "admin").then(({ data }) => {
+        setIsAdmin((data?.length ?? 0) > 0);
+      });
+    });
   }, []);
 
   const totalSeekers = Object.values(counts).reduce((a, b) => a + b, 0);
