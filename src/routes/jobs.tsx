@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { cities } from "@/lib/constants";
+import { whatsappUrl } from "@/lib/whatsapp";
 
 const T = "وظائف المقاهي والمطاعم في المغرب — قهوتي";
 const D = "تصفح آخر عروض العمل للبارستا، النادل والطباخ في مدينتك.";
@@ -14,6 +15,7 @@ export const Route = createFileRoute("/jobs")({
 
 function Jobs() {
   const [city, setCity] = useState("");
+  const [search, setSearch] = useState("");
   const { data, isLoading } = useQuery({
     queryKey: ["jobs", city],
     queryFn: async () => {
@@ -23,6 +25,11 @@ function Jobs() {
       return data ?? [];
     },
   });
+
+  const term = search.trim();
+  const filtered = (data ?? []).filter((j) =>
+    !term || [j.title, j.role, j.business_name, j.description ?? ""].join(" ").includes(term)
+  );
 
   return (
     <div className="mx-auto max-w-4xl px-5 py-8">
@@ -36,10 +43,16 @@ function Jobs() {
           <option value="">كل المدن</option>{cities.map((c) => <option key={c}>{c}</option>)}
         </select>
       </div>
+      <input
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        placeholder="🔍 ابحث: باريستا، نادل، طباخ…"
+        className="mt-4 w-full rounded-full border bg-card px-5 py-2.5 text-sm"
+      />
       <div className="mt-6 space-y-4">
         {isLoading && <p>...</p>}
-        {data?.length === 0 && <p className="rounded-2xl border p-8 text-center text-muted-foreground">لا توجد وظائف حالياً. كن أول من ينشر!</p>}
-        {data?.map((j) => (
+        {!isLoading && filtered.length === 0 && <p className="rounded-2xl border p-8 text-center text-muted-foreground">لا توجد وظائف مطابقة حالياً. كن أول من ينشر!</p>}
+        {filtered.map((j) => (
           <div key={j.id} className="rounded-2xl border bg-card p-5">
             <div className="flex flex-wrap items-start justify-between gap-2">
               <div>
@@ -49,9 +62,21 @@ function Jobs() {
               <span className="rounded-full bg-accent/30 px-3 py-1 text-xs font-bold">{j.role} · {j.schedule}</span>
             </div>
             {j.description && <p className="mt-3 text-sm">{j.description}</p>}
-            <div className="mt-3 flex gap-4 text-sm font-bold">
+            <div className="mt-3 flex flex-wrap items-center gap-4 text-sm font-bold">
               {j.salary && <span>💰 {j.salary}</span>}
-              {j.phone && <a href={`tel:${j.phone}`} className="text-primary underline" dir="ltr">{j.phone}</a>}
+              {j.phone && (
+                <>
+                  <a href={`tel:${j.phone}`} className="text-primary underline" dir="ltr">{j.phone}</a>
+                  <a
+                    href={whatsappUrl(j.phone, `سلام، شفت إعلان "${j.title}" في منصة قهوتي وبغيت نقدم ترشيحي.`)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="rounded-full bg-primary px-4 py-1.5 text-primary-foreground"
+                  >
+                    تواصل عبر واتساب
+                  </a>
+                </>
+              )}
             </div>
           </div>
         ))}
