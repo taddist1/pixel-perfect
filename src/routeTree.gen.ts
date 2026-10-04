@@ -20,6 +20,7 @@ import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedPostJobRouteImport } from './routes/_authenticated/post-job'
 import { Route as BlogIndexRouteImport } from './routes/blog.index'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
+import { Route as CitiesCityRouteImport } from './routes/cities.$city'
 import { Route as AuthenticatedAdminArticlesRouteImport } from './routes/_authenticated/admin.articles'
 import { Route as AuthenticatedAdminVideosRouteImport } from './routes/_authenticated/admin.videos'
 
@@ -77,6 +78,11 @@ const BlogSlugRoute = BlogSlugRouteImport.update({
   path: '/blog/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CitiesCityRoute = CitiesCityRouteImport.update({
+  id: '/cities/$city',
+  path: '/cities/$city',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedAdminArticlesRoute =
   AuthenticatedAdminArticlesRouteImport.update({
     id: '/admin/articles',
@@ -100,6 +106,7 @@ export interface FileRoutesByFullPath {
   '/account': typeof AuthenticatedAccountRoute
   '/post-job': typeof AuthenticatedPostJobRoute
   '/blog/$slug': typeof BlogSlugRoute
+  '/cities/$city': typeof CitiesCityRoute
   '/blog/': typeof BlogIndexRoute
   '/admin/articles': typeof AuthenticatedAdminArticlesRoute
   '/admin/videos': typeof AuthenticatedAdminVideosRoute
@@ -114,6 +121,7 @@ export interface FileRoutesByTo {
   '/account': typeof AuthenticatedAccountRoute
   '/post-job': typeof AuthenticatedPostJobRoute
   '/blog/$slug': typeof BlogSlugRoute
+  '/cities/$city': typeof CitiesCityRoute
   '/blog': typeof BlogIndexRoute
   '/admin/articles': typeof AuthenticatedAdminArticlesRoute
   '/admin/videos': typeof AuthenticatedAdminVideosRoute
@@ -130,6 +138,7 @@ export interface FileRoutesById {
   '/_authenticated/account': typeof AuthenticatedAccountRoute
   '/_authenticated/post-job': typeof AuthenticatedPostJobRoute
   '/blog/$slug': typeof BlogSlugRoute
+  '/cities/$city': typeof CitiesCityRoute
   '/blog/': typeof BlogIndexRoute
   '/_authenticated/admin/articles': typeof AuthenticatedAdminArticlesRoute
   '/_authenticated/admin/videos': typeof AuthenticatedAdminVideosRoute
@@ -146,6 +155,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/post-job'
     | '/blog/$slug'
+    | '/cities/$city'
     | '/blog/'
     | '/admin/articles'
     | '/admin/videos'
@@ -160,6 +170,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/post-job'
     | '/blog/$slug'
+    | '/cities/$city'
     | '/blog'
     | '/admin/articles'
     | '/admin/videos'
@@ -175,6 +186,7 @@ export interface FileRouteTypes {
     | '/_authenticated/account'
     | '/_authenticated/post-job'
     | '/blog/$slug'
+    | '/cities/$city'
     | '/blog/'
     | '/_authenticated/admin/articles'
     | '/_authenticated/admin/videos'
@@ -189,6 +201,7 @@ export interface RootRouteChildren {
   SeekersRoute: typeof SeekersRoute
   VideosRoute: typeof VideosRoute
   BlogSlugRoute: typeof BlogSlugRoute
+  CitiesCityRoute: typeof CitiesCityRoute
   BlogIndexRoute: typeof BlogIndexRoute
 }
 
@@ -271,6 +284,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/cities/$city': {
+      id: '/cities/$city'
+      path: '/cities/$city'
+      fullPath: '/cities/$city'
+      preLoaderRoute: typeof CitiesCityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/admin/articles': {
       id: '/_authenticated/admin/articles'
       path: '/admin/articles'
@@ -314,6 +334,7 @@ const rootRouteChildren: RootRouteChildren = {
   SeekersRoute: SeekersRoute,
   VideosRoute: VideosRoute,
   BlogSlugRoute: BlogSlugRoute,
+  CitiesCityRoute: CitiesCityRoute,
   BlogIndexRoute: BlogIndexRoute,
 }
 export const routeTree = rootRouteImport
