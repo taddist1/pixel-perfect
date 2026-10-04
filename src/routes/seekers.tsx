@@ -150,8 +150,8 @@ function Seekers() {
                   {s.experience_years != null && (
                     <span className="rounded-full bg-accent/20 px-3 py-1">خبرة {s.experience_years} سنة</span>
                   )}
-                  {ratings[s.id] && (
-                    <span className="rounded-full bg-accent/20 px-3 py-1">★ {ratings[s.id].avg} ({ratings[s.id].n})</span>
+                  {ratings[s.id] != null && (
+                    <span className="rounded-full bg-accent/20 px-3 py-1">★ {ratings[s.id]!.avg} ({ratings[s.id]!.n})</span>
                   )}
                   {(s.skills ?? []).map((sk) => <span key={sk} className="rounded-full bg-secondary px-3 py-1">{sk}</span>)}
                 </div>
