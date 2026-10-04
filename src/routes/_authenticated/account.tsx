@@ -8,7 +8,7 @@ export const Route = createFileRoute("/_authenticated/account")({
   component: Account,
 });
 
-type P = { full_name: string | null; city: string | null; phone: string | null; account_type: "owner" | "seeker" | null; profession: string | null; experience_years: number | null; avatar_url: string | null; is_available: boolean | null; skills: string[] | null };
+type P = { full_name: string | null; city: string | null; phone: string | null; account_type: "owner" | "seeker" | null; profession: string | null; experience_years: number | null; avatar_url: string | null; is_available: boolean; skills: string[] | null };
 
 function Account() {
   const { user } = Route.useRouteContext();

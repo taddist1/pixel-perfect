@@ -44,7 +44,7 @@ function CityPage() {
     supabase.from("public_seekers").select("id,full_name,profession,experience_years,phone,is_available,skills").eq("city", city).then(({ data }) => {
       const rows = (data ?? []) as Seeker[];
       setSeekers(rows);
-      if (rows.length) setRvSeeker(rows[0].id);
+      if (rows.length) setRvSeeker(rows[0]?.id ?? "");
     });
     supabase.from("reviews").select("id,author_name,rating,comment,created_at,profiles!inner(full_name,profession,city)").eq("profiles.city", city).order("created_at", { ascending: false }).then(({ data }) => setReviews((data ?? []) as unknown as Review[]));
     supabase.auth.getUser().then(({ data: { user: u } }) => {
