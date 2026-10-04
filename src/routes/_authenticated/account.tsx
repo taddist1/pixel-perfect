@@ -2,6 +2,8 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { cities, professions } from "@/lib/constants";
+import { flushPush } from "@/lib/push.functions";
+import { enablePush, pushSupported } from "@/lib/push-client";
 
 export const Route = createFileRoute("/_authenticated/account")({
   head: () => ({ meta: [{ title: "حسابي — قهوتي" }, { name: "description", content: "ملفك الشخصي في قهوتي" }] }),
@@ -127,6 +129,8 @@ function Account() {
         <button className="w-full rounded-xl bg-primary py-3 font-black text-primary-foreground">{p.account_type === "owner" ? "حفظ ونشر وظيفة ←" : "حفظ وتصفح الوظائف ←"}</button>
         {msg && <p className="text-center text-sm">{msg}</p>}
       </form>
+      <PushToggle />
+      {p.account_type && <MyRequests userId={user.id} role={p.account_type} />}
       {p.account_type === "owner" && <MyJobs userId={user.id} />}
       {p.account_type === "seeker" && <SeekerExtras userId={user.id} p={p} avatar={avatar} />}
     </div>
