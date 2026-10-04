@@ -155,12 +155,13 @@ function Seekers() {
                   )}
                   {(s.skills ?? []).map((sk) => <span key={sk} className="rounded-full bg-secondary px-3 py-1">{sk}</span>)}
                 </div>
+                <RequestButton seeker={s} />
                 {s.phone && (
                   <a
                     href={whatsappUrl(s.phone, `سلام ${s.full_name ?? ""}، شفت ملفك في منصة قهوتي وعندي فرصة عمل ليك.`)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-4 block rounded-full bg-primary px-4 py-2 text-center text-sm font-bold text-primary-foreground"
+                    className="mt-2 block rounded-full border px-4 py-2 text-center text-sm font-bold"
                   >
                     تواصل عبر واتساب
                   </a>
