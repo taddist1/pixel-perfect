@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as JobsRouteImport } from './routes/jobs'
+import { Route as NewThisWeekRouteImport } from './routes/new-this-week'
 import { Route as SeekersRouteImport } from './routes/seekers'
 import { Route as VideosRouteImport } from './routes/videos'
 import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticated/account'
@@ -39,6 +40,11 @@ const AuthRoute = AuthRouteImport.update({
 const JobsRoute = JobsRouteImport.update({
   id: '/jobs',
   path: '/jobs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NewThisWeekRoute = NewThisWeekRouteImport.update({
+  id: '/new-this-week',
+  path: '/new-this-week',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SeekersRoute = SeekersRouteImport.update({
@@ -88,6 +94,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/jobs': typeof JobsRoute
+  '/new-this-week': typeof NewThisWeekRoute
   '/seekers': typeof SeekersRoute
   '/videos': typeof VideosRoute
   '/account': typeof AuthenticatedAccountRoute
@@ -101,6 +108,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/jobs': typeof JobsRoute
+  '/new-this-week': typeof NewThisWeekRoute
   '/seekers': typeof SeekersRoute
   '/videos': typeof VideosRoute
   '/account': typeof AuthenticatedAccountRoute
@@ -116,6 +124,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/jobs': typeof JobsRoute
+  '/new-this-week': typeof NewThisWeekRoute
   '/seekers': typeof SeekersRoute
   '/videos': typeof VideosRoute
   '/_authenticated/account': typeof AuthenticatedAccountRoute
@@ -131,6 +140,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/jobs'
+    | '/new-this-week'
     | '/seekers'
     | '/videos'
     | '/account'
@@ -144,6 +154,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/jobs'
+    | '/new-this-week'
     | '/seekers'
     | '/videos'
     | '/account'
@@ -158,6 +169,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/jobs'
+    | '/new-this-week'
     | '/seekers'
     | '/videos'
     | '/_authenticated/account'
@@ -173,6 +185,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   JobsRoute: typeof JobsRoute
+  NewThisWeekRoute: typeof NewThisWeekRoute
   SeekersRoute: typeof SeekersRoute
   VideosRoute: typeof VideosRoute
   BlogSlugRoute: typeof BlogSlugRoute
@@ -207,6 +220,13 @@ declare module '@tanstack/react-router' {
       path: '/jobs'
       fullPath: '/jobs'
       preLoaderRoute: typeof JobsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/new-this-week': {
+      id: '/new-this-week'
+      path: '/new-this-week'
+      fullPath: '/new-this-week'
+      preLoaderRoute: typeof NewThisWeekRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/seekers': {
@@ -290,6 +310,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   JobsRoute: JobsRoute,
+  NewThisWeekRoute: NewThisWeekRoute,
   SeekersRoute: SeekersRoute,
   VideosRoute: VideosRoute,
   BlogSlugRoute: BlogSlugRoute,
