@@ -17,6 +17,8 @@ export const Route = createFileRoute("/jobs")({
 function Jobs() {
   const [city, setCity] = useState("");
   const [search, setSearch] = useState("");
+  const [role, setRole] = useState("");
+  const [schedule, setSchedule] = useState("");
   const { data, isLoading } = useQuery({
     queryKey: ["jobs", city],
     queryFn: async () => {
@@ -29,7 +31,9 @@ function Jobs() {
 
   const term = search.trim();
   const filtered = (data ?? []).filter((j) =>
-    !term || [j.title, j.role, j.business_name, j.description ?? ""].join(" ").includes(term)
+    (!term || [j.title, j.role, j.business_name, j.description ?? ""].join(" ").includes(term))
+    && (!role || j.role === role)
+    && (!schedule || j.schedule === schedule)
   );
 
   return (
@@ -44,9 +48,19 @@ function Jobs() {
       </div>
       <div className="mt-8 flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-3xl font-black">الوظائف المتاحة</h1>
-        <select value={city} onChange={(e) => setCity(e.target.value)} className="rounded-full border bg-card px-4 py-2">
-          <option value="">كل المدن</option>{cities.map((c) => <option key={c}>{c}</option>)}
-        </select>
+        <div className="flex flex-wrap gap-2">
+          <select value={city} onChange={(e) => setCity(e.target.value)} className="rounded-full border bg-card px-4 py-2">
+            <option value="">كل المدن</option>{cities.map((c) => <option key={c}>{c}</option>)}
+          </select>
+          <select value={role} onChange={(e) => setRole(e.target.value)} className="rounded-full border bg-card px-4 py-2">
+            <option value="">كل المهن</option>
+            {["باريستا", "نادل", "طباخ", "تقني آلات القهوة", "مهن مساندة"].map((r) => <option key={r}>{r}</option>)}
+          </select>
+          <select value={schedule} onChange={(e) => setSchedule(e.target.value)} className="rounded-full border bg-card px-4 py-2">
+            <option value="">كل الأنظمة</option>
+            {["دوام كامل", "دوام جزئي", "ورديات"].map((s) => <option key={s}>{s}</option>)}
+          </select>
+        </div>
       </div>
       <input
         value={search}
