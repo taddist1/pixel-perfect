@@ -22,7 +22,7 @@ function Jobs() {
   const { data, isLoading } = useQuery({
     queryKey: ["jobs", city],
     queryFn: async () => {
-      let q = supabase.from("jobs").select("*").order("created_at", { ascending: false }).limit(100);
+      let q = supabase.from("jobs").select("*").eq("is_filled", false).order("created_at", { ascending: false }).limit(100);
       if (city) q = q.eq("city", city);
       const { data } = await q;
       return data ?? [];
