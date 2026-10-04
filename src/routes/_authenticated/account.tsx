@@ -127,6 +127,117 @@ function Account() {
         <button className="w-full rounded-xl bg-primary py-3 font-black text-primary-foreground">{p.account_type === "owner" ? "حفظ ونشر وظيفة ←" : "حفظ وتصفح الوظائف ←"}</button>
         {msg && <p className="text-center text-sm">{msg}</p>}
       </form>
+      {p.account_type === "owner" && <MyJobs userId={user.id} />}
+      {p.account_type === "seeker" && <SeekerExtras userId={user.id} p={p} avatar={avatar} />}
     </div>
+  );
+}
+
+function completion(p: P) {
+  const checks = [p.full_name, p.city, p.phone, p.avatar_url, p.profession, p.experience_years != null ? "x" : null, p.skills.length ? "x" : null];
+  const done = checks.filter(Boolean).length;
+  return { pct: Math.round((done / checks.length) * 100), missing: [
+    !p.full_name && "الاسم", !p.city && "المدينة", !p.phone && "الهاتف", !p.avatar_url && "الصورة",
+    !p.profession && "المهنة", p.experience_years == null && "سنوات الخبرة", !p.skills.length && "المهارات",
+  ].filter(Boolean) as string[] };
+}
+
+type Review = { id: string; author_name: string; rating: number; comment: string; created_at: string };
+
+function SeekerExtras({ userId, p, avatar }: { userId: string; p: P; avatar?: string }) {
+  const [reviews, setReviews] = useState<Review[]>([]);
+  useEffect(() => {
+    supabase.from("reviews").select("id,author_name,rating,comment,created_at").eq("seeker_id", userId).order("created_at", { ascending: false })
+      .then(({ data }) => setReviews((data ?? []) as Review[]));
+  }, [userId]);
+  const { pct, missing } = completion(p);
+  const avg = reviews.length ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1) : null;
+
+  return (
+    <div className="mt-6 space-y-6">
+      <section className="rounded-3xl border bg-card p-6">
+        <div className="flex items-center justify-between"><h2 className="font-black">اكتمال ملفك</h2><span className="font-black text-primary">{pct}%</span></div>
+        <div className="mt-3 h-3 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-primary transition-all" style={{ width: `${pct}%` }} /></div>
+        {missing.length > 0
+          ? <p className="mt-2 text-sm text-muted-foreground">زيد: {missing.join("، ")} — باش تبان فالأول فالبحث.</p>
+          : <p className="mt-2 text-sm font-bold text-primary">ملفك كامل ✓</p>}
+      </section>
+
+      <section className="rounded-3xl border bg-card p-6">
+        <h2 className="font-black">بطاقتي كما يراها الناس</h2>
+        <div className="mt-4 flex items-center gap-4 rounded-2xl border p-4">
+          <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-muted text-xl font-black">
+            {avatar ? <img src={avatar} alt="" className="h-full w-full object-cover" /> : (p.full_name?.[0] ?? "؟")}
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="font-black">{p.full_name || "بدون اسم"}</p>
+            <p className="text-sm text-muted-foreground">{p.profession || "—"} · {p.city || "—"} · {p.experience_years ?? 0} سنوات</p>
+            <div className="mt-1 flex flex-wrap gap-1">
+              {p.is_available && <span className="rounded-full bg-primary px-2 py-0.5 text-xs font-bold text-primary-foreground">🟢 متاح الآن</span>}
+              {avg && <span className="rounded-full border px-2 py-0.5 text-xs font-bold">★ {avg}</span>}
+              {p.skills.map((s) => <span key={s} className="rounded-full bg-muted px-2 py-0.5 text-xs">{s}</span>)}
+            </div>
+          </div>
+        </div>
+        <Link to="/seekers" className="mt-3 inline-block text-sm font-bold text-primary underline">شوفها فصفحة الكفاءات ←</Link>
+      </section>
+
+      <section className="rounded-3xl border bg-card p-6">
+        <div className="flex items-center justify-between"><h2 className="font-black">تقييماتي</h2>{avg && <span className="font-black text-primary">★ {avg} / 5 ({reviews.length})</span>}</div>
+        {reviews.length === 0 ? <p className="mt-3 text-sm text-muted-foreground">مازال ما عندك تقييمات. طلب من المشغلين ديالك يقيموك من صفحة مدينتك.</p> : (
+          <ul className="mt-3 space-y-3">
+            {reviews.map((r) => (
+              <li key={r.id} className="rounded-xl border p-3">
+                <div className="flex justify-between text-sm"><b>{r.author_name}</b><span className="text-primary">{"★".repeat(r.rating)}{"☆".repeat(5 - r.rating)}</span></div>
+                {r.comment && <p className="mt-1 text-sm">{r.comment}</p>}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    </div>
+  );
+}
+
+type MyJob = { id: string; title: string; business_name: string; city: string; created_at: string; is_filled: boolean };
+
+function MyJobs({ userId }: { userId: string }) {
+  const [jobs, setJobs] = useState<MyJob[]>([]);
+  const load = () => supabase.from("jobs").select("id,title,business_name,city,created_at,is_filled").eq("owner_id", userId).order("created_at", { ascending: false })
+    .then(({ data }) => setJobs((data ?? []) as MyJob[]));
+  useEffect(() => { load(); }, [userId]);
+
+  async function toggle(j: MyJob) {
+    await supabase.from("jobs").update({ is_filled: !j.is_filled }).eq("id", j.id);
+    load();
+  }
+  async function remove(j: MyJob) {
+    if (!confirm("واش متأكد بغيتي تحذف هاد الإعلان؟")) return;
+    await supabase.from("jobs").delete().eq("id", j.id);
+    load();
+  }
+
+  return (
+    <section className="mt-6 rounded-3xl border bg-card p-6">
+      <div className="flex items-center justify-between"><h2 className="font-black">وظائفي المنشورة ({jobs.length})</h2><Link to="/post-job" className="text-sm font-bold text-primary underline">+ وظيفة جديدة</Link></div>
+      {jobs.length === 0 ? <p className="mt-3 text-sm text-muted-foreground">مازال ما نشرتي حتى وظيفة.</p> : (
+        <ul className="mt-3 space-y-3">
+          {jobs.map((j) => (
+            <li key={j.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border p-3">
+              <div>
+                <p className="font-bold">{j.title} {j.is_filled && <span className="rounded-full bg-muted px-2 py-0.5 text-xs">مكتملة</span>}</p>
+                <p className="text-xs text-muted-foreground">{j.business_name} · {j.city} · {new Date(j.created_at).toLocaleDateString("ar-MA")}</p>
+              </div>
+              <div className="flex gap-2">
+                <button onClick={() => toggle(j)} className={`rounded-full px-3 py-1 text-sm font-bold ${j.is_filled ? "bg-primary text-primary-foreground" : "border"}`}>
+                  {j.is_filled ? "رجّعها شاغرة" : "✓ لقيت شي واحد"}
+                </button>
+                <button onClick={() => remove(j)} className="rounded-full border border-accent px-3 py-1 text-sm font-bold text-accent">حذف</button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
   );
 }
