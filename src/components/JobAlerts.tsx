@@ -35,6 +35,13 @@ export function useUserCity() {
 
 /** Bell showing how many new jobs were posted in the user's city since their last visit. */
 export function JobAlertsBell() {
+  const [uid, setUid] = useState<string | null | undefined>(undefined);
+  useEffect(() => { supabase.auth.getUser().then(({ data }) => setUid(data.user?.id ?? null)); }, []);
+  if (uid === undefined) return null;
+  return uid ? <AccountBell userId={uid} /> : <GuestBell />;
+}
+
+function GuestBell() {
   const city = useUserCity();
   const [seenAt, setSeenAt] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
@@ -80,6 +87,45 @@ export function JobAlertsBell() {
           <div className="mt-3 flex justify-between text-sm font-bold">
             <Link to="/new-this-week" className="text-primary underline">جديد هاد الأسبوع</Link>
             <button onClick={() => { markJobsSeen(); setSeenAt(new Date().toISOString()); setOpen(false); }} className="text-muted-foreground">تمت القراءة</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AccountBell({ userId }: { userId: string }) {
+  const [open, setOpen] = useState(false);
+  const { data = [], refetch } = useQuery({
+    queryKey: ["notifications", userId],
+    refetchInterval: 60_000,
+    queryFn: async () => (await supabase.from("notifications").select("id,title,body,url,read_at,created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(15)).data ?? [],
+  });
+  const unread = data.filter((n) => !n.read_at).length;
+  async function readAll() {
+    await supabase.from("notifications").update({ read_at: new Date().toISOString() }).eq("user_id", userId).is("read_at", null);
+    refetch(); setOpen(false);
+  }
+  return (
+    <div className="relative">
+      <button onClick={() => setOpen(!open)} aria-label="الإشعارات" className="relative rounded-full border px-3 py-1.5 text-sm font-bold">
+        🔔{unread > 0 && <span className="absolute -top-1 -left-1 rounded-full bg-accent px-1.5 text-xs text-accent-foreground">{unread}</span>}
+      </button>
+      {open && (
+        <div className="absolute left-0 z-20 mt-2 w-72 rounded-2xl border bg-card p-3 shadow-lg">
+          <p className="mb-2 text-sm font-black">إشعاراتي</p>
+          {data.length === 0 ? <p className="text-sm text-muted-foreground">ما كاين حتى إشعار.</p> : (
+            <ul className="max-h-80 space-y-2 overflow-auto">
+              {data.map((n) => (
+                <li key={n.id}><a href={n.url} className={`block rounded-xl p-2 text-sm ${n.read_at ? "bg-muted/50" : "bg-muted font-bold"}`}>
+                  <div>{n.title}</div><div className="text-xs font-normal text-muted-foreground">{n.body}</div>
+                </a></li>
+              ))}
+            </ul>
+          )}
+          <div className="mt-3 flex justify-between text-sm font-bold">
+            <Link to="/account" className="text-primary underline">📱 إشعارات الهاتف</Link>
+            <button onClick={readAll} className="text-muted-foreground">تمت القراءة</button>
           </div>
         </div>
       )}

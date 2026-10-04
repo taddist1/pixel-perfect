@@ -2,6 +2,8 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { cities, professions } from "@/lib/constants";
+import { flushPush } from "@/lib/push.functions";
+import { enablePush, pushSupported } from "@/lib/push-client";
 
 export const Route = createFileRoute("/_authenticated/account")({
   head: () => ({ meta: [{ title: "حسابي — قهوتي" }, { name: "description", content: "ملفك الشخصي في قهوتي" }] }),
@@ -127,6 +129,8 @@ function Account() {
         <button className="w-full rounded-xl bg-primary py-3 font-black text-primary-foreground">{p.account_type === "owner" ? "حفظ ونشر وظيفة ←" : "حفظ وتصفح الوظائف ←"}</button>
         {msg && <p className="text-center text-sm">{msg}</p>}
       </form>
+      <PushToggle />
+      {p.account_type && <MyRequests userId={user.id} role={p.account_type} />}
       {p.account_type === "owner" && <MyJobs userId={user.id} />}
       {p.account_type === "seeker" && <SeekerExtras userId={user.id} p={p} avatar={avatar} />}
     </div>
@@ -234,6 +238,81 @@ function MyJobs({ userId }: { userId: string }) {
                 </button>
                 <button onClick={() => remove(j)} className="rounded-full border border-accent px-3 py-1 text-sm font-bold text-accent">حذف</button>
               </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
+function PushToggle() {
+  const [state, setState] = useState("");
+  const [granted, setGranted] = useState(false);
+  useEffect(() => { setGranted(pushSupported() && Notification.permission === "granted"); }, []);
+  async function on() {
+    const r = await enablePush();
+    setState(r === "ok" ? "✅ تفعّلات الإشعارات فهاد الجهاز" : r === "denied" ? "رفضتي الإذن — فعّلو من إعدادات المتصفح" : r === "unsupported" ? "هاد المتصفح ما كيدعمش الإشعارات. فآيفون: زيد الموقع للشاشة الرئيسية أولاً (مشاركة ← إضافة إلى الشاشة الرئيسية)" : "سجّل الدخول أولاً");
+    if (r === "ok") setGranted(true);
+  }
+  return (
+    <section className="mt-6 rounded-3xl border bg-card p-6">
+      <h2 className="font-black">📱 إشعارات الهاتف</h2>
+      <p className="mt-1 text-sm text-muted-foreground">توصل بالوظائف الجديدة فمدينتك، وبالطلبات والردود، حتى والموقع مسدود.</p>
+      <button onClick={on} className="mt-3 rounded-full bg-primary px-5 py-2 text-sm font-bold text-primary-foreground">
+        {granted ? "إعادة تفعيل فهاد الجهاز" : "فعّل الإشعارات"}
+      </button>
+      {state && <p className="mt-2 text-sm">{state}</p>}
+    </section>
+  );
+}
+
+type Req = { id: string; seeker_id: string; owner_id: string; owner_name: string; message: string; status: string; reply: string | null; created_at: string };
+
+function MyRequests({ userId, role }: { userId: string; role: "owner" | "seeker" }) {
+  const [rows, setRows] = useState<Req[]>([]);
+  const [names, setNames] = useState<Record<string, string>>({});
+  const [drafts, setDrafts] = useState<Record<string, string>>({});
+  const load = () => supabase.from("job_requests").select("*").eq(role === "owner" ? "owner_id" : "seeker_id", userId).order("created_at", { ascending: false })
+    .then(async ({ data }) => {
+      const list = (data ?? []) as Req[];
+      setRows(list);
+      if (role === "owner" && list.length) {
+        const { data: s } = await supabase.from("public_seekers").select("id,full_name").in("id", list.map((r) => r.seeker_id));
+        setNames(Object.fromEntries((s ?? []).map((x) => [x.id!, x.full_name ?? ""])));
+      }
+    });
+  useEffect(() => { load(); }, [userId, role]);
+
+  async function answer(r: Req, status: "accepted" | "declined") {
+    await supabase.from("job_requests").update({ status, reply: drafts[r.id]?.trim() || null }).eq("id", r.id);
+    flushPush().catch(() => {});
+    load();
+  }
+  const label: Record<string, string> = { pending: "⏳ فانتظار الرد", accepted: "✅ مقبول", declined: "✖ مرفوض" };
+
+  return (
+    <section className="mt-6 rounded-3xl border bg-card p-6">
+      <h2 className="font-black">{role === "owner" ? "الطلبات اللي صيفطت" : "طلبات العمل اللي وصلاتك"} ({rows.length})</h2>
+      {rows.length === 0 ? <p className="mt-3 text-sm text-muted-foreground">{role === "owner" ? "صيفط طلب لشي كفاءة من صفحة الكفاءات." : "مازال ما وصلك حتى طلب."}</p> : (
+        <ul className="mt-3 space-y-3">
+          {rows.map((r) => (
+            <li key={r.id} className="rounded-xl border p-3 text-sm">
+              <div className="flex flex-wrap justify-between gap-2">
+                <b>{role === "owner" ? `إلى: ${names[r.seeker_id] ?? "كفاءة"}` : `من: ${r.owner_name || "صاحب مشروع"}`}</b>
+                <span className="text-xs">{label[r.status]} · {new Date(r.created_at).toLocaleDateString("ar-MA")}</span>
+              </div>
+              <p className="mt-1 whitespace-pre-line">{r.message}</p>
+              {r.reply && <p className="mt-2 rounded-lg bg-muted p-2">💬 الرد: {r.reply}</p>}
+              {role === "seeker" && r.status === "pending" && (
+                <div className="mt-2 space-y-2">
+                  <input value={drafts[r.id] ?? ""} onChange={(e) => setDrafts({ ...drafts, [r.id]: e.target.value })} placeholder="رد قصير (اختياري)" className="w-full rounded-lg border bg-background px-3 py-2" />
+                  <div className="flex gap-2">
+                    <button onClick={() => answer(r, "accepted")} className="rounded-full bg-primary px-4 py-1.5 font-bold text-primary-foreground">قبول</button>
+                    <button onClick={() => answer(r, "declined")} className="rounded-full border border-accent px-4 py-1.5 font-bold text-accent">رفض</button>
+                  </div>
+                </div>
+              )}
             </li>
           ))}
         </ul>

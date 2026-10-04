@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { cities, professions, schedules } from "@/lib/constants";
+import { flushPush } from "@/lib/push.functions";
 
 export const Route = createFileRoute("/_authenticated/post-job")({
   head: () => ({ meta: [{ title: "نشر وظيفة — قهوتي" }, { name: "description", content: "انشر وظيفة لمقهاك أو مطعمك" }] }),
@@ -19,6 +20,7 @@ function PostJob() {
     e.preventDefault();
     const { error } = await supabase.from("jobs").insert(f);
     if (error) return setMsg("وقع خطأ، حاول مرة أخرى");
+    flushPush().catch(() => {});
     nav({ to: "/jobs" });
   }
 
