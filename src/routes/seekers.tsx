@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { whatsappUrl } from "@/lib/whatsapp";
 
 const T = "الكفاءات المتاحة — قهوتي";
-const D = "تصفح الباحثين عن عمل في قطاع المقاهي والمطاعم حسب المدينة: بارستا، ندلاء، تقنيو آلات القهوة ومهن مساندة.";
+const D = "تصفح الباحثين عن عمل في قطاع المقاهي والمطاعم حسب المدينة والخبرة والمهارات: بارستا، ندلاء، تقنيو آلات القهوة ومهن مساندة.";
 
 export const Route = createFileRoute("/seekers")({
   head: () => ({
@@ -21,6 +21,7 @@ export const Route = createFileRoute("/seekers")({
 });
 
 const cities = ["الكل", "الدار البيضاء", "الرباط", "مراكش", "فاس", "طنجة", "أكادير", "مكناس", "وجدة", "تطوان", "العيون"];
+const skillOptions = ["لاتيه آرت", "V60", "كيمكس", "كولد برو", "قهوة مختصة", "صيانة الآلات", "خدمة الطاولات"];
 
 type Seeker = {
   id: string;
@@ -30,12 +31,18 @@ type Seeker = {
   experience_years: number | null;
   avatar_url: string | null;
   phone: string | null;
+  is_available: boolean | null;
+  skills: string[] | null;
 };
 
 function Seekers() {
   const [city, setCity] = useState("الكل");
   const [search, setSearch] = useState("");
+  const [exp, setExp] = useState("");
+  const [avail, setAvail] = useState("");
+  const [skill, setSkill] = useState("");
   const [rows, setRows] = useState<Seeker[]>([]);
+  const [ratings, setRatings] = useState<Record<string, { avg: number; n: number }>>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -46,12 +53,31 @@ function Seekers() {
       setRows((data ?? []) as Seeker[]);
       setLoading(false);
     });
+    supabase.from("reviews").select("seeker_id, rating").then(({ data }) => {
+      const acc: Record<string, { sum: number; n: number }> = {};
+      for (const r of data ?? []) {
+        acc[r.seeker_id] = { sum: (acc[r.seeker_id]?.sum ?? 0) + r.rating, n: (acc[r.seeker_id]?.n ?? 0) + 1 };
+      }
+      const out: Record<string, { avg: number; n: number }> = {};
+      for (const [id, v] of Object.entries(acc)) out[id] = { avg: Math.round((v.sum / v.n) * 10) / 10, n: v.n };
+      setRatings(out);
+    });
   }, [city]);
 
   const term = search.trim();
-  const filtered = rows.filter((s) =>
-    !term || [s.full_name ?? "", s.profession ?? "", s.city ?? ""].join(" ").includes(term)
-  );
+  const filtered = rows.filter((s) => {
+    if (term && ![s.full_name ?? "", s.profession ?? "", s.city ?? "", (s.skills ?? []).join(" ")].join(" ").includes(term)) return false;
+    if (avail === "yes" && !s.is_available) return false;
+    if (skill && !(s.skills ?? []).includes(skill)) return false;
+    if (exp) {
+      const y = s.experience_years ?? 0;
+      if (exp === "1" && y >= 1) return false;
+      if (exp === "2" && (y < 1 || y > 3)) return false;
+      if (exp === "3" && (y < 3 || y > 6)) return false;
+      if (exp === "4" && y < 6) return false;
+    }
+    return true;
+  });
 
   return (
     <div className="min-h-screen">
@@ -69,11 +95,29 @@ function Seekers() {
             className="rounded-full border bg-card px-4 py-2 text-sm font-bold">
             {cities.map((c) => <option key={c}>{c}</option>)}
           </select>
+          <select value={exp} onChange={(e) => setExp(e.target.value)}
+            className="rounded-full border bg-card px-4 py-2 text-sm font-bold">
+            <option value="">أي خبرة</option>
+            <option value="1">أقل من سنة</option>
+            <option value="2">1–3 سنوات</option>
+            <option value="3">3–6 سنوات</option>
+            <option value="4">+6 سنوات</option>
+          </select>
+          <select value={avail} onChange={(e) => setAvail(e.target.value)}
+            className="rounded-full border bg-card px-4 py-2 text-sm font-bold">
+            <option value="">كل التوفر</option>
+            <option value="yes">متاح الآن 🟢</option>
+          </select>
+          <select value={skill} onChange={(e) => setSkill(e.target.value)}
+            className="rounded-full border bg-card px-4 py-2 text-sm font-bold">
+            <option value="">كل المهارات</option>
+            {skillOptions.map((s) => <option key={s}>{s}</option>)}
+          </select>
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="🔍 ابحث بالاسم أو المهنة…"
-            className="flex-1 min-w-48 rounded-full border bg-card px-5 py-2 text-sm"
+            className="min-w-48 flex-1 rounded-full border bg-card px-5 py-2 text-sm"
           />
         </div>
 
@@ -100,11 +144,16 @@ function Seekers() {
                     <div className="text-sm text-muted-foreground">{s.profession ?? "مهنة غير محددة"}</div>
                   </div>
                 </div>
-                <div className="mt-4 flex flex-wrap gap-2 text-xs font-bold">
+                <div className="mt-3 flex flex-wrap gap-2 text-xs font-bold">
+                  {s.is_available && <span className="rounded-full bg-primary px-3 py-1 text-primary-foreground">🟢 متاح الآن</span>}
                   {s.city && <span className="rounded-full bg-accent/20 px-3 py-1">📍 {s.city}</span>}
                   {s.experience_years != null && (
                     <span className="rounded-full bg-accent/20 px-3 py-1">خبرة {s.experience_years} سنة</span>
                   )}
+                  {ratings[s.id] && (
+                    <span className="rounded-full bg-accent/20 px-3 py-1">★ {ratings[s.id].avg} ({ratings[s.id].n})</span>
+                  )}
+                  {(s.skills ?? []).map((sk) => <span key={sk} className="rounded-full bg-secondary px-3 py-1">{sk}</span>)}
                 </div>
                 {s.phone && (
                   <a
