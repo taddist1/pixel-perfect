@@ -81,7 +81,7 @@ function Index() {
             </>
           )}
           <Link to="/account" className="rounded-full bg-primary px-4 py-1.5 text-sm font-bold text-primary-foreground">حسابي</Link>
-          <select value={city} onChange={(e) => setCity(e.target.value)}
+          <select value={city} onChange={(e) => { setCity(e.target.value); localStorage.setItem("qahwati_city", e.target.value); }}
             className="rounded-full border bg-card px-3 py-1.5 text-sm">
             {cities.map((c) => <option key={c}>{c}</option>)}
           </select>

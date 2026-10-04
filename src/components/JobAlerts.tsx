@@ -1,0 +1,88 @@
+import { Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+
+const CITY_KEY = "qahwati_city";
+const SEEN_KEY = "qahwati_jobs_seen_at";
+
+export function rememberCity(city: string) {
+  if (typeof window !== "undefined") localStorage.setItem(CITY_KEY, city);
+}
+
+export function markJobsSeen() {
+  if (typeof window !== "undefined") localStorage.setItem(SEEN_KEY, new Date().toISOString());
+}
+
+/** User's city: profile city when signed in, otherwise the last city picked on the site. */
+export function useUserCity() {
+  const [city, setCity] = useState<string | null>(null);
+  useEffect(() => {
+    let active = true;
+    const fallback = localStorage.getItem(CITY_KEY);
+    supabase.auth.getUser().then(async ({ data }) => {
+      let c = fallback;
+      if (data.user) {
+        const { data: p } = await supabase.from("profiles").select("city").eq("id", data.user.id).maybeSingle();
+        if (p?.city) c = p.city;
+      }
+      if (active) setCity(c);
+    });
+    return () => { active = false; };
+  }, []);
+  return city;
+}
+
+/** Bell showing how many new jobs were posted in the user's city since their last visit. */
+export function JobAlertsBell() {
+  const city = useUserCity();
+  const [seenAt, setSeenAt] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
+  useEffect(() => {
+    setSeenAt(localStorage.getItem(SEEN_KEY) ?? new Date(Date.now() - 7 * 864e5).toISOString());
+  }, []);
+
+  const { data = [] } = useQuery({
+    queryKey: ["job-alerts", city, seenAt],
+    enabled: !!city && !!seenAt,
+    refetchInterval: 60_000,
+    queryFn: async () => {
+      const { data } = await supabase.from("jobs").select("id,title,business_name,created_at")
+        .eq("city", city!).gt("created_at", seenAt!).order("created_at", { ascending: false }).limit(10);
+      return data ?? [];
+    },
+  });
+
+  if (!city) return null;
+  return (
+    <div className="relative">
+      <button onClick={() => setOpen(!open)} aria-label="الإشعارات" className="relative rounded-full border px-3 py-1.5 text-sm font-bold">
+        🔔
+        {data.length > 0 && (
+          <span className="absolute -top-1 -left-1 rounded-full bg-accent px-1.5 text-xs text-accent-foreground">{data.length}</span>
+        )}
+      </button>
+      {open && (
+        <div className="absolute left-0 z-20 mt-2 w-72 rounded-2xl border bg-card p-3 shadow-lg">
+          <p className="mb-2 text-sm font-black">وظائف جديدة فـ {city}</p>
+          {data.length === 0 ? (
+            <p className="text-sm text-muted-foreground">ما كاين حتى وظيفة جديدة من آخر زيارة.</p>
+          ) : (
+            <ul className="space-y-2">
+              {data.map((j) => (
+                <li key={j.id} className="rounded-xl bg-muted p-2 text-sm">
+                  <div className="font-bold">{j.title}</div>
+                  <div className="text-xs text-muted-foreground">{j.business_name}</div>
+                </li>
+              ))}
+            </ul>
+          )}
+          <div className="mt-3 flex justify-between text-sm font-bold">
+            <Link to="/new-this-week" className="text-primary underline">جديد هاد الأسبوع</Link>
+            <button onClick={() => { markJobsSeen(); setSeenAt(new Date().toISOString()); setOpen(false); }} className="text-muted-foreground">تمت القراءة</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

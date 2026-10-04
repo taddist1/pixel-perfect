@@ -4,6 +4,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { cities } from "@/lib/constants";
 import { whatsappUrl } from "@/lib/whatsapp";
+import { JobAlertsBell } from "@/components/JobAlerts";
 
 const T = "وظائف المقاهي والمطاعم في المغرب — قهوتي";
 const D = "تصفح آخر عروض العمل للبارستا، النادل والطباخ في مدينتك.";
@@ -35,7 +36,11 @@ function Jobs() {
     <div className="mx-auto max-w-4xl px-5 py-8">
       <div className="flex items-center justify-between">
         <Link to="/" className="text-2xl font-black text-primary">قهوتي</Link>
-        <Link to="/account" className="rounded-full border px-4 py-1.5 text-sm font-bold">حسابي</Link>
+        <div className="flex gap-2">
+          <JobAlertsBell />
+          <Link to="/new-this-week" className="rounded-full border px-4 py-1.5 text-sm font-bold">جديد هاد الأسبوع</Link>
+          <Link to="/account" className="rounded-full border px-4 py-1.5 text-sm font-bold">حسابي</Link>
+        </div>
       </div>
       <div className="mt-8 flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-3xl font-black">الوظائف المتاحة</h1>
