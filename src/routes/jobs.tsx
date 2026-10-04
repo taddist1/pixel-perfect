@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { cities } from "@/lib/constants";
 import { whatsappUrl } from "@/lib/whatsapp";
@@ -19,6 +19,12 @@ function Jobs() {
   const [search, setSearch] = useState("");
   const [role, setRole] = useState("");
   const [schedule, setSchedule] = useState("");
+
+  // مدينة الزائر كتكون هي الأولى
+  useEffect(() => {
+    const saved = localStorage.getItem("qahwati_city");
+    if (saved && cities.includes(saved)) setCity(saved);
+  }, []);
   const { data, isLoading } = useQuery({
     queryKey: ["jobs", city],
     queryFn: async () => {
@@ -46,6 +52,14 @@ function Jobs() {
           <Link to="/account" className="rounded-full border px-4 py-1.5 text-sm font-bold">حسابي</Link>
         </div>
       </div>
+      {city && (
+        <div className="mt-8 flex flex-wrap items-center justify-between gap-3 rounded-2xl border bg-secondary/60 px-5 py-3">
+          <p className="text-sm font-bold">📍 كتشوف الوظائف ديال مدينتك: {city}</p>
+          <button onClick={() => setCity("")} className="rounded-full bg-primary px-4 py-1.5 text-sm font-bold text-primary-foreground">
+            وسّع البحث لكل المدن
+          </button>
+        </div>
+      )}
       <div className="mt-8 flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-3xl font-black">الوظائف المتاحة</h1>
         <div className="flex flex-wrap gap-2">
@@ -70,7 +84,16 @@ function Jobs() {
       />
       <div className="mt-6 space-y-4">
         {isLoading && <p>...</p>}
-        {!isLoading && filtered.length === 0 && <p className="rounded-2xl border p-8 text-center text-muted-foreground">لا توجد وظائف مطابقة حالياً. كن أول من ينشر!</p>}
+        {!isLoading && filtered.length === 0 && (
+          <div className="rounded-2xl border p-8 text-center text-muted-foreground">
+            <p>لا توجد وظائف مطابقة حالياً{city ? ` في ${city}` : ""}. كن أول من ينشر!</p>
+            {city && (
+              <button onClick={() => setCity("")} className="mt-4 rounded-full bg-primary px-5 py-2 text-sm font-bold text-primary-foreground">
+                وسّع البحث لكل المدن
+              </button>
+            )}
+          </div>
+        )}
         {filtered.map((j) => (
           <div key={j.id} className="rounded-2xl border bg-card p-5">
             <div className="flex flex-wrap items-start justify-between gap-2">
