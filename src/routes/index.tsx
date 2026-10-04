@@ -128,6 +128,19 @@ function Index() {
         </div>
       </section>
 
+      <section className="mx-auto max-w-6xl px-5 py-14">
+        <h2 className="text-3xl font-black">اختر مدينتك</h2>
+        <p className="mt-2 text-muted-foreground">كل مدينة عندها صفحتها: وظائفها، كفاءاتها وتقييماتها.</p>
+        <div className="mt-6 flex flex-wrap gap-3">
+          {cities.map((c) => (
+            <Link key={c} to="/cities/$city" params={{ city: c }}
+              className="rounded-full border bg-card px-5 py-2 font-bold transition hover:border-primary">
+              📍 {c}
+            </Link>
+          ))}
+        </div>
+      </section>
+
       <section className="border-t border-border bg-muted py-14">
         <div className="mx-auto max-w-6xl px-5">
           <div className="flex flex-wrap items-end justify-between gap-4">

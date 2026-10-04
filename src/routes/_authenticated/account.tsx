@@ -8,7 +8,7 @@ export const Route = createFileRoute("/_authenticated/account")({
   component: Account,
 });
 
-type P = { full_name: string | null; city: string | null; phone: string | null; account_type: "owner" | "seeker" | null; profession: string | null; experience_years: number | null; avatar_url: string | null };
+type P = { full_name: string | null; city: string | null; phone: string | null; account_type: "owner" | "seeker" | null; profession: string | null; experience_years: number | null; avatar_url: string | null; is_available: boolean; skills: string[] };
 
 function Account() {
   const { user } = Route.useRouteContext();
@@ -23,7 +23,7 @@ function Account() {
       setIsAdmin((data?.length ?? 0) > 0);
     });
     supabase.from("profiles").select("*").eq("id", user.id).maybeSingle().then(({ data }) => {
-      const v = (data ?? { full_name: null, city: null, phone: null, account_type: null, profession: null, experience_years: null, avatar_url: null }) as P;
+      const v = (data ?? { full_name: null, city: null, phone: null, account_type: null, profession: null, experience_years: null, avatar_url: null, is_available: true, skills: [] }) as P;
       setP(v);
       if (v.avatar_url) supabase.storage.from("avatars").createSignedUrl(v.avatar_url, 3600).then(({ data }) => setAvatar(data?.signedUrl));
     });
@@ -90,12 +90,39 @@ function Account() {
         </select>
         <input className={input} dir="ltr" placeholder="06XXXXXXXX" value={p.phone ?? ""} onChange={(e) => set("phone", e.target.value)} />
         {p.account_type === "seeker" && (
-          <div className="grid grid-cols-2 gap-3">
-            <select className={input} value={p.profession ?? ""} onChange={(e) => set("profession", e.target.value)}>
-              <option value="">المهنة</option>{professions.map((c) => <option key={c}>{c}</option>)}
-            </select>
-            <input className={input} type="number" min={0} placeholder="سنوات الخبرة" value={p.experience_years ?? ""} onChange={(e) => set("experience_years", e.target.value ? Number(e.target.value) : null)} />
-          </div>
+          <>
+            <div className="grid grid-cols-2 gap-3">
+              <select className={input} value={p.profession ?? ""} onChange={(e) => set("profession", e.target.value)}>
+                <option value="">المهنة</option>{professions.map((c) => <option key={c}>{c}</option>)}
+              </select>
+              <input className={input} type="number" min={0} placeholder="سنوات الخبرة" value={p.experience_years ?? ""} onChange={(e) => set("experience_years", e.target.value ? Number(e.target.value) : null)} />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <button type="button" onClick={() => set("is_available", true)}
+                className={`rounded-xl border-2 p-3 font-bold ${p.is_available ? "border-primary bg-primary text-primary-foreground" : ""}`}>
+                🟢 متاح الآن
+              </button>
+              <button type="button" onClick={() => set("is_available", false)}
+                className={`rounded-xl border-2 p-3 font-bold ${!p.is_available ? "border-accent bg-accent text-accent-foreground" : ""}`}>
+                ⏸ مشغول حالياً
+              </button>
+            </div>
+            <div className="rounded-xl border bg-muted/50 p-3">
+              <p className="mb-2 text-sm font-bold">مهاراتك (اختياري)</p>
+              <div className="flex flex-wrap gap-2">
+                {["لاتيه آرت", "V60", "كيمكس", "كولد برو", "قهوة مختصة", "صيانة الآلات", "خدمة الطاولات"].map((s) => {
+                  const on = (p.skills ?? []).includes(s);
+                  return (
+                    <button type="button" key={s}
+                      onClick={() => set("skills", on ? (p.skills ?? []).filter((x) => x !== s) : [...(p.skills ?? []), s])}
+                      className={`rounded-full border px-3 py-1 text-sm font-bold ${on ? "border-primary bg-primary text-primary-foreground" : "bg-card"}`}>
+                      {s}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </>
         )}
         <button className="w-full rounded-xl bg-primary py-3 font-black text-primary-foreground">{p.account_type === "owner" ? "حفظ ونشر وظيفة ←" : "حفظ وتصفح الوظائف ←"}</button>
         {msg && <p className="text-center text-sm">{msg}</p>}

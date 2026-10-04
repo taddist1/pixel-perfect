@@ -143,8 +143,10 @@ export type Database = {
           experience_years: number | null
           full_name: string | null
           id: string
+          is_available: boolean
           phone: string | null
           profession: string | null
+          skills: string[]
           updated_at: string
         }
         Insert: {
@@ -155,8 +157,10 @@ export type Database = {
           experience_years?: number | null
           full_name?: string | null
           id: string
+          is_available?: boolean
           phone?: string | null
           profession?: string | null
+          skills?: string[]
           updated_at?: string
         }
         Update: {
@@ -167,11 +171,58 @@ export type Database = {
           experience_years?: number | null
           full_name?: string | null
           id?: string
+          is_available?: boolean
           phone?: string | null
           profession?: string | null
+          skills?: string[]
           updated_at?: string
         }
         Relationships: []
+      }
+      reviews: {
+        Row: {
+          author_id: string
+          author_name: string
+          comment: string
+          created_at: string
+          id: string
+          rating: number
+          seeker_id: string
+        }
+        Insert: {
+          author_id: string
+          author_name: string
+          comment?: string
+          created_at?: string
+          id?: string
+          rating: number
+          seeker_id: string
+        }
+        Update: {
+          author_id?: string
+          author_name?: string
+          comment?: string
+          created_at?: string
+          id?: string
+          rating?: number
+          seeker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_seeker_id_fkey"
+            columns: ["seeker_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_seeker_id_fkey"
+            columns: ["seeker_id"]
+            isOneToOne: false
+            referencedRelation: "public_seekers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -201,8 +252,10 @@ export type Database = {
           experience_years: number | null
           full_name: string | null
           id: string | null
+          is_available: boolean | null
           phone: string | null
           profession: string | null
+          skills: string[] | null
         }
         Insert: {
           avatar_url?: string | null
@@ -211,8 +264,10 @@ export type Database = {
           experience_years?: number | null
           full_name?: string | null
           id?: string | null
+          is_available?: boolean | null
           phone?: string | null
           profession?: string | null
+          skills?: string[] | null
         }
         Update: {
           avatar_url?: string | null
@@ -221,8 +276,10 @@ export type Database = {
           experience_years?: number | null
           full_name?: string | null
           id?: string | null
+          is_available?: boolean | null
           phone?: string | null
           profession?: string | null
+          skills?: string[] | null
         }
         Relationships: []
       }
