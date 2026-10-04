@@ -84,7 +84,16 @@ function Jobs() {
       />
       <div className="mt-6 space-y-4">
         {isLoading && <p>...</p>}
-        {!isLoading && filtered.length === 0 && <p className="rounded-2xl border p-8 text-center text-muted-foreground">لا توجد وظائف مطابقة حالياً. كن أول من ينشر!</p>}
+        {!isLoading && filtered.length === 0 && (
+          <div className="rounded-2xl border p-8 text-center text-muted-foreground">
+            <p>لا توجد وظائف مطابقة حالياً{city ? ` في ${city}` : ""}. كن أول من ينشر!</p>
+            {city && (
+              <button onClick={() => setCity("")} className="mt-4 rounded-full bg-primary px-5 py-2 text-sm font-bold text-primary-foreground">
+                وسّع البحث لكل المدن
+              </button>
+            )}
+          </div>
+        )}
         {filtered.map((j) => (
           <div key={j.id} className="rounded-2xl border bg-card p-5">
             <div className="flex flex-wrap items-start justify-between gap-2">
