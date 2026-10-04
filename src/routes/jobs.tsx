@@ -19,6 +19,12 @@ function Jobs() {
   const [search, setSearch] = useState("");
   const [role, setRole] = useState("");
   const [schedule, setSchedule] = useState("");
+
+  // مدينة الزائر كتكون هي الأولى
+  useEffect(() => {
+    const saved = localStorage.getItem("qahwati_city");
+    if (saved && cities.includes(saved)) setCity(saved);
+  }, []);
   const { data, isLoading } = useQuery({
     queryKey: ["jobs", city],
     queryFn: async () => {
@@ -46,6 +52,14 @@ function Jobs() {
           <Link to="/account" className="rounded-full border px-4 py-1.5 text-sm font-bold">حسابي</Link>
         </div>
       </div>
+      {city && (
+        <div className="mt-8 flex flex-wrap items-center justify-between gap-3 rounded-2xl border bg-secondary/60 px-5 py-3">
+          <p className="text-sm font-bold">📍 كتشوف الوظائف ديال مدينتك: {city}</p>
+          <button onClick={() => setCity("")} className="rounded-full bg-primary px-4 py-1.5 text-sm font-bold text-primary-foreground">
+            وسّع البحث لكل المدن
+          </button>
+        </div>
+      )}
       <div className="mt-8 flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-3xl font-black">الوظائف المتاحة</h1>
         <div className="flex flex-wrap gap-2">
