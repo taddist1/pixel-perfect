@@ -46,6 +46,12 @@ function Seekers() {
   const [ratings, setRatings] = useState<Record<string, { avg: number; n: number }>>({});
   const [loading, setLoading] = useState(true);
 
+  // المدينة المحفوظة ديال الزائر كتكون هي الأولى
+  useEffect(() => {
+    const saved = localStorage.getItem("qahwati_city");
+    if (saved && cities.includes(saved)) setCity(saved);
+  }, []);
+
   useEffect(() => {
     setLoading(true);
     let q = supabase.from("public_seekers").select("*").order("created_at", { ascending: false });
@@ -90,6 +96,15 @@ function Seekers() {
       <main className="mx-auto max-w-6xl px-5 pb-16 pt-6">
         <h1 className="text-3xl font-black md:text-4xl">الكفاءات المتاحة</h1>
         <p className="mt-2 text-muted-foreground">باحثون عن عمل في قطاع المقاهي والمطاعم. تواصل معهم مباشرة عبر واتساب.</p>
+
+        {city !== "الكل" && (
+          <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border bg-secondary/60 px-5 py-3">
+            <p className="text-sm font-bold">📍 كتشوف الكفاءات ديال مدينتك: {city}</p>
+            <button onClick={() => setCity("الكل")} className="rounded-full bg-primary px-4 py-1.5 text-sm font-bold text-primary-foreground">
+              وسّع البحث لكل المدن
+            </button>
+          </div>
+        )}
 
         <div className="mt-6 flex flex-wrap gap-3">
           <select value={city} onChange={(e) => setCity(e.target.value)}
