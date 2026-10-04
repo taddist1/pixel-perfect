@@ -99,6 +99,7 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
+          is_filled: boolean
           owner_id: string
           phone: string | null
           role: string
@@ -112,6 +113,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          is_filled?: boolean
           owner_id?: string
           phone?: string | null
           role: string
@@ -125,6 +127,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          is_filled?: boolean
           owner_id?: string
           phone?: string | null
           role?: string

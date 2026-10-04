@@ -47,7 +47,7 @@ export function JobAlertsBell() {
     enabled: !!city && !!seenAt,
     refetchInterval: 60_000,
     queryFn: async () => {
-      const { data } = await supabase.from("jobs").select("id,title,business_name,created_at")
+      const { data } = await supabase.from("jobs").select("id,title,business_name,created_at").eq("is_filled", false)
         .eq("city", city!).gt("created_at", seenAt!).order("created_at", { ascending: false }).limit(10);
       return data ?? [];
     },

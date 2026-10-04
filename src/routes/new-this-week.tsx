@@ -23,7 +23,7 @@ function NewThisWeek() {
     queryKey: ["jobs-week", city],
     queryFn: async () => {
       const since = new Date(Date.now() - 7 * 864e5).toISOString();
-      let q = supabase.from("jobs").select("*").gt("created_at", since).order("created_at", { ascending: false });
+      let q = supabase.from("jobs").select("*").eq("is_filled", false).gt("created_at", since).order("created_at", { ascending: false });
       if (city) q = q.eq("city", city);
       return (await q).data ?? [];
     },

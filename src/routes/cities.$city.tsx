@@ -40,7 +40,7 @@ function CityPage() {
   const [tab, setTab] = useState<"jobs" | "seekers" | "reviews">("seekers");
 
   useEffect(() => {
-    supabase.from("jobs").select("id,title,business_name,role,schedule,salary,phone,description").eq("city", city).order("created_at", { ascending: false }).then(({ data }) => setJobs((data ?? []) as Job[]));
+    supabase.from("jobs").select("id,title,business_name,role,schedule,salary,phone,description").eq("city", city).eq("is_filled", false).order("created_at", { ascending: false }).then(({ data }) => setJobs((data ?? []) as Job[]));
     supabase.from("public_seekers").select("id,full_name,profession,experience_years,phone,is_available,skills").eq("city", city).then(({ data }) => {
       const rows = (data ?? []) as Seeker[];
       setSeekers(rows);
