@@ -24,7 +24,7 @@ export const Route = createFileRoute("/cities/$city")({
 
 type Job = { id: string; title: string; business_name: string; role: string; schedule: string; salary: string | null; phone: string | null; description: string | null };
 type Seeker = { id: string; full_name: string | null; profession: string | null; experience_years: number | null; phone: string | null; is_available: boolean | null; skills: string[] | null };
-type Review = { id: string; author_name: string; rating: number; comment: string; created_at: string; profiles: { full_name: string | null; profession: string | null } | null };
+type Review = { id: string; author_name: string; author_type: "owner" | "seeker" | null; rating: number; comment: string; created_at: string; profiles: { full_name: string | null; profession: string | null } | null };
 
 function CityPage() {
   const { city } = Route.useParams();
@@ -33,6 +33,7 @@ function CityPage() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [user, setUser] = useState<{ id: string } | null>(null);
   const [myName, setMyName] = useState("");
+  const [myAccountType, setMyAccountType] = useState<string | null>(null);
   const [rvSeeker, setRvSeeker] = useState("");
   const [rvRating, setRvRating] = useState(5);
   const [rvComment, setRvComment] = useState("");
@@ -46,11 +47,14 @@ function CityPage() {
       setSeekers(rows);
       if (rows.length) setRvSeeker(rows[0]?.id ?? "");
     });
-    supabase.from("reviews").select("id,author_name,rating,comment,created_at,profiles!inner(full_name,profession,city)").eq("profiles.city", city).order("created_at", { ascending: false }).then(({ data }) => setReviews((data ?? []) as unknown as Review[]));
+    supabase.from("reviews").select("id,author_name,author_type,rating,comment,created_at,profiles!inner(full_name,profession,city)").eq("profiles.city", city).order("created_at", { ascending: false }).then(({ data }) => setReviews((data ?? []) as unknown as Review[]));
     supabase.auth.getUser().then(({ data: { user: u } }) => {
       if (!u) return;
       setUser({ id: u.id });
-      supabase.from("profiles").select("full_name").eq("id", u.id).maybeSingle().then(({ data: p }) => setMyName((p?.full_name as string) ?? ""));
+      supabase.from("profiles").select("full_name,account_type").eq("id", u.id).maybeSingle().then(({ data: p }) => {
+        setMyName((p?.full_name as string) ?? "");
+        setMyAccountType((p?.account_type as string) ?? null);
+      });
     });
   }, [city]);
 
@@ -61,13 +65,14 @@ function CityPage() {
       seeker_id: rvSeeker,
       author_id: user.id,
       author_name: myName || "مستخدم قهوتي",
+      author_type: (myAccountType as "owner" | "seeker" | null) ?? "seeker",
       rating: rvRating,
       comment: rvComment.trim(),
     });
     if (error) return setRvMsg("وقع خطأ، حاول مرة أخرى");
     setRvMsg("تم نشر التقييم ✓");
     setRvComment("");
-    const { data } = await supabase.from("reviews").select("id,author_name,rating,comment,created_at,profiles!inner(full_name,profession,city)").eq("profiles.city", city).order("created_at", { ascending: false });
+    const { data } = await supabase.from("reviews").select("id,author_name,author_type,rating,comment,created_at,profiles!inner(full_name,profession,city)").eq("profiles.city", city).order("created_at", { ascending: false });
     setReviews((data ?? []) as unknown as Review[]);
   }
 
@@ -192,8 +197,13 @@ function CityPage() {
               <div className="grid gap-4 md:grid-cols-2">
                 {reviews.map((r) => (
                   <div key={r.id} className="rounded-2xl border bg-card p-5">
-                    <div className="flex items-center justify-between">
-                      <span className="font-black">{r.author_name}</span>
+                    <div className="flex items-center justify-between gap-2">
+                      <div>
+                        <span className="font-black">{r.author_name}</span>
+                        {r.author_type === "owner" && (
+                          <span className="ms-2 rounded-full bg-primary/15 px-2 py-0.5 text-xs font-bold text-primary">✅ صاحب مشروع</span>
+                        )}
+                      </div>
                       <span className="text-accent">{"★".repeat(r.rating)}<span className="opacity-30">{"★".repeat(5 - r.rating)}</span></span>
                     </div>
                     <p className="mt-1 text-xs text-muted-foreground">عن {r.profiles?.full_name ?? "كفاءة"}{r.profiles?.profession ? ` · ${r.profiles.profession}` : ""}</p>

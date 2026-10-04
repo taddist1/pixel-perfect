@@ -186,6 +186,7 @@ export type Database = {
         Row: {
           author_id: string
           author_name: string
+          author_type: Database["public"]["Enums"]["account_type"]
           comment: string
           created_at: string
           id: string
@@ -195,6 +196,7 @@ export type Database = {
         Insert: {
           author_id: string
           author_name: string
+          author_type?: Database["public"]["Enums"]["account_type"]
           comment?: string
           created_at?: string
           id?: string
@@ -204,6 +206,7 @@ export type Database = {
         Update: {
           author_id?: string
           author_name?: string
+          author_type?: Database["public"]["Enums"]["account_type"]
           comment?: string
           created_at?: string
           id?: string
