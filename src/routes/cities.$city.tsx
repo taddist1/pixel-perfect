@@ -47,7 +47,7 @@ function CityPage() {
       setSeekers(rows);
       if (rows.length) setRvSeeker(rows[0]?.id ?? "");
     });
-    supabase.from("reviews").select("id,author_name,rating,comment,created_at,profiles!inner(full_name,profession,city)").eq("profiles.city", city).order("created_at", { ascending: false }).then(({ data }) => setReviews((data ?? []) as unknown as Review[]));
+    supabase.from("reviews").select("id,author_name,author_type,rating,comment,created_at,profiles!inner(full_name,profession,city)").eq("profiles.city", city).order("created_at", { ascending: false }).then(({ data }) => setReviews((data ?? []) as unknown as Review[]));
     supabase.auth.getUser().then(({ data: { user: u } }) => {
       if (!u) return;
       setUser({ id: u.id });
@@ -72,7 +72,7 @@ function CityPage() {
     if (error) return setRvMsg("وقع خطأ، حاول مرة أخرى");
     setRvMsg("تم نشر التقييم ✓");
     setRvComment("");
-    const { data } = await supabase.from("reviews").select("id,author_name,rating,comment,created_at,profiles!inner(full_name,profession,city)").eq("profiles.city", city).order("created_at", { ascending: false });
+    const { data } = await supabase.from("reviews").select("id,author_name,author_type,rating,comment,created_at,profiles!inner(full_name,profession,city)").eq("profiles.city", city).order("created_at", { ascending: false });
     setReviews((data ?? []) as unknown as Review[]);
   }
 
