@@ -144,7 +144,7 @@ function completion(p: P) {
 
 type Review = { id: string; author_name: string; rating: number; comment: string; created_at: string };
 
-function SeekerExtras({ userId, p, avatar }: { userId: string; p: P; avatar?: string }) {
+function SeekerExtras({ userId, p, avatar }: { userId: string; p: P; avatar: string | undefined }) {
   const [reviews, setReviews] = useState<Review[]>([]);
   useEffect(() => {
     supabase.from("reviews").select("id,author_name,rating,comment,created_at").eq("seeker_id", userId).order("created_at", { ascending: false })
