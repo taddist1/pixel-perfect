@@ -43,6 +43,13 @@
       "when": 1791067962993,
       "tag": "0005_publish_article_drafts",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791138627544,
+      "tag": "0006_jobs_is_filled",
+      "breakpoints": true
     }
   ]
 }
