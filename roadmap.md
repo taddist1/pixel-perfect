@@ -1,6 +1,16 @@
-# Roadmap
+# خارطة الطريق — منصة قهوتي
 
-- [x] Add the public educational video library with search, filters, playback, and sharing.
-- [x] Add admin video publishing and deletion controls.
-- [x] Surface the latest educational videos on the home page.
-- [x] Verify public and admin-facing states on mobile and desktop.
+## قيد التنفيذ (من مثال "قهوة برو" المرفوع)
+- [x] عنوان المدونة: "مدونة قهوتي" (موجود أصلاً في head)
+- [x] ترحيل قاعدة البيانات: is_available + skills على profiles، تحديث public_seekers، جدول reviews مع RLS
+- [x] صفحات المدن المستقلة `/cities/$city` (وظائف + كفاءات + تقييمات لكل مدينة)
+- [x] فلترة متقدمة في /seekers (الخبرة، التوفر، المهارات) و /jobs (المهنة، نظام الدوام)
+- [x] شارة "متاح الآن" على بطاقات الكفاءات
+- [x] التقييمات: عرض متوسط النجوم + نموذج إضافة تقييم للمسجلين
+- [x] قسم "اختر مدينتك" في الرئيسية مع روابط صفحات المدن
+- [ ] المستخدم يجرّب: إضافة تقييم بجلسة مسجلة + تعبئة المهارات في /account
+- [ ] مقالات أصلية من المستخدم (لـ AdSense)
+- [ ] نشر الموقع (زر Publish)
+
+## مفتوحة بانتظار المستخدم
+- اختيار طريقة إصلاح صور الكفاءات (حرف أول من الاسم أو روابط موقتة) — لم يُحسم بعد
