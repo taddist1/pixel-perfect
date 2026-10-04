@@ -105,9 +105,11 @@ function Index() {
         {menuOpen && (
           <nav className="absolute inset-x-0 top-full border-b border-border bg-card p-4 shadow-xl lg:hidden" aria-label="قائمة الهاتف">
             <div className="mx-auto grid max-w-md gap-1">
-              {[["الوظائف", "/jobs"], ["الكفاءات", "/seekers"], ["الفيديوهات", "/videos"], ["المدونة", "/blog"], ["حسابي", "/account"]].map(([label, to]) => (
-                <Link key={to} to={to} onClick={() => setMenuOpen(false)} className="rounded-md px-4 py-3 font-bold hover:bg-secondary">{label}</Link>
-              ))}
+              <Link to="/jobs" onClick={() => setMenuOpen(false)} className="rounded-md px-4 py-3 font-bold hover:bg-secondary">الوظائف</Link>
+              <Link to="/seekers" onClick={() => setMenuOpen(false)} className="rounded-md px-4 py-3 font-bold hover:bg-secondary">الكفاءات</Link>
+              <Link to="/videos" onClick={() => setMenuOpen(false)} className="rounded-md px-4 py-3 font-bold hover:bg-secondary">الفيديوهات</Link>
+              <Link to="/blog" onClick={() => setMenuOpen(false)} className="rounded-md px-4 py-3 font-bold hover:bg-secondary">المدونة</Link>
+              <Link to="/account" onClick={() => setMenuOpen(false)} className="rounded-md px-4 py-3 font-bold hover:bg-secondary">حسابي</Link>
               <select aria-label="اختر المدينة" value={city} onChange={(e) => { setCity(e.target.value); localStorage.setItem("qahwati_city", e.target.value); }} className="mt-2 h-11 rounded-md border bg-card px-3 text-sm font-semibold">
                 {cities.map((c) => <option key={c}>{c}</option>)}
               </select>
