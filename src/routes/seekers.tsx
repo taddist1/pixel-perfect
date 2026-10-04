@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { whatsappUrl } from "@/lib/whatsapp";
+import { flushPush } from "@/lib/push.functions";
 
 const T = "الكفاءات المتاحة — قهوتي";
 const D = "تصفح الباحثين عن عمل في قطاع المقاهي والمطاعم حسب المدينة والخبرة والمهارات: بارستا، ندلاء، تقنيو آلات القهوة ومهن مساندة.";
@@ -171,6 +172,45 @@ function Seekers() {
           </div>
         )}
       </main>
+    </div>
+  );
+}
+
+function RequestButton({ seeker }: { seeker: Seeker }) {
+  const [open, setOpen] = useState(false);
+  const [text, setText] = useState("");
+  const [msg, setMsg] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  async function send() {
+    setBusy(true); setMsg("");
+    const { data } = await supabase.auth.getUser();
+    if (!data.user) { setBusy(false); return setMsg("سجّل الدخول بحساب صاحب مشروع باش تصيفط طلب."); }
+    const { data: me } = await supabase.from("profiles").select("full_name,account_type").eq("id", data.user.id).maybeSingle();
+    if (me?.account_type !== "owner") { setBusy(false); return setMsg("الطلبات خاصة بأصحاب المشاريع فقط."); }
+    if (data.user.id === seeker.id) { setBusy(false); return setMsg("ما يمكنش تصيفط طلب لراسك."); }
+    const { error } = await supabase.from("job_requests").insert({ seeker_id: seeker.id, owner_id: data.user.id, owner_name: me.full_name ?? "", message: text.trim() });
+    setBusy(false);
+    if (error) return setMsg("وقع خطأ، حاول مرة أخرى");
+    flushPush().catch(() => {});
+    setText(""); setOpen(false); setMsg("✅ تصيفط الطلب — غادي يوصلك إشعار ملي يرد.");
+  }
+
+  return (
+    <div className="mt-4">
+      {!open ? (
+        <button onClick={() => setOpen(true)} className="block w-full rounded-full bg-primary px-4 py-2 text-sm font-bold text-primary-foreground">📩 أرسل طلب عمل</button>
+      ) : (
+        <div className="space-y-2">
+          <textarea value={text} onChange={(e) => setText(e.target.value)} maxLength={1000} rows={3}
+            placeholder={`سلام ${seeker.full_name ?? ""}، عندي فرصة عمل فـ…`} className="w-full rounded-xl border bg-background px-3 py-2 text-sm" />
+          <div className="flex gap-2">
+            <button disabled={busy || !text.trim()} onClick={send} className="flex-1 rounded-full bg-primary px-4 py-2 text-sm font-bold text-primary-foreground disabled:opacity-50">{busy ? "…" : "إرسال"}</button>
+            <button onClick={() => setOpen(false)} className="rounded-full border px-4 py-2 text-sm font-bold">إلغاء</button>
+          </div>
+        </div>
+      )}
+      {msg && <p className="mt-2 text-xs">{msg}</p>}
     </div>
   );
 }
