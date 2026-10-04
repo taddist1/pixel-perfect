@@ -141,7 +141,12 @@ function Seekers() {
           <p className="mt-10 text-center text-muted-foreground">جارٍ التحميل…</p>
         ) : filtered.length === 0 ? (
           <div className="mt-10 rounded-2xl border p-10 text-center text-muted-foreground">
-            لا توجد كفاءات مطابقة حالياً{city !== "الكل" ? ` في ${city}` : ""}. كن أول من يسجل!
+            <p>لا توجد كفاءات مطابقة حالياً{city !== "الكل" ? ` في ${city}` : ""}. كن أول من يسجل!</p>
+            {city !== "الكل" && (
+              <button onClick={() => setCity("الكل")} className="mt-4 rounded-full bg-primary px-5 py-2 text-sm font-bold text-primary-foreground">
+                وسّع البحث لكل المدن
+              </button>
+            )}
           </div>
         ) : (
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
