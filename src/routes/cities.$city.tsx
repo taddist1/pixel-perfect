@@ -197,12 +197,13 @@ function CityPage() {
               <div className="grid gap-4 md:grid-cols-2">
                 {reviews.map((r) => (
                   <div key={r.id} className="rounded-2xl border bg-card p-5">
-                    <div>
-                      <span className="font-black">{r.author_name}</span>
-                      {r.author_type === "owner" && (
-                        <span className="ms-2 rounded-full bg-primary/15 px-2 py-0.5 text-xs font-bold text-primary">✅ صاحب مشروع</span>
-                      )}
-                    </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <div>
+                        <span className="font-black">{r.author_name}</span>
+                        {r.author_type === "owner" && (
+                          <span className="ms-2 rounded-full bg-primary/15 px-2 py-0.5 text-xs font-bold text-primary">✅ صاحب مشروع</span>
+                        )}
+                      </div>
                       <span className="text-accent">{"★".repeat(r.rating)}<span className="opacity-30">{"★".repeat(5 - r.rating)}</span></span>
                     </div>
                     <p className="mt-1 text-xs text-muted-foreground">عن {r.profiles?.full_name ?? "كفاءة"}{r.profiles?.profession ? ` · ${r.profiles.profession}` : ""}</p>
