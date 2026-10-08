@@ -72,7 +72,7 @@ function Seekers() {
       for (const [id, v] of Object.entries(acc)) out[id] = { avg: Math.round((v.sum / v.n) * 10) / 10, n: v.n };
       setRatings(out);
     });
-    supabase.from("trust_adjustments").select("seeker_id,adjustment").then(({ data }) => setAdjs(Object.fromEntries((data ?? []).map((x) => [x.seeker_id, x.adjustment]))));
+    supabase.from("public_trust_adjustments" as never).select("seeker_id,adjustment").then(({ data }) => setAdjs(Object.fromEntries((data ?? []).map((x) => [x.seeker_id, x.adjustment]))));
     supabase.rpc("seeker_trust_stats").then(({ data }) => {
       const o: Record<string, { total: number; answered: number; accepted: number }> = {};
       for (const r of data ?? []) o[r.seeker_id] = r;
