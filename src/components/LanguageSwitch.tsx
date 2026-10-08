@@ -55,7 +55,7 @@ export function LanguageSwitch() {
         type="button"
         onClick={toggle}
         translate="no"
-        className="notranslate fixed bottom-20 left-3 z-50 rounded-full border border-border bg-background px-4 py-2 text-sm font-bold text-primary shadow-lg"
+        className="notranslate fixed top-3 left-16 z-[60] rounded-full border border-border bg-background px-3 py-1.5 text-xs font-bold text-primary shadow-md sm:left-1/2 sm:-translate-x-1/2 sm:text-sm"
         aria-label="Changer la langue / تغيير اللغة"
       >
         {lang === "ar" ? "🇫🇷 Français" : "🇲🇦 العربية"}
