@@ -156,3 +156,7 @@
 
   .qahwati-rise { animation: qahwati-rise 600ms ease-out both; }
 }
+
+/* Hide Google Translate banner */
+.goog-te-banner-frame, .skiptranslate iframe, #goog-gt-tt { display: none !important; }
+body { top: 0 !important; }

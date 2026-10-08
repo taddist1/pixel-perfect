@@ -34,7 +34,6 @@ const roles = [
 
 function Index() {
   const [city, setCity] = useState(cities[0]);
-  const [lang, setLang] = useState<"ar" | "fr">("ar");
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [jobsCount, setJobsCount] = useState(0);
   const [videos, setVideos] = useState<Tables<"educational_videos">[]>([]);
@@ -95,7 +94,6 @@ function Index() {
               className="h-10 rounded-md border bg-card px-3 text-sm font-semibold">
             {cities.map((c) => <option key={c}>{c}</option>)}
             </select>
-            <Button variant="outline" size="icon" onClick={() => setLang(lang === "ar" ? "fr" : "ar")} aria-label="تغيير اللغة">{lang === "ar" ? "FR" : "ع"}</Button>
             <Button asChild><Link to="/account">حسابي</Link></Button>
           </div>
           <Button className="lg:hidden" variant="ghost" size="icon" onClick={() => setMenuOpen((open) => !open)} aria-label={menuOpen ? "إغلاق القائمة" : "فتح القائمة"}>
