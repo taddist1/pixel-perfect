@@ -134,6 +134,8 @@ function TrustEditor({ s, avg, stats, current, onSaved }: { s: Seeker; avg: numb
   const [a, setA] = useState(current?.adjustment ?? 0);
   const [note, setNote] = useState(current?.note ?? "");
   const [msg, setMsg] = useState("");
+  const [confirming, setConfirming] = useState(false);
+  const [busy, setBusy] = useState(false);
   const base = trustScore({ profile: s, ratingAvg: avg, stats });
   const final = trustScore({ profile: s, ratingAvg: avg, stats, adjustment: a });
 
@@ -141,6 +143,14 @@ function TrustEditor({ s, avg, stats, current, onSaved }: { s: Seeker; avg: numb
     const { error } = await supabase.from("trust_adjustments").upsert({ seeker_id: s.id, adjustment: a, note: note.trim(), updated_at: new Date().toISOString() });
     setMsg(error ? "وقع خطأ" : "تحفظ ✓");
     if (!error) onSaved();
+  }
+
+  async function remove() {
+    setBusy(true);
+    const { error } = await supabase.from("profiles").delete().eq("id", s.id);
+    setBusy(false);
+    if (error) { setMsg("وقع خطأ فالحذف"); return; }
+    onSaved();
   }
 
   return (
@@ -156,6 +166,15 @@ function TrustEditor({ s, avg, stats, current, onSaved }: { s: Seeker; avg: numb
       <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="السبب (اختياري)" className="min-w-40 flex-1 rounded-lg border bg-background px-3 py-1.5 text-sm" />
       <span className="font-black text-primary">{final.icon} {final.score}</span>
       <button onClick={save} className="rounded-full bg-primary px-4 py-1.5 text-sm font-bold text-primary-foreground">حفظ</button>
+      {!confirming ? (
+        <button onClick={() => setConfirming(true)} className="rounded-full border border-accent px-4 py-1.5 text-sm font-bold text-accent">🗑 حذف</button>
+      ) : (
+        <span className="flex items-center gap-2 text-sm font-bold text-accent">
+          متأكد؟
+          <button disabled={busy} onClick={remove} className="rounded-full bg-accent px-3 py-1 text-white disabled:opacity-50">{busy ? "…" : "نعم، احذف"}</button>
+          <button onClick={() => setConfirming(false)} className="rounded-full border px-3 py-1">إلغاء</button>
+        </span>
+      )}
       {msg && <span className="text-xs">{msg}</span>}
     </div>
   );
