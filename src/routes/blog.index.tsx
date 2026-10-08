@@ -19,7 +19,7 @@ function Blog() {
   });
 
   return (
-    <main dir="rtl" className="mx-auto max-w-4xl px-4 py-10">
+    <main dir="rtl" className="notranslate mx-auto max-w-4xl px-4 py-10" translate="no">
       <Link to="/" className="text-sm text-muted-foreground">← الرئيسية</Link>
       <h1 className="mt-4 text-3xl font-black">مدونة قهوتي</h1>
       <p className="mt-2 text-muted-foreground">نصائح ودلائل لكل من يشتغل في المقاهي والمطاعم.</p>

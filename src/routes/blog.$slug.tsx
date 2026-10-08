@@ -38,7 +38,7 @@ function ArticlePage() {
   const excerpt = data.kind === "static" ? data.article.excerpt : data.draft.seo_description;
 
   return (
-    <main dir="rtl" className="mx-auto max-w-3xl px-4 py-10">
+    <main dir="rtl" className="notranslate mx-auto max-w-3xl px-4 py-10" translate="no">
       <Link to="/blog" className="text-sm text-muted-foreground">← المدونة</Link>
       <h1 className="mt-4 text-3xl font-black leading-tight">{title}</h1>
       <p className="mt-3 text-lg text-muted-foreground">{excerpt}</p>
