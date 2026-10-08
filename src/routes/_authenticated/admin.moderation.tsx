@@ -130,7 +130,7 @@ function ReviewEditor({ r, seekerName, onSaved }: { r: Review; seekerName: strin
   );
 }
 
-function TrustEditor({ s, avg, stats, current, onSaved }: { s: Seeker; avg: number | null; stats?: Stats; current?: { adjustment: number; note: string }; onSaved: () => void }) {
+function TrustEditor({ s, avg, stats, current, onSaved }: { s: Seeker; avg: number | null; stats?: Stats | undefined; current?: { adjustment: number; note: string } | undefined; onSaved: () => void }) {
   const [a, setA] = useState(current?.adjustment ?? 0);
   const [note, setNote] = useState(current?.note ?? "");
   const [msg, setMsg] = useState("");
