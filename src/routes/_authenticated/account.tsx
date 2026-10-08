@@ -179,7 +179,7 @@ function SeekerExtras({ userId, p, avatar }: { userId: string; p: P; avatar: str
     .then(({ data }) => setReviews((data ?? []) as Review[]));
   useEffect(() => {
     load();
-    supabase.from("trust_adjustments").select("adjustment").eq("seeker_id", userId).maybeSingle().then(({ data }) => setAdjustment(data?.adjustment ?? 0));
+    supabase.from("public_trust_adjustments" as never).select("adjustment").eq("seeker_id", userId).maybeSingle().then(({ data }) => setAdjustment((data as { adjustment: number } | null)?.adjustment ?? 0));
     supabase.rpc("seeker_trust_stats").then(({ data }) => setStats((data ?? []).find((s) => s.seeker_id === userId) ?? null));
   }, [userId]);
   const { pct, missing } = completion(p);
