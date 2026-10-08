@@ -4,6 +4,27 @@ import { supabase } from "@/integrations/supabase/client";
 import { cities, professions } from "@/lib/constants";
 import { flushPush } from "@/lib/push.functions";
 import { enablePush, pushSupported } from "@/lib/push-client";
+import { trustScore } from "@/lib/trust";
+import { isAbusive } from "@/lib/moderation";
+
+function ReplyBox({ id, onDone }: { id: string; onDone: () => void }) {
+  const [t, setT] = useState("");
+  const [m, setM] = useState("");
+  async function send() {
+    if (isAbusive(t)) return setM("⚠️ الرد فيه كلام غير لائق.");
+    if (!confirm("الرد كيتنشر مرة وحدة وما يمكنش يتبدل. متأكد؟")) return;
+    const { error } = await supabase.from("reviews").update({ reply: t.trim() }).eq("id", id);
+    if (error) return setM("وقع خطأ");
+    onDone();
+  }
+  return (
+    <div className="mt-2 flex gap-2">
+      <input value={t} onChange={(e) => setT(e.target.value)} maxLength={500} placeholder="رد مهني (مرة وحدة)…" className="flex-1 rounded-lg border bg-background px-3 py-1.5 text-sm" />
+      <button disabled={!t.trim()} onClick={send} className="rounded-full bg-primary px-4 text-sm font-bold text-primary-foreground disabled:opacity-50">رد</button>
+      {m && <span className="text-xs">{m}</span>}
+    </div>
+  );
+}
 
 export const Route = createFileRoute("/_authenticated/account")({
   head: () => ({ meta: [{ title: "حسابي — قهوتي" }, { name: "description", content: "ملفك الشخصي في قهوتي" }] }),
@@ -146,19 +167,30 @@ function completion(p: P) {
   ].filter(Boolean) as string[] };
 }
 
-type Review = { id: string; author_name: string; rating: number; comment: string; created_at: string };
+type Review = { id: string; author_name: string; rating: number; comment: string; created_at: string; reply: string | null };
+type Stats = { total: number; answered: number; accepted: number };
 
 function SeekerExtras({ userId, p, avatar }: { userId: string; p: P; avatar: string | undefined }) {
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [stats, setStats] = useState<Stats | null>(null);
+  const load = () => supabase.from("reviews").select("id,author_name,rating,comment,created_at,reply").eq("seeker_id", userId).order("created_at", { ascending: false })
+    .then(({ data }) => setReviews((data ?? []) as Review[]));
   useEffect(() => {
-    supabase.from("reviews").select("id,author_name,rating,comment,created_at").eq("seeker_id", userId).order("created_at", { ascending: false })
-      .then(({ data }) => setReviews((data ?? []) as Review[]));
+    load();
+    supabase.rpc("seeker_trust_stats").then(({ data }) => setStats((data ?? []).find((s) => s.seeker_id === userId) ?? null));
   }, [userId]);
   const { pct, missing } = completion(p);
   const avg = reviews.length ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1) : null;
+  const trust = trustScore({ profile: { ...p, avatar_url: p.avatar_url }, ratingAvg: avg ? Number(avg) : null, stats });
 
   return (
     <div className="mt-6 space-y-6">
+      <section className="rounded-3xl border bg-card p-6">
+        <div className="flex items-center justify-between"><h2 className="font-black">مؤشر الثقة</h2><span className="font-black text-primary">{trust.icon} {trust.score}/100 · {trust.label}</span></div>
+        <div className="mt-3 h-3 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-accent transition-all" style={{ width: `${trust.score}%` }} /></div>
+        <p className="mt-2 text-xs text-muted-foreground">إكمال الملف 20% · الخدمات المقبولة 30% · التقييم 30% · سرعة الرد على الطلبات 20%</p>
+      </section>
+
       <section className="rounded-3xl border bg-card p-6">
         <div className="flex items-center justify-between"><h2 className="font-black">اكتمال ملفك</h2><span className="font-black text-primary">{pct}%</span></div>
         <div className="mt-3 h-3 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-primary transition-all" style={{ width: `${pct}%` }} /></div>
@@ -194,6 +226,7 @@ function SeekerExtras({ userId, p, avatar }: { userId: string; p: P; avatar: str
               <li key={r.id} className="rounded-xl border p-3">
                 <div className="flex justify-between text-sm"><b>{r.author_name}</b><span className="text-primary">{"★".repeat(r.rating)}{"☆".repeat(5 - r.rating)}</span></div>
                 {r.comment && <p className="mt-1 text-sm">{r.comment}</p>}
+                {r.reply ? <p className="mt-2 rounded-lg bg-muted p-2 text-sm"><b>ردّك:</b> {r.reply}</p> : <ReplyBox id={r.id} onDone={load} />}
               </li>
             ))}
           </ul>
