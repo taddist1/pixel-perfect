@@ -1,8 +1,8 @@
 // مؤشر الثقة: إكمال الملف 20% + الخدمات المكتملة 30% + التقييم 30% + سرعة الرد 20%
 export type TrustInput = {
   profile: { full_name?: string | null; city?: string | null; phone?: string | null; avatar_url?: string | null; profession?: string | null; experience_years?: number | null; skills?: string[] | null };
-  ratingAvg?: number | null;
-  stats?: { total: number; answered: number; accepted: number } | null;
+  ratingAvg?: number | null | undefined;
+  stats?: { total: number; answered: number; accepted: number } | null | undefined;
 };
 
 export function trustScore({ profile: p, ratingAvg, stats }: TrustInput) {

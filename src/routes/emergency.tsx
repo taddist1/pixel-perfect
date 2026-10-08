@@ -37,7 +37,7 @@ function Emergency() {
       if (!data.user) return setMe(null);
       const { data: p } = await supabase.from("profiles").select("account_type,city,phone,full_name").eq("id", data.user.id).maybeSingle();
       setMe({ id: data.user.id, account_type: p?.account_type ?? null, city: p?.city ?? null, phone: p?.phone ?? null, full_name: p?.full_name ?? null });
-      setCity(p?.city ?? cities[0]); setPhone(p?.phone ?? "");
+      setCity(p?.city ?? cities[0] ?? ""); setPhone(p?.phone ?? "");
       load();
     });
     const t = setInterval(load, 20000);
