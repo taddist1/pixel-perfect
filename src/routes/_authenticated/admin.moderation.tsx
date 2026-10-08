@@ -134,6 +134,8 @@ function TrustEditor({ s, avg, stats, current, onSaved }: { s: Seeker; avg: numb
   const [a, setA] = useState(current?.adjustment ?? 0);
   const [note, setNote] = useState(current?.note ?? "");
   const [msg, setMsg] = useState("");
+  const [confirming, setConfirming] = useState(false);
+  const [busy, setBusy] = useState(false);
   const base = trustScore({ profile: s, ratingAvg: avg, stats });
   const final = trustScore({ profile: s, ratingAvg: avg, stats, adjustment: a });
 
@@ -141,6 +143,14 @@ function TrustEditor({ s, avg, stats, current, onSaved }: { s: Seeker; avg: numb
     const { error } = await supabase.from("trust_adjustments").upsert({ seeker_id: s.id, adjustment: a, note: note.trim(), updated_at: new Date().toISOString() });
     setMsg(error ? "وقع خطأ" : "تحفظ ✓");
     if (!error) onSaved();
+  }
+
+  async function remove() {
+    setBusy(true);
+    const { error } = await supabase.from("profiles").delete().eq("id", s.id);
+    setBusy(false);
+    if (error) { setMsg("وقع خطأ فالحذف"); return; }
+    onSaved();
   }
 
   return (
