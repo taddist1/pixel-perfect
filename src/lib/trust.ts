@@ -3,15 +3,17 @@ export type TrustInput = {
   profile: { full_name?: string | null; city?: string | null; phone?: string | null; avatar_url?: string | null; profession?: string | null; experience_years?: number | null; skills?: string[] | null };
   ratingAvg?: number | null | undefined;
   stats?: { total: number; answered: number; accepted: number } | null | undefined;
+  adjustment?: number | null | undefined;
 };
 
-export function trustScore({ profile: p, ratingAvg, stats }: TrustInput) {
+export function trustScore({ profile: p, ratingAvg, stats, adjustment }: TrustInput) {
   const checks = [p.full_name, p.city, p.phone, p.avatar_url, p.profession, p.experience_years != null, (p.skills ?? []).length > 0];
   const completion = checks.filter(Boolean).length / checks.length;
   const services = Math.min(stats?.accepted ?? 0, 5) / 5;
   const rating = ratingAvg ? ratingAvg / 5 : 0;
   const response = stats && stats.total > 0 ? stats.answered / stats.total : 0;
-  const score = Math.round(completion * 20 + services * 30 + rating * 30 + response * 20);
+  const raw = Math.round(completion * 20 + services * 30 + rating * 30 + response * 20 + (adjustment ?? 0));
+  const score = Math.max(0, Math.min(100, raw));
   return { score, ...trustBadge(score) };
 }
 

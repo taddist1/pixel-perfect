@@ -45,6 +45,7 @@ function Seekers() {
   const [skill, setSkill] = useState("");
   const [rows, setRows] = useState<Seeker[]>([]);
   const [ratings, setRatings] = useState<Record<string, { avg: number; n: number }>>({});
+  const [adjs, setAdjs] = useState<Record<string, number>>({});
   const [stats, setStats] = useState<Record<string, { total: number; answered: number; accepted: number }>>({});
   const [loading, setLoading] = useState(true);
 
@@ -71,6 +72,7 @@ function Seekers() {
       for (const [id, v] of Object.entries(acc)) out[id] = { avg: Math.round((v.sum / v.n) * 10) / 10, n: v.n };
       setRatings(out);
     });
+    supabase.from("trust_adjustments").select("seeker_id,adjustment").then(({ data }) => setAdjs(Object.fromEntries((data ?? []).map((x) => [x.seeker_id, x.adjustment]))));
     supabase.rpc("seeker_trust_stats").then(({ data }) => {
       const o: Record<string, { total: number; answered: number; accepted: number }> = {};
       for (const r of data ?? []) o[r.seeker_id] = r;
@@ -181,7 +183,7 @@ function Seekers() {
                   {ratings[s.id] != null && (
                     <span className="rounded-full bg-accent/20 px-3 py-1">★ {ratings[s.id]!.avg} ({ratings[s.id]!.n})</span>
                   )}
-                  {(() => { const t = trustScore({ profile: s, ratingAvg: ratings[s.id]?.avg, stats: stats[s.id] }); return (
+                  {(() => { const t = trustScore({ profile: s, ratingAvg: ratings[s.id]?.avg, stats: stats[s.id], adjustment: adjs[s.id] }); return (
                     <span className="rounded-full border border-primary/40 px-3 py-1 text-primary" title="مؤشر الثقة">{t.icon} {t.label} · {t.score}</span>
                   ); })()}
                   {(s.skills ?? []).map((sk) => <span key={sk} className="rounded-full bg-secondary px-3 py-1">{sk}</span>)}
