@@ -190,23 +190,31 @@ function CityPage() {
 
         {tab === "reviews" && (
           <div className="space-y-6">
-            {user && (
+            {myAccountType === "owner" && (eligible.some((id) => seekers.some((s) => s.id === id)) ? (
               <form onSubmit={submitReview} className="rounded-2xl border bg-card p-5">
-                <h2 className="font-black">أضف تقييمك 👇</h2>
+                <h2 className="font-black">أضف تقييم موثّق 👇</h2>
+                <p className="mt-1 text-xs text-muted-foreground">تقييم واحد لكل كفاءة، وغير من بعد خدمة مقبولة.</p>
+                <select value={rvSeeker} onChange={(e) => setRvSeeker(e.target.value)} className="mt-3 w-full rounded-xl border bg-card px-4 py-3">
+                  {seekers.filter((s) => eligible.includes(s.id)).map((s) => <option key={s.id} value={s.id}>{s.full_name ?? "بدون اسم"}</option>)}
+                </select>
                 <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                  <select value={rvSeeker} onChange={(e) => setRvSeeker(e.target.value)} className="rounded-xl border bg-card px-4 py-3">
-                    {seekers.map((s) => <option key={s.id} value={s.id}>{s.full_name ?? "بدون اسم"}</option>)}
-                  </select>
-                  <select value={rvRating} onChange={(e) => setRvRating(Number(e.target.value))} className="rounded-xl border bg-card px-4 py-3">
-                    {[5, 4, 3, 2, 1].map((n) => <option key={n} value={n}>{"★".repeat(n)}</option>)}
-                  </select>
+                  {criteria.map(([k, label]) => (
+                    <label key={k} className="flex items-center justify-between gap-2 rounded-xl border px-4 py-2 text-sm font-bold">
+                      {label}
+                      <select value={crit[k]} onChange={(e) => setCrit({ ...crit, [k]: Number(e.target.value) })} className="bg-card text-accent">
+                        {[5, 4, 3, 2, 1].map((n) => <option key={n} value={n}>{"★".repeat(n)}</option>)}
+                      </select>
+                    </label>
+                  ))}
                 </div>
-                <textarea value={rvComment} onChange={(e) => setRvComment(e.target.value)} placeholder="شنو رأيك فالخدمة؟" rows={3}
+                <textarea value={rvComment} onChange={(e) => setRvComment(e.target.value)} maxLength={500} placeholder="شنو رأيك فالخدمة؟" rows={3}
                   className="mt-3 w-full rounded-xl border bg-card px-4 py-3" />
                 <button className="mt-3 rounded-full bg-primary px-6 py-2 font-bold text-primary-foreground">نشر التقييم</button>
                 {rvMsg && <span className="ms-3 text-sm">{rvMsg}</span>}
               </form>
-            )}
+            ) : (
+              <p className="rounded-2xl border bg-secondary/60 p-4 text-sm">🔒 التقييم كيتفتح ليك ملي كفاءة من {city} تقبل طلب العمل ديالك.</p>
+            ))}
             {reviews.length === 0 ? (
               <p className="rounded-2xl border p-10 text-center text-muted-foreground">لا توجد تقييمات بعد في {city}.</p>
             ) : (
@@ -217,13 +225,19 @@ function CityPage() {
                       <div>
                         <span className="font-black">{r.author_name}</span>
                         {r.author_type === "owner" && (
-                          <span className="ms-2 rounded-full bg-primary/15 px-2 py-0.5 text-xs font-bold text-primary">✅ صاحب مشروع</span>
+                          <span className="ms-2 rounded-full bg-primary/15 px-2 py-0.5 text-xs font-bold text-primary">✅ تقييم موثّق</span>
                         )}
                       </div>
                       <span className="text-accent">{"★".repeat(r.rating)}<span className="opacity-30">{"★".repeat(5 - r.rating)}</span></span>
                     </div>
                     <p className="mt-1 text-xs text-muted-foreground">عن {r.profiles?.full_name ?? "كفاءة"}{r.profiles?.profession ? ` · ${r.profiles.profession}` : ""}</p>
+                    {r.quality != null && (
+                      <div className="mt-2 grid grid-cols-2 gap-1 text-xs">
+                        {criteria.map(([k, label]) => <span key={k}>{label}: <b className="text-accent">{r[k]}/5</b></span>)}
+                      </div>
+                    )}
                     {r.comment && <p className="mt-2 text-sm">{r.comment}</p>}
+                    {r.reply && <p className="mt-2 rounded-xl bg-muted p-3 text-sm"><b>رد الكفاءة:</b> {r.reply}</p>}
                   </div>
                 ))}
               </div>
