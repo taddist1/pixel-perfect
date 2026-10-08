@@ -166,6 +166,15 @@ function TrustEditor({ s, avg, stats, current, onSaved }: { s: Seeker; avg: numb
       <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="السبب (اختياري)" className="min-w-40 flex-1 rounded-lg border bg-background px-3 py-1.5 text-sm" />
       <span className="font-black text-primary">{final.icon} {final.score}</span>
       <button onClick={save} className="rounded-full bg-primary px-4 py-1.5 text-sm font-bold text-primary-foreground">حفظ</button>
+      {!confirming ? (
+        <button onClick={() => setConfirming(true)} className="rounded-full border border-accent px-4 py-1.5 text-sm font-bold text-accent">🗑 حذف</button>
+      ) : (
+        <span className="flex items-center gap-2 text-sm font-bold text-accent">
+          متأكد؟
+          <button disabled={busy} onClick={remove} className="rounded-full bg-accent px-3 py-1 text-white disabled:opacity-50">{busy ? "…" : "نعم، احذف"}</button>
+          <button onClick={() => setConfirming(false)} className="rounded-full border px-3 py-1">إلغاء</button>
+        </span>
+      )}
       {msg && <span className="text-xs">{msg}</span>}
     </div>
   );
