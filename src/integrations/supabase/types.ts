@@ -516,6 +516,36 @@ export type Database = {
         }
         Relationships: []
       }
+      public_trust_adjustments: {
+        Row: {
+          adjustment: number | null
+          seeker_id: string | null
+        }
+        Insert: {
+          adjustment?: number | null
+          seeker_id?: string | null
+        }
+        Update: {
+          adjustment?: number | null
+          seeker_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trust_adjustments_seeker_id_fkey"
+            columns: ["seeker_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trust_adjustments_seeker_id_fkey"
+            columns: ["seeker_id"]
+            isOneToOne: true
+            referencedRelation: "public_seekers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       accept_service_call: { Args: { _id: string }; Returns: boolean }
