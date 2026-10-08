@@ -317,6 +317,7 @@ export type Database = {
           communication: number | null
           created_at: string
           id: string
+          is_hidden: boolean
           professionalism: number | null
           quality: number | null
           rating: number
@@ -333,6 +334,7 @@ export type Database = {
           communication?: number | null
           created_at?: string
           id?: string
+          is_hidden?: boolean
           professionalism?: number | null
           quality?: number | null
           rating: number
@@ -349,6 +351,7 @@ export type Database = {
           communication?: number | null
           created_at?: string
           id?: string
+          is_hidden?: boolean
           professionalism?: number | null
           quality?: number | null
           rating?: number
@@ -417,6 +420,42 @@ export type Database = {
           taker_phone?: string | null
         }
         Relationships: []
+      }
+      trust_adjustments: {
+        Row: {
+          adjustment: number
+          note: string
+          seeker_id: string
+          updated_at: string
+        }
+        Insert: {
+          adjustment?: number
+          note?: string
+          seeker_id: string
+          updated_at?: string
+        }
+        Update: {
+          adjustment?: number
+          note?: string
+          seeker_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trust_adjustments_seeker_id_fkey"
+            columns: ["seeker_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trust_adjustments_seeker_id_fkey"
+            columns: ["seeker_id"]
+            isOneToOne: true
+            referencedRelation: "public_seekers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {

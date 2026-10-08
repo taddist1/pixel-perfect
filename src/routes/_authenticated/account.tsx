@@ -90,6 +90,7 @@ function Account() {
           <div className="mt-3 flex flex-wrap gap-2">
             <Link to="/admin/articles" className="rounded-full bg-primary px-4 py-2 text-sm font-bold text-primary-foreground">مولّد المقالات</Link>
             <Link to="/admin/videos" className="rounded-full bg-primary px-4 py-2 text-sm font-bold text-primary-foreground">إدارة الفيديوهات</Link>
+            <Link to="/admin/moderation" className="rounded-full bg-primary px-4 py-2 text-sm font-bold text-primary-foreground">التقييمات والثقة</Link>
           </div>
         </div>
       )}
@@ -173,15 +174,17 @@ type Stats = { total: number; answered: number; accepted: number };
 function SeekerExtras({ userId, p, avatar }: { userId: string; p: P; avatar: string | undefined }) {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
+  const [adjustment, setAdjustment] = useState(0);
   const load = () => supabase.from("reviews").select("id,author_name,rating,comment,created_at,reply").eq("seeker_id", userId).order("created_at", { ascending: false })
     .then(({ data }) => setReviews((data ?? []) as Review[]));
   useEffect(() => {
     load();
+    supabase.from("trust_adjustments").select("adjustment").eq("seeker_id", userId).maybeSingle().then(({ data }) => setAdjustment(data?.adjustment ?? 0));
     supabase.rpc("seeker_trust_stats").then(({ data }) => setStats((data ?? []).find((s) => s.seeker_id === userId) ?? null));
   }, [userId]);
   const { pct, missing } = completion(p);
   const avg = reviews.length ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1) : null;
-  const trust = trustScore({ profile: { ...p, avatar_url: p.avatar_url }, ratingAvg: avg ? Number(avg) : null, stats });
+  const trust = trustScore({ profile: { ...p, avatar_url: p.avatar_url }, ratingAvg: avg ? Number(avg) : null, stats, adjustment });
 
   return (
     <div className="mt-6 space-y-6">

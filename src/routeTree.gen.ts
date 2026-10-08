@@ -23,6 +23,7 @@ import { Route as BlogIndexRouteImport } from './routes/blog.index'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as CitiesCityRouteImport } from './routes/cities.$city'
 import { Route as AuthenticatedAdminArticlesRouteImport } from './routes/_authenticated/admin.articles'
+import { Route as AuthenticatedAdminModerationRouteImport } from './routes/_authenticated/admin.moderation'
 import { Route as AuthenticatedAdminVideosRouteImport } from './routes/_authenticated/admin.videos'
 
 const IndexRoute = IndexRouteImport.update({
@@ -95,6 +96,12 @@ const AuthenticatedAdminArticlesRoute =
     path: '/admin/articles',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminModerationRoute =
+  AuthenticatedAdminModerationRouteImport.update({
+    id: '/admin/moderation',
+    path: '/admin/moderation',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminVideosRoute =
   AuthenticatedAdminVideosRouteImport.update({
     id: '/admin/videos',
@@ -116,6 +123,7 @@ export interface FileRoutesByFullPath {
   '/cities/$city': typeof CitiesCityRoute
   '/blog/': typeof BlogIndexRoute
   '/admin/articles': typeof AuthenticatedAdminArticlesRoute
+  '/admin/moderation': typeof AuthenticatedAdminModerationRoute
   '/admin/videos': typeof AuthenticatedAdminVideosRoute
 }
 export interface FileRoutesByTo {
@@ -132,6 +140,7 @@ export interface FileRoutesByTo {
   '/cities/$city': typeof CitiesCityRoute
   '/blog': typeof BlogIndexRoute
   '/admin/articles': typeof AuthenticatedAdminArticlesRoute
+  '/admin/moderation': typeof AuthenticatedAdminModerationRoute
   '/admin/videos': typeof AuthenticatedAdminVideosRoute
 }
 export interface FileRoutesById {
@@ -150,6 +159,7 @@ export interface FileRoutesById {
   '/cities/$city': typeof CitiesCityRoute
   '/blog/': typeof BlogIndexRoute
   '/_authenticated/admin/articles': typeof AuthenticatedAdminArticlesRoute
+  '/_authenticated/admin/moderation': typeof AuthenticatedAdminModerationRoute
   '/_authenticated/admin/videos': typeof AuthenticatedAdminVideosRoute
 }
 export interface FileRouteTypes {
@@ -168,6 +178,7 @@ export interface FileRouteTypes {
     | '/cities/$city'
     | '/blog/'
     | '/admin/articles'
+    | '/admin/moderation'
     | '/admin/videos'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -184,6 +195,7 @@ export interface FileRouteTypes {
     | '/cities/$city'
     | '/blog'
     | '/admin/articles'
+    | '/admin/moderation'
     | '/admin/videos'
   id:
     | '__root__'
@@ -201,6 +213,7 @@ export interface FileRouteTypes {
     | '/cities/$city'
     | '/blog/'
     | '/_authenticated/admin/articles'
+    | '/_authenticated/admin/moderation'
     | '/_authenticated/admin/videos'
   fileRoutesById: FileRoutesById
 }
@@ -318,6 +331,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminArticlesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/moderation': {
+      id: '/_authenticated/admin/moderation'
+      path: '/admin/moderation'
+      fullPath: '/admin/moderation'
+      preLoaderRoute: typeof AuthenticatedAdminModerationRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/videos': {
       id: '/_authenticated/admin/videos'
       path: '/admin/videos'
@@ -332,6 +352,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAccountRoute: typeof AuthenticatedAccountRoute
   AuthenticatedPostJobRoute: typeof AuthenticatedPostJobRoute
   AuthenticatedAdminArticlesRoute: typeof AuthenticatedAdminArticlesRoute
+  AuthenticatedAdminModerationRoute: typeof AuthenticatedAdminModerationRoute
   AuthenticatedAdminVideosRoute: typeof AuthenticatedAdminVideosRoute
 }
 
@@ -339,6 +360,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAccountRoute: AuthenticatedAccountRoute,
   AuthenticatedPostJobRoute: AuthenticatedPostJobRoute,
   AuthenticatedAdminArticlesRoute: AuthenticatedAdminArticlesRoute,
+  AuthenticatedAdminModerationRoute: AuthenticatedAdminModerationRoute,
   AuthenticatedAdminVideosRoute: AuthenticatedAdminVideosRoute,
 }
 
