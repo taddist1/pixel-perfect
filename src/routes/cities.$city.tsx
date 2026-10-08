@@ -2,6 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { whatsappUrl } from "@/lib/whatsapp";
+import { criteria, type CriterionKey } from "@/lib/trust";
+import { isAbusive } from "@/lib/moderation";
 
 export const Route = createFileRoute("/cities/$city")({
   head: ({ params }) => {
@@ -24,7 +26,8 @@ export const Route = createFileRoute("/cities/$city")({
 
 type Job = { id: string; title: string; business_name: string; role: string; schedule: string; salary: string | null; phone: string | null; description: string | null };
 type Seeker = { id: string; full_name: string | null; profession: string | null; experience_years: number | null; phone: string | null; is_available: boolean | null; skills: string[] | null };
-type Review = { id: string; author_name: string; author_type: "owner" | "seeker" | null; rating: number; comment: string; created_at: string; profiles: { full_name: string | null; profession: string | null } | null };
+type Review = { id: string; author_name: string; author_type: "owner" | "seeker" | null; rating: number; comment: string; created_at: string; reply: string | null; quality: number | null; commitment: number | null; communication: number | null; professionalism: number | null; profiles: { full_name: string | null; profession: string | null } | null };
+const REVIEW_SELECT = "id,author_name,author_type,rating,comment,created_at,reply,quality,commitment,communication,professionalism,profiles!inner(full_name,profession,city)";
 
 function CityPage() {
   const { city } = Route.useParams();
@@ -35,7 +38,8 @@ function CityPage() {
   const [myName, setMyName] = useState("");
   const [myAccountType, setMyAccountType] = useState<string | null>(null);
   const [rvSeeker, setRvSeeker] = useState("");
-  const [rvRating, setRvRating] = useState(5);
+  const [eligible, setEligible] = useState<string[]>([]);
+  const [crit, setCrit] = useState<Record<CriterionKey, number>>({ quality: 5, commitment: 5, communication: 5, professionalism: 5 });
   const [rvComment, setRvComment] = useState("");
   const [rvMsg, setRvMsg] = useState("");
   const [tab, setTab] = useState<"jobs" | "seekers" | "reviews">("seekers");
@@ -47,7 +51,7 @@ function CityPage() {
       setSeekers(rows);
       if (rows.length) setRvSeeker(rows[0]?.id ?? "");
     });
-    supabase.from("reviews").select("id,author_name,author_type,rating,comment,created_at,profiles!inner(full_name,profession,city)").eq("profiles.city", city).order("created_at", { ascending: false }).then(({ data }) => setReviews((data ?? []) as unknown as Review[]));
+    supabase.from("reviews").select(REVIEW_SELECT).eq("profiles.city", city).order("created_at", { ascending: false }).then(({ data }) => setReviews((data ?? []) as unknown as Review[]));
     supabase.auth.getUser().then(({ data: { user: u } }) => {
       if (!u) return;
       setUser({ id: u.id });
@@ -58,21 +62,33 @@ function CityPage() {
     });
   }, [city]);
 
+  useEffect(() => {
+    if (!user || myAccountType !== "owner") return;
+    supabase.from("job_requests").select("seeker_id").eq("owner_id", user.id).eq("status", "accepted").then(({ data }) => {
+      const ids = [...new Set((data ?? []).map((r) => r.seeker_id))];
+      setEligible(ids);
+      setRvSeeker((cur) => (ids.includes(cur) ? cur : ids.find((id) => seekers.some((s) => s.id === id)) ?? ""));
+    });
+  }, [user, myAccountType, seekers]);
+
   async function submitReview(e: React.FormEvent) {
     e.preventDefault();
     if (!user || !rvSeeker) return;
+    if (rvComment && isAbusive(rvComment)) return setRvMsg("⚠️ التعليق فيه كلام غير لائق — عدّلو من فضلك.");
+    const vals = Object.values(crit);
     const { error } = await supabase.from("reviews").insert({
       seeker_id: rvSeeker,
       author_id: user.id,
       author_name: myName || "مستخدم قهوتي",
-      author_type: (myAccountType as "owner" | "seeker" | null) ?? "seeker",
-      rating: rvRating,
+      author_type: "owner",
+      rating: Math.round(vals.reduce((a, b) => a + b, 0) / vals.length),
+      ...crit,
       comment: rvComment.trim(),
     });
-    if (error) return setRvMsg("وقع خطأ، حاول مرة أخرى");
+    if (error) return setRvMsg(error.code === "23505" ? "سبق ليك قيّمتي هاد الكفاءة." : "ما يمكنش — التقييم كيتقبل غير من بعد خدمة مقبولة.");
     setRvMsg("تم نشر التقييم ✓");
     setRvComment("");
-    const { data } = await supabase.from("reviews").select("id,author_name,author_type,rating,comment,created_at,profiles!inner(full_name,profession,city)").eq("profiles.city", city).order("created_at", { ascending: false });
+    const { data } = await supabase.from("reviews").select(REVIEW_SELECT).eq("profiles.city", city).order("created_at", { ascending: false });
     setReviews((data ?? []) as unknown as Review[]);
   }
 
