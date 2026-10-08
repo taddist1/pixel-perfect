@@ -313,9 +313,15 @@ export type Database = {
           author_name: string
           author_type: Database["public"]["Enums"]["account_type"]
           comment: string
+          commitment: number | null
+          communication: number | null
           created_at: string
           id: string
+          professionalism: number | null
+          quality: number | null
           rating: number
+          replied_at: string | null
+          reply: string | null
           seeker_id: string
         }
         Insert: {
@@ -323,9 +329,15 @@ export type Database = {
           author_name: string
           author_type?: Database["public"]["Enums"]["account_type"]
           comment?: string
+          commitment?: number | null
+          communication?: number | null
           created_at?: string
           id?: string
+          professionalism?: number | null
+          quality?: number | null
           rating: number
+          replied_at?: string | null
+          reply?: string | null
           seeker_id: string
         }
         Update: {
@@ -333,9 +345,15 @@ export type Database = {
           author_name?: string
           author_type?: Database["public"]["Enums"]["account_type"]
           comment?: string
+          commitment?: number | null
+          communication?: number | null
           created_at?: string
           id?: string
+          professionalism?: number | null
+          quality?: number | null
           rating?: number
+          replied_at?: string | null
+          reply?: string | null
           seeker_id?: string
         }
         Relationships: [
@@ -354,6 +372,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      service_calls: {
+        Row: {
+          city: string
+          created_at: string
+          description: string
+          id: string
+          owner_id: string
+          owner_name: string
+          phone: string
+          status: string
+          taken_at: string | null
+          taker_id: string | null
+          taker_name: string | null
+          taker_phone: string | null
+        }
+        Insert: {
+          city: string
+          created_at?: string
+          description: string
+          id?: string
+          owner_id: string
+          owner_name?: string
+          phone: string
+          status?: string
+          taken_at?: string | null
+          taker_id?: string | null
+          taker_name?: string | null
+          taker_phone?: string | null
+        }
+        Update: {
+          city?: string
+          created_at?: string
+          description?: string
+          id?: string
+          owner_id?: string
+          owner_name?: string
+          phone?: string
+          status?: string
+          taken_at?: string | null
+          taker_id?: string | null
+          taker_name?: string | null
+          taker_phone?: string | null
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {
@@ -416,12 +479,22 @@ export type Database = {
       }
     }
     Functions: {
+      accept_service_call: { Args: { _id: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      seeker_trust_stats: {
+        Args: never
+        Returns: {
+          accepted: number
+          answered: number
+          seeker_id: string
+          total: number
+        }[]
       }
     }
     Enums: {

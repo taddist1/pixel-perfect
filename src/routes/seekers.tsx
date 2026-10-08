@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { whatsappUrl } from "@/lib/whatsapp";
 import { flushPush } from "@/lib/push.functions";
+import { trustScore } from "@/lib/trust";
 
 const T = "الكفاءات المتاحة — قهوتي";
 const D = "تصفح الباحثين عن عمل في قطاع المقاهي والمطاعم حسب المدينة والخبرة والمهارات: بارستا، ندلاء، تقنيو آلات القهوة ومهن مساندة.";
@@ -44,6 +45,7 @@ function Seekers() {
   const [skill, setSkill] = useState("");
   const [rows, setRows] = useState<Seeker[]>([]);
   const [ratings, setRatings] = useState<Record<string, { avg: number; n: number }>>({});
+  const [stats, setStats] = useState<Record<string, { total: number; answered: number; accepted: number }>>({});
   const [loading, setLoading] = useState(true);
 
   // المدينة المحفوظة ديال الزائر كتكون هي الأولى
@@ -68,6 +70,11 @@ function Seekers() {
       const out: Record<string, { avg: number; n: number }> = {};
       for (const [id, v] of Object.entries(acc)) out[id] = { avg: Math.round((v.sum / v.n) * 10) / 10, n: v.n };
       setRatings(out);
+    });
+    supabase.rpc("seeker_trust_stats").then(({ data }) => {
+      const o: Record<string, { total: number; answered: number; accepted: number }> = {};
+      for (const r of data ?? []) o[r.seeker_id] = r;
+      setStats(o);
     });
   }, [city]);
 
@@ -174,6 +181,9 @@ function Seekers() {
                   {ratings[s.id] != null && (
                     <span className="rounded-full bg-accent/20 px-3 py-1">★ {ratings[s.id]!.avg} ({ratings[s.id]!.n})</span>
                   )}
+                  {(() => { const t = trustScore({ profile: s, ratingAvg: ratings[s.id]?.avg, stats: stats[s.id] }); return (
+                    <span className="rounded-full border border-primary/40 px-3 py-1 text-primary" title="مؤشر الثقة">{t.icon} {t.label} · {t.score}</span>
+                  ); })()}
                   {(s.skills ?? []).map((sk) => <span key={sk} className="rounded-full bg-secondary px-3 py-1">{sk}</span>)}
                 </div>
                 <RequestButton seeker={s} />

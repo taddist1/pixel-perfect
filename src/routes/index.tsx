@@ -156,7 +156,7 @@ function Index() {
             { title: "فرص العمل", desc: "وظائف جديدة حسب المدينة والمهنة", to: "/jobs" as const, icon: BriefcaseBusiness, tone: "bg-secondary text-primary" },
             { title: "الكفاءات", desc: "بارستا ونوادل وتقنيون موثوقون", to: "/seekers" as const, icon: UserRoundSearch, tone: "bg-surface-soft text-primary" },
             { title: "التكوين المهني", desc: "فيديوهات عملية من أهل الخبرة", to: "/videos" as const, icon: BookOpen, tone: "bg-accent/10 text-accent" },
-            { title: "الصيانة والخبرة", desc: "الوصول إلى تقنيي آلات القهوة", to: "/seekers" as const, icon: Wrench, tone: "bg-muted text-foreground" },
+            { title: "🚨 آلتي تعطلت الآن", desc: "أول تقني متاح فمدينتك كيجيك", to: "/emergency" as const, icon: Wrench, tone: "bg-muted text-foreground" },
           ].map((service) => (
             <Link key={service.title} to={service.to} className="group rounded-lg border border-border bg-card p-5 transition duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg">
               <span className={`grid size-12 place-items-center rounded-lg ${service.tone}`}><service.icon className="size-6" /></span>
