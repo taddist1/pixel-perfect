@@ -122,7 +122,9 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <div className="pt-12">
+        <Outlet />
+      </div>
       <LanguageSwitch />
     </QueryClientProvider>
   );
