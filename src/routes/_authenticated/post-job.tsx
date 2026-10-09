@@ -5,7 +5,7 @@ import { cities, professions, schedules } from "@/lib/constants";
 import { flushPush } from "@/lib/push.functions";
 
 export const Route = createFileRoute("/_authenticated/post-job")({
-  head: () => ({ meta: [{ title: "نشر وظيفة — قهوتي" }, { name: "description", content: "انشر وظيفة لمقهاك أو مطعمك" }] }),
+  head: () => ({ meta: [{ title: "نشر وظيفة — قهوتي" }, { name: "description", content: "انشر وظيفة لمقهاك أو مطعمك" }, { property: "og:title", content: "نشر وظيفة — قهوتي" }, { property: "og:description", content: "انشر وظيفة لمقهاك أو مطعمك" }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: PostJob,
 });
 
