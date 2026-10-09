@@ -16,11 +16,25 @@ function applyDir(lang: Lang) {
   document.documentElement.dir = lang === "fr" ? "ltr" : "rtl";
 }
 
+function forceFrench() {
+  let tries = 0;
+  const t = setInterval(() => {
+    tries++;
+    const combo = document.querySelector<HTMLSelectElement>("select.goog-te-combo");
+    if (combo && combo.options.length > 1) {
+      combo.value = "fr";
+      combo.dispatchEvent(new Event("change"));
+      clearInterval(t);
+    } else if (tries > 60) clearInterval(t);
+  }, 250);
+}
+
 function loadTranslator() {
   if (document.getElementById("gt-script")) return;
   (window as unknown as { gtInit: () => void }).gtInit = () => {
     const g = (window as unknown as { google: any }).google;
     new g.translate.TranslateElement({ pageLanguage: "ar", includedLanguages: "fr,ar", autoDisplay: false }, "gt-el");
+    forceFrench();
   };
   const s = document.createElement("script");
   s.id = "gt-script";
