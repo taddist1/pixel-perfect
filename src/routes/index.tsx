@@ -75,7 +75,7 @@ function Index() {
         <div className="mx-auto flex h-18 max-w-7xl items-center justify-between px-5 lg:px-8">
           <Link to="/" className="flex items-center gap-2" aria-label="قهوتي — الرئيسية">
             <span className="grid size-10 place-items-center rounded-lg bg-primary text-xl font-black text-primary-foreground">ق</span>
-            <span className="text-2xl font-black text-foreground">قهوتي<span className="text-accent">.</span></span>
+            <span translate="no" className="notranslate text-2xl font-black text-foreground">قهوتي<span className="text-accent">.</span></span>
           </Link>
           <nav className="hidden items-center gap-1 lg:flex" aria-label="التنقل الرئيسي">
             <Link to="/jobs" className="px-3 py-2 text-sm font-bold hover:text-primary">الوظائف</Link>
@@ -147,7 +147,7 @@ function Index() {
 
       <section className="mx-auto max-w-7xl px-5 pb-16 pt-20 lg:px-8">
         <div className="mb-8 flex items-end justify-between gap-4">
-          <div><p className="text-sm font-bold text-accent">كل ما يحتاجه القطاع</p><h2 className="mt-2 text-3xl font-black">استكشف خدمات قهوتي</h2></div>
+          <div><p className="text-sm font-bold text-accent">كل ما يحتاجه القطاع</p><h2 className="mt-2 text-3xl font-black">استكشف خدمات <span translate="no" className="notranslate">قهوتي</span></h2></div>
         </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {[
@@ -220,7 +220,7 @@ function Index() {
               ))}
             </div>
           ) : (
-            <Link to="/videos" className="mt-7 flex min-h-40 items-center justify-center rounded-lg border border-dashed border-primary bg-card px-5 text-center font-bold text-primary">قريباً: أول فيديوهات قهوتي التعليمية</Link>
+            <Link to="/videos" className="mt-7 flex min-h-40 items-center justify-center rounded-lg border border-dashed border-primary bg-card px-5 text-center font-bold text-primary"><span>قريباً: أول فيديوهات <span translate="no" className="notranslate">قهوتي</span> التعليمية</span></Link>
           )}
         </div>
       </section>
@@ -234,9 +234,9 @@ function Index() {
       </section>
       <footer className="bg-surface-strong py-10 text-primary-foreground">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-5 px-5 text-center sm:flex-row sm:text-right lg:px-8">
-          <div><div className="flex items-center justify-center gap-2 text-2xl font-black sm:justify-start"><Coffee className="size-6" /> قهوتي<span className="text-accent">.</span></div><p className="mt-2 text-sm text-primary-foreground/65">منصة أهل المقاهي والمطاعم في المغرب.</p></div>
+          <div><div translate="no" className="notranslate flex items-center justify-center gap-2 text-2xl font-black sm:justify-start"><Coffee className="size-6" /> قهوتي<span className="text-accent">.</span></div><p className="mt-2 text-sm text-primary-foreground/65">منصة أهل المقاهي والمطاعم في المغرب.</p></div>
           <div className="flex gap-5 text-sm font-semibold"><Link to="/jobs">الوظائف</Link><Link to="/seekers">الكفاءات</Link><Link to="/blog">المدونة</Link></div>
-          <p className="text-xs text-primary-foreground/55">© 2026 قهوتي — المغرب</p>
+          <p className="text-xs text-primary-foreground/55">© 2026 <span translate="no" className="notranslate">قهوتي</span> — المغرب</p>
         </div>
       </footer>
     </div>
