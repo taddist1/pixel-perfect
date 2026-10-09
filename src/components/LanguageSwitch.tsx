@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
 
 type Lang = "ar" | "fr";
 const KEY = "qahwati_lang";
@@ -65,15 +66,19 @@ export function LanguageSwitch() {
   return (
     <>
       <div id="gt-el" aria-hidden="true" style={{ position: "fixed", left: 0, top: 0, width: 0, height: 0, overflow: "hidden", opacity: 0, pointerEvents: "none" }} />
-      <button
+      <div className="fixed inset-x-0 top-0 z-[60] flex h-12 items-center justify-center border-b border-border bg-background" role="region" aria-label="اختيار اللغة">
+      <Button
         type="button"
+         variant="outline"
+         size="sm"
         onClick={toggle}
         translate="no"
-        className="notranslate fixed top-3 left-16 z-[60] rounded-full border border-border bg-background px-3 py-1.5 text-xs font-bold text-primary shadow-md sm:left-1/2 sm:-translate-x-1/2 sm:text-sm"
+        className="notranslate font-bold text-primary"
         aria-label="Changer la langue / تغيير اللغة"
       >
         {lang === "ar" ? "🇫🇷 Français" : "🇲🇦 العربية"}
-      </button>
+      </Button>
+      </div>
     </>
   );
 }
