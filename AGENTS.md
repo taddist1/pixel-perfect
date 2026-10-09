@@ -13,3 +13,4 @@
 - Notifications are rows created by database triggers in `notifications`; push delivery is a queue flushed by the `flushPush` server function (Web Push via @pushforge/builder, VAPID key in secrets) because the Worker runtime has no background jobs.
 - Mark visible brand text with both `translate="no"` and `notranslate`, protecting only the name in mixed text so surrounding copy remains translatable.
 - Keep the shared language switch in a dedicated fixed top toolbar with matching space reserved by the root layout, so it never overlaps page navigation.
+- Render bell notification menus with the shared collision-aware Popover in a portal, so both guest and account menus remain inside the viewport.

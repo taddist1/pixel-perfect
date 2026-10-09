@@ -2,6 +2,8 @@ import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 const CITY_KEY = "qahwati_city";
 const SEEN_KEY = "qahwati_jobs_seen_at";
@@ -54,23 +56,25 @@ function GuestBell() {
     enabled: !!city && !!seenAt,
     refetchInterval: 60_000,
     queryFn: async () => {
+      if (!city || !seenAt) return [];
       const { data } = await supabase.from("jobs").select("id,title,business_name,created_at").eq("is_filled", false)
-        .eq("city", city!).gt("created_at", seenAt!).order("created_at", { ascending: false }).limit(10);
+        .eq("city", city).gt("created_at", seenAt).order("created_at", { ascending: false }).limit(10);
       return data ?? [];
     },
   });
 
   if (!city) return null;
   return (
-    <div className="relative">
-      <button onClick={() => setOpen(!open)} aria-label="الإشعارات" className="relative rounded-full border px-3 py-1.5 text-sm font-bold">
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+      <Button variant="outline" aria-label="الإشعارات" className="relative rounded-full px-3 py-1.5 text-sm font-bold">
         🔔
         {data.length > 0 && (
           <span className="absolute -top-1 -left-1 rounded-full bg-accent px-1.5 text-xs text-accent-foreground">{data.length}</span>
         )}
-      </button>
-      {open && (
-        <div className="absolute left-0 z-20 mt-2 w-72 rounded-2xl border bg-card p-3 shadow-lg">
+      </Button>
+      </PopoverTrigger>
+        <PopoverContent align="end" sideOffset={8} collisionPadding={12} dir="rtl" className="w-72 max-w-[calc(100vw-24px)] max-h-[var(--radix-popover-content-available-height)] overflow-y-auto break-words bg-card p-3 text-card-foreground">
           <p className="mb-2 text-sm font-black">وظائف جديدة فـ {city}</p>
           {data.length === 0 ? (
             <p className="text-sm text-muted-foreground">ما كاين حتى وظيفة جديدة من آخر زيارة.</p>
@@ -86,11 +90,10 @@ function GuestBell() {
           )}
           <div className="mt-3 flex justify-between text-sm font-bold">
             <Link to="/new-this-week" className="text-primary underline">جديد هاد الأسبوع</Link>
-            <button onClick={() => { markJobsSeen(); setSeenAt(new Date().toISOString()); setOpen(false); }} className="text-muted-foreground">تمت القراءة</button>
+            <Button variant="ghost" size="sm" onClick={() => { markJobsSeen(); setSeenAt(new Date().toISOString()); setOpen(false); }} className="text-muted-foreground">تمت القراءة</Button>
           </div>
-        </div>
-      )}
-    </div>
+        </PopoverContent>
+    </Popover>
   );
 }
 
@@ -107,12 +110,13 @@ function AccountBell({ userId }: { userId: string }) {
     refetch(); setOpen(false);
   }
   return (
-    <div className="relative">
-      <button onClick={() => setOpen(!open)} aria-label="الإشعارات" className="relative rounded-full border px-3 py-1.5 text-sm font-bold">
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+      <Button variant="outline" aria-label="الإشعارات" className="relative rounded-full px-3 py-1.5 text-sm font-bold">
         🔔{unread > 0 && <span className="absolute -top-1 -left-1 rounded-full bg-accent px-1.5 text-xs text-accent-foreground">{unread}</span>}
-      </button>
-      {open && (
-        <div className="absolute left-0 z-20 mt-2 w-72 rounded-2xl border bg-card p-3 shadow-lg">
+      </Button>
+      </PopoverTrigger>
+        <PopoverContent align="end" sideOffset={8} collisionPadding={12} dir="rtl" className="w-72 max-w-[calc(100vw-24px)] max-h-[var(--radix-popover-content-available-height)] overflow-y-auto break-words bg-card p-3 text-card-foreground">
           <p className="mb-2 text-sm font-black">إشعاراتي</p>
           {data.length === 0 ? <p className="text-sm text-muted-foreground">ما كاين حتى إشعار.</p> : (
             <ul className="max-h-80 space-y-2 overflow-auto">
@@ -125,10 +129,9 @@ function AccountBell({ userId }: { userId: string }) {
           )}
           <div className="mt-3 flex justify-between text-sm font-bold">
             <Link to="/account" className="text-primary underline">📱 إشعارات الهاتف</Link>
-            <button onClick={readAll} className="text-muted-foreground">تمت القراءة</button>
+            <Button variant="ghost" size="sm" onClick={readAll} className="text-muted-foreground">تمت القراءة</Button>
           </div>
-        </div>
-      )}
-    </div>
+        </PopoverContent>
+    </Popover>
   );
 }
