@@ -64,7 +64,7 @@ export function LanguageSwitch() {
 
   return (
     <>
-      <div id="gt-el" className="hidden" />
+      <div id="gt-el" aria-hidden="true" style={{ position: "absolute", left: -9999, top: 0, width: 1, height: 1, overflow: "hidden" }} />
       <button
         type="button"
         onClick={toggle}
