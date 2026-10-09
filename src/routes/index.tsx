@@ -235,7 +235,12 @@ function Index() {
       <footer className="bg-surface-strong py-10 text-primary-foreground">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-5 px-5 text-center sm:flex-row sm:text-right lg:px-8">
           <div><div translate="no" className="notranslate flex items-center justify-center gap-2 text-2xl font-black sm:justify-start"><Coffee className="size-6" /> قهوتي<span className="text-accent">.</span></div><p className="mt-2 text-sm text-primary-foreground/65">منصة أهل المقاهي والمطاعم في المغرب.</p></div>
-          <div className="flex gap-5 text-sm font-semibold"><Link to="/jobs">الوظائف</Link><Link to="/seekers">الكفاءات</Link><Link to="/blog">المدونة</Link></div>
+          <div className="flex flex-col items-center gap-3 sm:items-start">
+            <div className="flex gap-5 text-sm font-semibold"><Link to="/jobs">الوظائف</Link><Link to="/seekers">الكفاءات</Link><Link to="/blog">المدونة</Link></div>
+            <a href="mailto:dar.elkahwat@gmail.com?subject=%D8%A7%D8%B3%D8%AA%D9%81%D8%B3%D8%A7%D8%B1" className="text-sm">
+              للاستفسار: <span translate="no" dir="ltr" className="notranslate font-bold underline">dar.elkahwat@gmail.com</span>
+            </a>
+          </div>
           <p className="text-xs text-primary-foreground/55">© 2026 <span translate="no" className="notranslate">قهوتي</span> — المغرب</p>
         </div>
       </footer>
