@@ -48,7 +48,7 @@ function VideosPage() {
     <main dir="rtl" className="min-h-screen bg-background">
       <header className="border-b border-border bg-card">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-          <Link to="/" className="text-2xl font-black text-primary">قهوتي</Link>
+          <Link to="/" translate="no" className="notranslate text-2xl font-black text-primary">قهوتي</Link>
           <Button asChild variant="ghost"><Link to="/"><ArrowRight aria-hidden="true" />الرئيسية</Link></Button>
         </div>
       </header>

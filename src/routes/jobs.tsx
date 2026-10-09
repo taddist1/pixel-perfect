@@ -10,7 +10,7 @@ const T = "وظائف المقاهي والمطاعم في المغرب — قه
 const D = "تصفح آخر عروض العمل للبارستا، النادل والطباخ في مدينتك.";
 
 export const Route = createFileRoute("/jobs")({
-  head: () => ({ meta: [{ title: T }, { name: "description", content: D }, { property: "og:title", content: T }, { property: "og:description", content: D }] }),
+  head: () => ({ meta: [{ title: T }, { name: "description", content: D }, { property: "og:title", content: T }, { property: "og:description", content: D }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: Jobs,
 });
 
@@ -45,7 +45,7 @@ function Jobs() {
   return (
     <div className="mx-auto max-w-4xl px-5 py-8">
       <div className="flex items-center justify-between">
-        <Link to="/" className="text-2xl font-black text-primary">قهوتي</Link>
+        <Link to="/" translate="no" className="notranslate text-2xl font-black text-primary">قهوتي</Link>
         <div className="flex gap-2">
           <JobAlertsBell />
           <Link to="/new-this-week" className="rounded-full border px-4 py-1.5 text-sm font-bold">جديد هاد الأسبوع</Link>

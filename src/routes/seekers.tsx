@@ -98,7 +98,7 @@ function Seekers() {
   return (
     <div className="min-h-screen">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-5 py-5">
-        <Link to="/" className="text-2xl font-black text-primary">قهوتي</Link>
+        <Link to="/" translate="no" className="notranslate text-2xl font-black text-primary">قهوتي</Link>
         <Link to="/account" className="rounded-full border px-4 py-1.5 text-sm font-bold">حسابي</Link>
       </header>
 

@@ -27,7 +27,7 @@ function ReplyBox({ id, onDone }: { id: string; onDone: () => void }) {
 }
 
 export const Route = createFileRoute("/_authenticated/account")({
-  head: () => ({ meta: [{ title: "حسابي — قهوتي" }, { name: "description", content: "ملفك الشخصي في قهوتي" }] }),
+  head: () => ({ meta: [{ title: "حسابي — قهوتي" }, { name: "description", content: "ملفك الشخصي في قهوتي" }, { property: "og:title", content: "حسابي — قهوتي" }, { property: "og:description", content: "ملفك الشخصي في قهوتي" }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: Account,
 });
 
@@ -76,7 +76,7 @@ function Account() {
   return (
     <div className="mx-auto max-w-2xl px-5 py-8">
       <div className="flex items-center justify-between">
-        <Link to="/" className="text-2xl font-black text-primary">قهوتي</Link>
+        <Link to="/" translate="no" className="notranslate text-2xl font-black text-primary">قهوتي</Link>
         <div className="flex gap-3 text-sm">
           <Link to="/jobs" className="underline">الوظائف</Link>
           {p.account_type === "owner" && <Link to="/post-job" className="underline">نشر وظيفة</Link>}

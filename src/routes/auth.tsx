@@ -10,6 +10,8 @@ export const Route = createFileRoute("/auth")({
       { name: "description", content: "أنشئ حسابك المجاني في قهوتي أو سجّل الدخول." },
       { property: "og:title", content: "تسجيل الدخول — قهوتي" },
       { property: "og:description", content: "أنشئ حسابك المجاني في قهوتي أو سجّل الدخول." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: AuthPage,
@@ -57,7 +59,7 @@ function AuthPage() {
   return (
     <div className="flex min-h-screen items-center justify-center px-5">
       <div className="w-full max-w-md rounded-3xl border bg-card p-8 shadow-sm">
-        <Link to="/" className="text-2xl font-black text-primary">قهوتي</Link>
+        <Link to="/" translate="no" className="notranslate text-2xl font-black text-primary">قهوتي</Link>
         <h1 className="mt-4 text-2xl font-black">{mode === "in" ? "تسجيل الدخول" : "إنشاء حساب مجاني"}</h1>
         <button onClick={google} className="mt-6 w-full rounded-xl border-2 py-3 font-bold">المتابعة بحساب Google</button>
         <div className="my-5 text-center text-sm text-muted-foreground">أو</div>

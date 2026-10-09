@@ -32,7 +32,7 @@ function NewThisWeek() {
   return (
     <div className="mx-auto max-w-4xl px-5 py-8">
       <div className="flex items-center justify-between">
-        <Link to="/" className="text-2xl font-black text-primary">قهوتي</Link>
+        <Link to="/" translate="no" className="notranslate text-2xl font-black text-primary">قهوتي</Link>
         <div className="flex gap-2"><JobAlertsBell /><Link to="/jobs" className="rounded-full border px-4 py-1.5 text-sm font-bold">كل الوظائف</Link></div>
       </div>
       <div className="mt-8 flex flex-wrap items-center justify-between gap-3">
