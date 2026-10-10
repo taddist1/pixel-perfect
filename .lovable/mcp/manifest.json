@@ -1,0 +1,111 @@
+{
+  "version": 1,
+  "sdk_version": "3.0.5",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://mtwqscxbsimxmhyejfkb.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "pixel-perfect",
+      "version": "0.1.0",
+      "title": "Pixel Perfect"
+    },
+    "tools": [
+      {
+        "name": "search_jobs",
+        "title": "Search jobs",
+        "description": "List open café and restaurant jobs in Morocco, optionally filtered by city or role.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "city": {
+              "description": "City name in Arabic, e.g. الرباط",
+              "type": "string",
+              "maxLength": 60
+            },
+            "role": {
+              "description": "Role text to match, e.g. باريستا",
+              "type": "string",
+              "maxLength": 60
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            }
+          },
+          "additionalProperties": false
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "search_seekers",
+        "title": "Search talent",
+        "description": "List registered café workers (baristas, waiters, technicians), optionally filtered by city, profession or availability.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "city": {
+              "type": "string",
+              "maxLength": 60
+            },
+            "profession": {
+              "type": "string",
+              "maxLength": 60
+            },
+            "available_only": {
+              "type": "boolean"
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            }
+          },
+          "additionalProperties": false
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "my_notifications",
+        "title": "My notifications",
+        "description": "List the signed-in user's latest notifications.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            }
+          },
+          "additionalProperties": false
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
