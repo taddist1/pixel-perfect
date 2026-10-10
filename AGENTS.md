@@ -14,3 +14,4 @@
 - Mark visible brand text with both `translate="no"` and `notranslate`, protecting only the name in mixed text so surrounding copy remains translatable.
 - Keep the shared language switch in a dedicated fixed top toolbar with matching space reserved by the root layout, so it never overlaps page navigation.
 - Render bell notification menus with the shared collision-aware Popover in a portal, so both guest and account menus remain inside the viewport.
+- External AI assistants connect via the MCP server in `src/lib/mcp/` (OAuth, tools query as the caller), because user data must stay behind RLS.
