@@ -14,14 +14,17 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as EmergencyRouteImport } from './routes/emergency'
 import { Route as JobsRouteImport } from './routes/jobs'
+import { Route as McpRouteImport } from './routes/mcp'
 import { Route as NewThisWeekRouteImport } from './routes/new-this-week'
 import { Route as SeekersRouteImport } from './routes/seekers'
 import { Route as VideosRouteImport } from './routes/videos'
+import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticated/account'
 import { Route as AuthenticatedPostJobRouteImport } from './routes/_authenticated/post-job'
 import { Route as BlogIndexRouteImport } from './routes/blog.index'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as CitiesCityRouteImport } from './routes/cities.$city'
+import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as AuthenticatedAdminArticlesRouteImport } from './routes/_authenticated/admin.articles'
 import { Route as AuthenticatedAdminModerationRouteImport } from './routes/_authenticated/admin.moderation'
 import { Route as AuthenticatedAdminVideosRouteImport } from './routes/_authenticated/admin.videos'
@@ -50,6 +53,11 @@ const JobsRoute = JobsRouteImport.update({
   path: '/jobs',
   getParentRoute: () => rootRouteImport,
 } as any)
+const McpRoute = McpRouteImport.update({
+  id: '/mcp',
+  path: '/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const NewThisWeekRoute = NewThisWeekRouteImport.update({
   id: '/new-this-week',
   path: '/new-this-week',
@@ -65,6 +73,12 @@ const VideosRoute = VideosRouteImport.update({
   path: '/videos',
   getParentRoute: () => rootRouteImport,
 } as any)
+const Char91DotwellKnownChar93OauthProtectedResourceRoute =
+  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
+    id: '/.well-known/oauth-protected-resource',
+    path: '/.well-known/oauth-protected-resource',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedAccountRoute = AuthenticatedAccountRouteImport.update({
   id: '/account',
   path: '/account',
@@ -88,6 +102,11 @@ const BlogSlugRoute = BlogSlugRouteImport.update({
 const CitiesCityRoute = CitiesCityRouteImport.update({
   id: '/cities/$city',
   path: '/cities/$city',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
+  id: '/.lovable/oauth/consent',
+  path: '/.lovable/oauth/consent',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAdminArticlesRoute =
@@ -114,14 +133,17 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/emergency': typeof EmergencyRoute
   '/jobs': typeof JobsRoute
+  '/mcp': typeof McpRoute
   '/new-this-week': typeof NewThisWeekRoute
   '/seekers': typeof SeekersRoute
   '/videos': typeof VideosRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/account': typeof AuthenticatedAccountRoute
   '/post-job': typeof AuthenticatedPostJobRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/cities/$city': typeof CitiesCityRoute
   '/blog/': typeof BlogIndexRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/admin/articles': typeof AuthenticatedAdminArticlesRoute
   '/admin/moderation': typeof AuthenticatedAdminModerationRoute
   '/admin/videos': typeof AuthenticatedAdminVideosRoute
@@ -131,14 +153,17 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/emergency': typeof EmergencyRoute
   '/jobs': typeof JobsRoute
+  '/mcp': typeof McpRoute
   '/new-this-week': typeof NewThisWeekRoute
   '/seekers': typeof SeekersRoute
   '/videos': typeof VideosRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/account': typeof AuthenticatedAccountRoute
   '/post-job': typeof AuthenticatedPostJobRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/cities/$city': typeof CitiesCityRoute
   '/blog': typeof BlogIndexRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/admin/articles': typeof AuthenticatedAdminArticlesRoute
   '/admin/moderation': typeof AuthenticatedAdminModerationRoute
   '/admin/videos': typeof AuthenticatedAdminVideosRoute
@@ -150,14 +175,17 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/emergency': typeof EmergencyRoute
   '/jobs': typeof JobsRoute
+  '/mcp': typeof McpRoute
   '/new-this-week': typeof NewThisWeekRoute
   '/seekers': typeof SeekersRoute
   '/videos': typeof VideosRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/_authenticated/account': typeof AuthenticatedAccountRoute
   '/_authenticated/post-job': typeof AuthenticatedPostJobRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/cities/$city': typeof CitiesCityRoute
   '/blog/': typeof BlogIndexRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/_authenticated/admin/articles': typeof AuthenticatedAdminArticlesRoute
   '/_authenticated/admin/moderation': typeof AuthenticatedAdminModerationRoute
   '/_authenticated/admin/videos': typeof AuthenticatedAdminVideosRoute
@@ -169,14 +197,17 @@ export interface FileRouteTypes {
     | '/auth'
     | '/emergency'
     | '/jobs'
+    | '/mcp'
     | '/new-this-week'
     | '/seekers'
     | '/videos'
+    | '/.well-known/oauth-protected-resource'
     | '/account'
     | '/post-job'
     | '/blog/$slug'
     | '/cities/$city'
     | '/blog/'
+    | '/.lovable/oauth/consent'
     | '/admin/articles'
     | '/admin/moderation'
     | '/admin/videos'
@@ -186,14 +217,17 @@ export interface FileRouteTypes {
     | '/auth'
     | '/emergency'
     | '/jobs'
+    | '/mcp'
     | '/new-this-week'
     | '/seekers'
     | '/videos'
+    | '/.well-known/oauth-protected-resource'
     | '/account'
     | '/post-job'
     | '/blog/$slug'
     | '/cities/$city'
     | '/blog'
+    | '/.lovable/oauth/consent'
     | '/admin/articles'
     | '/admin/moderation'
     | '/admin/videos'
@@ -204,14 +238,17 @@ export interface FileRouteTypes {
     | '/auth'
     | '/emergency'
     | '/jobs'
+    | '/mcp'
     | '/new-this-week'
     | '/seekers'
     | '/videos'
+    | '/.well-known/oauth-protected-resource'
     | '/_authenticated/account'
     | '/_authenticated/post-job'
     | '/blog/$slug'
     | '/cities/$city'
     | '/blog/'
+    | '/.lovable/oauth/consent'
     | '/_authenticated/admin/articles'
     | '/_authenticated/admin/moderation'
     | '/_authenticated/admin/videos'
@@ -223,12 +260,15 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   EmergencyRoute: typeof EmergencyRoute
   JobsRoute: typeof JobsRoute
+  McpRoute: typeof McpRoute
   NewThisWeekRoute: typeof NewThisWeekRoute
   SeekersRoute: typeof SeekersRoute
   VideosRoute: typeof VideosRoute
+  Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   BlogSlugRoute: typeof BlogSlugRoute
   CitiesCityRoute: typeof CitiesCityRoute
   BlogIndexRoute: typeof BlogIndexRoute
+  DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -268,6 +308,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof JobsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/mcp': {
+      id: '/mcp'
+      path: '/mcp'
+      fullPath: '/mcp'
+      preLoaderRoute: typeof McpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/new-this-week': {
       id: '/new-this-week'
       path: '/new-this-week'
@@ -287,6 +334,13 @@ declare module '@tanstack/react-router' {
       path: '/videos'
       fullPath: '/videos'
       preLoaderRoute: typeof VideosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.well-known/oauth-protected-resource': {
+      id: '/.well-known/oauth-protected-resource'
+      path: '/.well-known/oauth-protected-resource'
+      fullPath: '/.well-known/oauth-protected-resource'
+      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/account': {
@@ -322,6 +376,13 @@ declare module '@tanstack/react-router' {
       path: '/cities/$city'
       fullPath: '/cities/$city'
       preLoaderRoute: typeof CitiesCityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.lovable/oauth/consent': {
+      id: '/.lovable/oauth/consent'
+      path: '/.lovable/oauth/consent'
+      fullPath: '/.lovable/oauth/consent'
+      preLoaderRoute: typeof DotlovableOauthConsentRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin/articles': {
@@ -373,12 +434,16 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   EmergencyRoute: EmergencyRoute,
   JobsRoute: JobsRoute,
+  McpRoute: McpRoute,
   NewThisWeekRoute: NewThisWeekRoute,
   SeekersRoute: SeekersRoute,
   VideosRoute: VideosRoute,
+  Char91DotwellKnownChar93OauthProtectedResourceRoute:
+    Char91DotwellKnownChar93OauthProtectedResourceRoute,
   BlogSlugRoute: BlogSlugRoute,
   CitiesCityRoute: CitiesCityRoute,
   BlogIndexRoute: BlogIndexRoute,
+  DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
