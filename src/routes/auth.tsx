@@ -2,8 +2,10 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
+import { oauthReturnPath } from "@/lib/oauth-return-path";
 
 export const Route = createFileRoute("/auth")({
+  validateSearch: (s: Record<string, unknown>) => ({ next: typeof s.next === "string" ? s.next : undefined }),
   head: () => ({
     meta: [
       { title: "تسجيل الدخول — قهوتي" },
@@ -19,6 +21,10 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const nav = useNavigate();
+  const { next: rawNext } = Route.useSearch();
+  const next = rawNext ? oauthReturnPath(rawNext) : null;
+  const go = () => (next ? window.location.assign(next) : nav({ to: "/account" }));
+  const back = () => next ? new URL(next, window.location.origin).href : window.location.origin + "/auth";
   const [mode, setMode] = useState<"in" | "up">("in");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -27,12 +33,12 @@ function AuthPage() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => data.user && nav({ to: "/account" }));
+    supabase.auth.getUser().then(({ data }) => data.user && go());
     const { data } = supabase.auth.onAuthStateChange((e, s) => {
-      if (e === "SIGNED_IN" && s) nav({ to: "/account" });
+      if (e === "SIGNED_IN" && s) go();
     });
     return () => data.subscription.unsubscribe();
-  }, [nav]);
+  }, [nav, next]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -40,7 +46,7 @@ function AuthPage() {
     if (mode === "up") {
       const { error } = await supabase.auth.signUp({
         email, password,
-        options: { emailRedirectTo: window.location.origin + "/auth", data: { full_name: name } },
+        options: { emailRedirectTo: back(), data: { full_name: name } },
       });
       setMsg(error ? error.message : "تفقد بريدك الإلكتروني لتأكيد الحساب ✉️");
     } else {
@@ -51,7 +57,7 @@ function AuthPage() {
   }
 
   async function google() {
-    const r = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin + "/auth" });
+    const r = await lovable.auth.signInWithOAuth("google", { redirect_uri: back() });
     if (r.error) setMsg("تعذر الدخول بـ Google");
   }
 
