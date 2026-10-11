@@ -93,6 +93,7 @@ function Account() {
             <Link to="/admin/articles" className="rounded-full bg-primary px-4 py-2 text-sm font-bold text-primary-foreground">مولّد المقالات</Link>
             <Link to="/admin/videos" className="rounded-full bg-primary px-4 py-2 text-sm font-bold text-primary-foreground">إدارة الفيديوهات</Link>
             <Link to="/admin/moderation" className="rounded-full bg-primary px-4 py-2 text-sm font-bold text-primary-foreground">التقييمات والثقة</Link>
+            <Link to="/admin/settings" className="rounded-full bg-primary px-4 py-2 text-sm font-bold text-primary-foreground">⚙️ الإعدادات</Link>
           </div>
         </div>
       )}
