@@ -1,3 +1,4 @@
+import { useCities } from "@/lib/use-cities";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { BookOpen, BriefcaseBusiness, ChevronLeft, Coffee, MapPin, Menu, Play, UserRoundSearch, Wrench, X } from "lucide-react";
@@ -24,7 +25,7 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-const cities = ["الدار البيضاء", "الرباط", "سلا", "القنيطرة", "مراكش", "فاس", "طنجة", "أكادير", "مكناس", "وجدة", "تطوان", "الحسيمة", "الناظور", "بركان", "العرائش", "القصر الكبير", "آسفي", "الجديدة", "سطات", "المحمدية", "برشيد", "بني ملال", "خريبكة", "قصبة تادلة", "اليوسفية", "قلعة السراغنة", "الصويرة", "شيشاوة", "تارودانت", "تيزنيت", "إنزكان", "الرشيدية", "ميدلت", "أزيلال", "خنيفرة", "تازة", "ورزازات", "زاكورة", "تنغير", "جرادة", "شفشاون", "وزان", "سيدي بنور", "سيدي قاسم", "الفقيه بن صالح", "كلميم", "طانطان", "سمارة", "الداخلة", "بوجدور", "العيون"];
+
 const roles = [
   { t: "تقني آلات القهوة", d: "إصلاح وصيانة عاجلة قريبة منك", match: "تقني" },
   { t: "بارستا", d: "دوام كامل، جزئي أو ورديات", match: "باريستا" },
@@ -33,6 +34,7 @@ const roles = [
 ];
 
 function Index() {
+  const cities = useCities();
   const [city, setCity] = useState(cities[0]);
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [jobsCount, setJobsCount] = useState(0);

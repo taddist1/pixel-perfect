@@ -56,6 +56,24 @@ export type Database = {
         }
         Relationships: []
       }
+      cities: {
+        Row: {
+          created_at: string
+          name: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          name: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          name?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
       educational_videos: {
         Row: {
           category: string
@@ -418,6 +436,30 @@ export type Database = {
           taker_id?: string | null
           taker_name?: string | null
           taker_phone?: string | null
+        }
+        Relationships: []
+      }
+      site_settings: {
+        Row: {
+          id: number
+          notify_new_job: boolean
+          notify_new_profile: boolean
+          notify_new_review: boolean
+          updated_at: string
+        }
+        Insert: {
+          id?: number
+          notify_new_job?: boolean
+          notify_new_profile?: boolean
+          notify_new_review?: boolean
+          updated_at?: string
+        }
+        Update: {
+          id?: number
+          notify_new_job?: boolean
+          notify_new_profile?: boolean
+          notify_new_review?: boolean
+          updated_at?: string
         }
         Relationships: []
       }

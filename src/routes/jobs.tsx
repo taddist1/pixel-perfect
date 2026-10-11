@@ -1,8 +1,9 @@
+import { useCities } from "@/lib/use-cities";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { cities } from "@/lib/constants";
+
 import { whatsappUrl } from "@/lib/whatsapp";
 import { JobAlertsBell } from "@/components/JobAlerts";
 
@@ -15,6 +16,7 @@ export const Route = createFileRoute("/jobs")({
 });
 
 function Jobs() {
+  const cities = useCities();
   const [city, setCity] = useState("");
   const [search, setSearch] = useState("");
   const [role, setRole] = useState("");

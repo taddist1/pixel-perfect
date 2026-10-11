@@ -1,7 +1,8 @@
+import { useCities } from "@/lib/use-cities";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { cities, professions } from "@/lib/constants";
+import { professions } from "@/lib/constants";
 import { flushPush } from "@/lib/push.functions";
 import { enablePush, pushSupported } from "@/lib/push-client";
 import { trustScore } from "@/lib/trust";
@@ -34,6 +35,7 @@ export const Route = createFileRoute("/_authenticated/account")({
 type P = { full_name: string | null; city: string | null; phone: string | null; account_type: "owner" | "seeker" | null; profession: string | null; experience_years: number | null; avatar_url: string | null; is_available: boolean; skills: string[] };
 
 function Account() {
+  const cities = useCities();
   const { user } = Route.useRouteContext();
   const nav = useNavigate();
   const [p, setP] = useState<P | null>(null);
@@ -91,6 +93,7 @@ function Account() {
             <Link to="/admin/articles" className="rounded-full bg-primary px-4 py-2 text-sm font-bold text-primary-foreground">مولّد المقالات</Link>
             <Link to="/admin/videos" className="rounded-full bg-primary px-4 py-2 text-sm font-bold text-primary-foreground">إدارة الفيديوهات</Link>
             <Link to="/admin/moderation" className="rounded-full bg-primary px-4 py-2 text-sm font-bold text-primary-foreground">التقييمات والثقة</Link>
+            <Link to="/admin/settings" className="rounded-full bg-primary px-4 py-2 text-sm font-bold text-primary-foreground">⚙️ الإعدادات</Link>
           </div>
         </div>
       )}

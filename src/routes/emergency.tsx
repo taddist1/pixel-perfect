@@ -1,7 +1,8 @@
+import { useCities } from "@/lib/use-cities";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { cities } from "@/lib/constants";
+
 import { flushPush } from "@/lib/push.functions";
 import { whatsappUrl } from "@/lib/whatsapp";
 
@@ -23,6 +24,7 @@ type Call = { id: string; owner_id: string; owner_name: string; city: string; ph
 type Me = { id: string; account_type: string | null; city: string | null; phone: string | null; full_name: string | null };
 
 function Emergency() {
+  const cities = useCities();
   const [me, setMe] = useState<Me | null | undefined>(undefined);
   const [calls, setCalls] = useState<Call[]>([]);
   const [city, setCity] = useState("");
