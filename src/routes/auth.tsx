@@ -27,12 +27,10 @@ function AuthPage() {
   const back = () => (next ? new URL(next, window.location.origin).href : window.location.origin + "/auth");
   const [mode, setMode] = useState<"in" | "up">("in");
   const [method, setMethod] = useState<"email" | "phone">("email");
-  const [step, setStep] = useState<"phone" | "code">("phone");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [phoneDigits, setPhoneDigits] = useState("");
-  const [code, setCode] = useState("");
   const [msg, setMsg] = useState("");
   const [busy, setBusy] = useState(false);
   const [unconfirmed, setUnconfirmed] = useState(false);
@@ -46,6 +44,7 @@ function AuthPage() {
   }, [nav, next]);
 
   const phoneE164 = () => "+212" + phoneDigits;
+  const phoneEmail = () => `212${phoneDigits}@phone.kahwaty.online`;
   const phoneValid = () => /^[67]\d{8}$/.test(phoneDigits);
 
   async function submit(e: React.FormEvent) {
@@ -58,34 +57,27 @@ function AuthPage() {
         setBusy(false);
         return;
       }
-      if (step === "phone") {
-        const { error } = await supabase.auth.signInWithOtp({
-          phone: phoneE164(),
-          options: { data: { full_name: name || "مستخدم قهوتي" } },
-        });
-        if (!error) {
-          setStep("code");
-          setMsg("أرسلنا رمز التحقق عبر رسالة إلى رقمك 📱 اكتبه بالأسفل.");
-        } else if (error.status === 429) {
-          setMsg("انتظر دقيقة واحدة قبل المحاولة من جديد.");
-        } else if (/sms|provider|configured|twilio|phone/i.test(error.message)) {
-          setMsg("خدمة إرسال الرسائل غير مفعّلة بعد — جرّب التسجيل بالبريد مؤقتاً.");
-        } else if (/invalid|phone/i.test(error.message)) {
-          setMsg("رقم الهاتف غير صحيح — تأكد من الأرقام التسعة.");
-        } else {
-          setMsg("تعذّر إرسال الرمز، جرّب من جديد.");
-        }
+      if (password.length < 6) {
+        setMsg("كلمة السر يجب أن تكون 6 أحرف على الأقل.");
         setBusy(false);
         return;
       }
-      const { error } = await supabase.auth.verifyOtp({ phone: phoneE164(), token: code, type: "sms" });
-      if (!error) {
-        setMsg("تم التحقق ✅ جاري تحويلك...");
-        go();
-      } else if (error.status === 429) {
-        setMsg("انتظر دقيقة واحدة قبل المحاولة من جديد.");
+      if (mode === "up") {
+        const { error } = await supabase.auth.signUp({
+          email: phoneEmail(),
+          password,
+          options: { emailRedirectTo: back(), data: { full_name: name || "مستخدم قهوتي", phone: phoneE164() } },
+        });
+        if (!error) {
+          setMsg("تم إنشاء حسابك ✅ جاري تحويلك لإكمال ملفك...");
+          nav({ to: "/account" });
+        } else if (/registered/i.test(error.message)) setMsg("هذا الرقم مسجّل من قبل — اضغط «عندك حساب؟ دخول».");
+        else if (error.status === 429) setMsg("انتظر دقيقة واحدة قبل المحاولة من جديد.");
+        else if (/pwned|weak/i.test(error.message)) setMsg("كلمة السر ضعيفة جداً أو معروفة لدى المخترقين — اختر كلمة سر أقوى.");
+        else setMsg("تعذّر إنشاء الحساب، جرّب كلمة سر أخرى (6 أحرف على الأقل).");
       } else {
-        setMsg("الرمز غير صحيح أو انتهت صلاحيته.");
+        const { error } = await supabase.auth.signInWithPassword({ email: phoneEmail(), password });
+        if (error) setMsg("رقم الهاتف أو كلمة السر غير صحيحة");
       }
       setBusy(false);
       return;
@@ -101,6 +93,7 @@ function AuthPage() {
         nav({ to: "/account" });
       } else if (error.status === 429) setMsg("انتظر دقيقة واحدة قبل المحاولة من جديد.");
       else if (/registered/i.test(error.message)) setMsg("هذا البريد مسجّل من قبل — اضغط «عندك حساب؟ دخول».");
+      else if (/pwned|weak/i.test(error.message)) setMsg("كلمة السر ضعيفة جداً أو معروفة لدى المخترقين — اختر كلمة سر أقوى.");
       else setMsg("تعذّر إنشاء الحساب، تأكد من البريد وكلمة السر (6 أحرف على الأقل).");
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -109,17 +102,6 @@ function AuthPage() {
         setUnconfirmed(true);
       } else if (error) setMsg("البريد أو كلمة السر غير صحيحة");
     }
-    setBusy(false);
-  }
-
-  async function resend() {
-    setBusy(true);
-    setMsg("");
-    const { error } = await supabase.auth.signInWithOtp({
-      phone: phoneE164(),
-      options: { data: { full_name: name || "مستخدم قهوتي" } },
-    });
-    setMsg(error ? (error.status === 429 ? "انتظر دقيقة واحدة قبل إعادة الإرسال." : "تعذّرت إعادة الإرسال.") : "أعدنا إرسال الرمز 📱 تفقد رسائلك.");
     setBusy(false);
   }
 
@@ -140,7 +122,7 @@ function AuthPage() {
         <div className="my-5 text-center text-sm text-muted-foreground">أو</div>
         <div className="mb-4 grid grid-cols-2 gap-2">
           <button type="button" onClick={() => { setMethod("email"); setMsg(""); }} className={methodBtn("email")}>✉️ بالبريد</button>
-          <button type="button" onClick={() => { setMethod("phone"); setStep("phone"); setMsg(""); }} className={methodBtn("phone")}>📱 بالهاتف</button>
+          <button type="button" onClick={() => { setMethod("phone"); setMsg(""); }} className={methodBtn("phone")}>📱 بالهاتف</button>
         </div>
         <form onSubmit={submit} className="space-y-3">
           {method === "email" ? (
@@ -152,7 +134,7 @@ function AuthPage() {
                 {mode === "in" ? "دخول" : "إنشاء الحساب"}
               </button>
             </>
-          ) : step === "phone" ? (
+          ) : (
             <>
               {mode === "up" && <input className={input} placeholder="الاسم الكامل" value={name} onChange={(e) => setName(e.target.value)} required />}
               <div className="flex items-center gap-2" dir="ltr">
@@ -167,36 +149,14 @@ function AuthPage() {
                   required
                 />
               </div>
+              <input className={input} type="password" dir="ltr" placeholder="كلمة السر ••••••" minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} required />
               <button disabled={busy} className="w-full rounded-xl bg-primary py-3 font-black text-primary-foreground disabled:opacity-60">
-                {mode === "in" ? "أرسل رمز الدخول" : "أرسل رمز التسجيل"}
-              </button>
-            </>
-          ) : (
-            <>
-              <p className="text-center text-sm text-muted-foreground">اكتب الرمز المكوّن من 6 أرقام الذي وصلك في رسالة</p>
-              <input
-                className={input + " text-center text-2xl tracking-[0.5em]"}
-                dir="ltr"
-                inputMode="numeric"
-                placeholder="••••••"
-                maxLength={6}
-                value={code}
-                onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
-                autoFocus
-                required
-              />
-              <button disabled={busy || code.length < 6} className="w-full rounded-xl bg-primary py-3 font-black text-primary-foreground disabled:opacity-60">
-                تحقق ودخول
+                {mode === "in" ? "دخول" : "إنشاء الحساب"}
               </button>
             </>
           )}
         </form>
         {msg && <p className="mt-4 text-center text-sm">{msg}</p>}
-        {method === "phone" && step === "code" && (
-          <button type="button" disabled={busy} onClick={resend} className="mt-3 w-full rounded-xl border-2 border-primary py-2 text-sm font-bold text-primary disabled:opacity-60">
-            أعد إرسال الرمز
-          </button>
-        )}
         {unconfirmed && (
           <button type="button" disabled={busy} onClick={async () => {
             setBusy(true);
@@ -205,7 +165,7 @@ function AuthPage() {
             setBusy(false);
           }} className="mt-3 w-full rounded-xl border-2 border-primary py-2 text-sm font-bold text-primary disabled:opacity-60">أعد إرسال رسالة التأكيد</button>
         )}
-        <button onClick={() => { setMode(mode === "in" ? "up" : "in"); setStep("phone"); setMsg(""); }} className="mt-5 w-full text-sm text-muted-foreground underline">
+        <button onClick={() => { setMode(mode === "in" ? "up" : "in"); setMsg(""); }} className="mt-5 w-full text-sm text-muted-foreground underline">
           {mode === "in" ? "ما عندكش حساب؟ سجّل الآن" : "عندك حساب؟ دخول"}
         </button>
       </div>
