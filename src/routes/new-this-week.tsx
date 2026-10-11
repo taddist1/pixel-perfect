@@ -1,8 +1,9 @@
+import { useCities } from "@/lib/use-cities";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { cities } from "@/lib/constants";
+
 import { whatsappUrl } from "@/lib/whatsapp";
 import { JobAlertsBell, useUserCity, rememberCity } from "@/components/JobAlerts";
 
@@ -15,6 +16,7 @@ export const Route = createFileRoute("/new-this-week")({
 });
 
 function NewThisWeek() {
+  const cities = useCities();
   const userCity = useUserCity();
   const [city, setCity] = useState("");
   useEffect(() => { if (userCity) setCity(userCity); }, [userCity]);

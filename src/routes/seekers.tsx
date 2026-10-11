@@ -1,3 +1,4 @@
+import { useCities } from "@/lib/use-cities";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,7 +23,7 @@ export const Route = createFileRoute("/seekers")({
   component: Seekers,
 });
 
-const cities = ["الكل", "الدار البيضاء", "الرباط", "سلا", "القنيطرة", "مراكش", "فاس", "طنجة", "أكادير", "مكناس", "وجدة", "تطوان", "الحسيمة", "الناظور", "بركان", "العرائش", "القصر الكبير", "آسفي", "الجديدة", "سطات", "المحمدية", "برشيد", "بني ملال", "خريبكة", "قصبة تادلة", "اليوسفية", "قلعة السراغنة", "الصويرة", "شيشاوة", "تارودانت", "تيزنيت", "إنزكان", "الرشيدية", "ميدلت", "أزيلال", "خنيفرة", "تازة", "ورزازات", "زاكورة", "تنغير", "جرادة", "شفشاون", "وزان", "سيدي بنور", "سيدي قاسم", "الفقيه بن صالح", "كلميم", "طانطان", "سمارة", "الداخلة", "بوجدور", "العيون"];
+
 const skillOptions = ["لاتيه آرت", "V60", "كيمكس", "كولد برو", "قهوة مختصة", "صيانة الآلات", "خدمة الطاولات"];
 
 type Seeker = {
@@ -38,6 +39,7 @@ type Seeker = {
 };
 
 function Seekers() {
+  const cities = ["الكل", ...useCities()];
   const [city, setCity] = useState("الكل");
   const [search, setSearch] = useState("");
   const [exp, setExp] = useState("");

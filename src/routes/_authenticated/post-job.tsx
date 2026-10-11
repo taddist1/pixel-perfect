@@ -1,7 +1,8 @@
+import { useCities } from "@/lib/use-cities";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { cities, professions, schedules } from "@/lib/constants";
+import { professions, schedules } from "@/lib/constants";
 import { flushPush } from "@/lib/push.functions";
 
 export const Route = createFileRoute("/_authenticated/post-job")({
@@ -10,6 +11,7 @@ export const Route = createFileRoute("/_authenticated/post-job")({
 });
 
 function PostJob() {
+  const cities = useCities();
   const nav = useNavigate();
   const [f, setF] = useState({ title: "", business_name: "", city: cities[0]!, role: professions[0]!, schedule: schedules[0]!, salary: "", description: "", phone: "" });
   const [msg, setMsg] = useState("");
