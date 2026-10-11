@@ -85,7 +85,9 @@ function NotificationsBox() {
   });
   async function toggle(key: keyof Settings) {
     if (!data) return;
-    await supabase.from("site_settings").update({ [key]: !data[key], updated_at: new Date().toISOString() }).eq("id", 1);
+    const patch: Partial<Settings> & { updated_at: string } = { updated_at: new Date().toISOString() };
+    patch[key] = !data[key];
+    await supabase.from("site_settings").update(patch).eq("id", 1);
     qc.invalidateQueries({ queryKey: ["site_settings"] });
   }
   const rows: [keyof Settings, string][] = [
