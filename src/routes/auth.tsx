@@ -31,6 +31,7 @@ function AuthPage() {
   const [name, setName] = useState("");
   const [msg, setMsg] = useState("");
   const [busy, setBusy] = useState(false);
+  const [unconfirmed, setUnconfirmed] = useState(false);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => data.user && go());
