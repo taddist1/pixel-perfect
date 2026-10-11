@@ -49,7 +49,7 @@ function AuthPage() {
         email, password,
         options: { emailRedirectTo: back(), data: { full_name: name } },
       });
-      if (!error) setMsg("أرسلنا لك رسالة تأكيد ✉️ افتح بريدك (وحتى مجلد Spam) واضغط على الرابط، ثم ارجع وسجّل الدخول.");
+      if (!error) setMsg("تم إنشاء حسابك ✅ جاري الدخول...");
       else if (error.status === 429) setMsg("انتظر دقيقة واحدة قبل المحاولة من جديد.");
       else if (/registered/i.test(error.message)) setMsg("هذا البريد مسجّل من قبل — اضغط «عندك حساب؟ دخول».");
       else setMsg("تعذّر إنشاء الحساب، تأكد من البريد وكلمة السر (6 أحرف على الأقل).");
