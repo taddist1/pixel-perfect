@@ -31,6 +31,7 @@ function AuthPage() {
   const [name, setName] = useState("");
   const [msg, setMsg] = useState("");
   const [busy, setBusy] = useState(false);
+  const [unconfirmed, setUnconfirmed] = useState(false);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => data.user && go());
@@ -48,10 +49,14 @@ function AuthPage() {
         email, password,
         options: { emailRedirectTo: back(), data: { full_name: name } },
       });
-      setMsg(error ? error.message : "تفقد بريدك الإلكتروني لتأكيد الحساب ✉️");
+      if (!error) setMsg("أرسلنا لك رسالة تأكيد ✉️ افتح بريدك (وحتى مجلد Spam) واضغط على الرابط، ثم ارجع وسجّل الدخول.");
+      else if (error.status === 429) setMsg("انتظر دقيقة واحدة قبل المحاولة من جديد.");
+      else if (/registered/i.test(error.message)) setMsg("هذا البريد مسجّل من قبل — اضغط «عندك حساب؟ دخول».");
+      else setMsg("تعذّر إنشاء الحساب، تأكد من البريد وكلمة السر (6 أحرف على الأقل).");
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) setMsg("البريد أو كلمة السر غير صحيحة");
+      if (error?.code === "email_not_confirmed") { setMsg("حسابك لم يتأكد بعد. افتح رسالة التأكيد في بريدك (وحتى Spam)، أو اضغط «أعد إرسال رسالة التأكيد»."); setUnconfirmed(true); }
+      else if (error) setMsg("البريد أو كلمة السر غير صحيحة");
     }
     setBusy(false);
   }
@@ -78,6 +83,14 @@ function AuthPage() {
           </button>
         </form>
         {msg && <p className="mt-4 text-center text-sm">{msg}</p>}
+        {unconfirmed && (
+          <button type="button" disabled={busy} onClick={async () => {
+            setBusy(true);
+            const { error } = await supabase.auth.resend({ type: "signup", email, options: { emailRedirectTo: back() } });
+            setMsg(error ? (error.status === 429 ? "انتظر دقيقة واحدة قبل إعادة الإرسال." : "تعذّرت إعادة الإرسال.") : "أعدنا إرسال رسالة التأكيد ✉️ تفقد بريدك.");
+            setBusy(false);
+          }} className="mt-3 w-full rounded-xl border-2 border-primary py-2 text-sm font-bold text-primary disabled:opacity-60">أعد إرسال رسالة التأكيد</button>
+        )}
         <button onClick={() => { setMode(mode === "in" ? "up" : "in"); setMsg(""); }} className="mt-5 w-full text-sm text-muted-foreground underline">
           {mode === "in" ? "ما عندكش حساب؟ سجّل الآن" : "عندك حساب؟ دخول"}
         </button>
