@@ -127,6 +127,7 @@ function RootComponent() {
         <Outlet />
       </div>
       <LanguageSwitch />
+      <CookieConsent />
     </QueryClientProvider>
   );
 }
