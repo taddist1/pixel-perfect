@@ -7,6 +7,7 @@ const T = "إدارة التقييمات والثقة — قهوتي";
 const D = "مراجعة التقييمات والردود ومؤشرات الثقة ديال الكفاءات.";
 
 export const Route = createFileRoute("/_authenticated/admin/moderation")({
+  staticData: { sitemap: false },
   head: () => ({ meta: [
     { title: T }, { name: "description", content: D }, { name: "robots", content: "noindex" },
     { property: "og:title", content: T }, { property: "og:description", content: D },

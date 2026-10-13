@@ -11,6 +11,7 @@ const T = "وظائف المقاهي والمطاعم في المغرب — قه
 const D = "تصفح آخر عروض العمل للبارستا، النادل والطباخ في مدينتك.";
 
 export const Route = createFileRoute("/jobs")({
+  staticData: { sitemap: true },
   head: () => ({ meta: [{ title: T }, { name: "description", content: D }, { property: "og:title", content: T }, { property: "og:description", content: D }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: Jobs,
 });

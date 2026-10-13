@@ -12,6 +12,7 @@ const T = "قهوتي — منصة توظيف وخدمات المقاهي وال
 const D = "اعثر على بارستا، نادل أو تقني إصلاح آلات القهوة في مدينتك. تسجيل مجاني 100% في كل مدن المغرب.";
 
 export const Route = createFileRoute("/")({
+  staticData: { sitemap: true },
   head: () => ({
     meta: [
       { title: T },

@@ -8,6 +8,7 @@ type PageData =
   | { kind: "draft"; draft: { title: string; seo_description: string; content: string } };
 
 export const Route = createFileRoute("/blog/$slug")({
+  staticData: { sitemap: true },
   loader: async ({ params }): Promise<PageData> => {
     const article = articles.find((a) => a.slug === params.slug);
     if (article) return { kind: "static", article };

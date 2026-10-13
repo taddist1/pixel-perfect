@@ -10,6 +10,7 @@ const T = "الكفاءات المتاحة — قهوتي";
 const D = "تصفح الباحثين عن عمل في قطاع المقاهي والمطاعم حسب المدينة والخبرة والمهارات: بارستا، ندلاء، تقنيو آلات القهوة ومهن مساندة.";
 
 export const Route = createFileRoute("/seekers")({
+  staticData: { sitemap: true },
   head: () => ({
     meta: [
       { title: T },

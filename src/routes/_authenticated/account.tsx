@@ -28,6 +28,7 @@ function ReplyBox({ id, onDone }: { id: string; onDone: () => void }) {
 }
 
 export const Route = createFileRoute("/_authenticated/account")({
+  staticData: { sitemap: false },
   head: () => ({ meta: [{ title: "حسابي — قهوتي" }, { name: "description", content: "ملفك الشخصي في قهوتي" }, { property: "og:title", content: "حسابي — قهوتي" }, { property: "og:description", content: "ملفك الشخصي في قهوتي" }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: Account,
 });

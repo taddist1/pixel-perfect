@@ -10,6 +10,7 @@ const T = "🚨 آلتي تعطلت الآن — تقني آلات القهوة 
 const D = "آلة القهوة طاحت؟ صيفط طلب عاجل وأول تقني متاح فمدينتك كيقبلو ويتاصل بيك مباشرة.";
 
 export const Route = createFileRoute("/emergency")({
+  staticData: { sitemap: true },
   head: () => ({
     meta: [
       { title: T }, { name: "description", content: D },
