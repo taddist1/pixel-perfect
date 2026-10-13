@@ -16,6 +16,7 @@ import { Route as EmergencyRouteImport } from './routes/emergency'
 import { Route as JobsRouteImport } from './routes/jobs'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as NewThisWeekRouteImport } from './routes/new-this-week'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as SeekersRouteImport } from './routes/seekers'
 import { Route as VideosRouteImport } from './routes/videos'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
@@ -62,6 +63,11 @@ const McpRoute = McpRouteImport.update({
 const NewThisWeekRoute = NewThisWeekRouteImport.update({
   id: '/new-this-week',
   path: '/new-this-week',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SeekersRoute = SeekersRouteImport.update({
@@ -142,6 +148,7 @@ export interface FileRoutesByFullPath {
   '/jobs': typeof JobsRoute
   '/mcp': typeof McpRoute
   '/new-this-week': typeof NewThisWeekRoute
+  '/privacy': typeof PrivacyRoute
   '/seekers': typeof SeekersRoute
   '/videos': typeof VideosRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
@@ -163,6 +170,7 @@ export interface FileRoutesByTo {
   '/jobs': typeof JobsRoute
   '/mcp': typeof McpRoute
   '/new-this-week': typeof NewThisWeekRoute
+  '/privacy': typeof PrivacyRoute
   '/seekers': typeof SeekersRoute
   '/videos': typeof VideosRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
@@ -186,6 +194,7 @@ export interface FileRoutesById {
   '/jobs': typeof JobsRoute
   '/mcp': typeof McpRoute
   '/new-this-week': typeof NewThisWeekRoute
+  '/privacy': typeof PrivacyRoute
   '/seekers': typeof SeekersRoute
   '/videos': typeof VideosRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
@@ -209,6 +218,7 @@ export interface FileRouteTypes {
     | '/jobs'
     | '/mcp'
     | '/new-this-week'
+    | '/privacy'
     | '/seekers'
     | '/videos'
     | '/.well-known/oauth-protected-resource'
@@ -230,6 +240,7 @@ export interface FileRouteTypes {
     | '/jobs'
     | '/mcp'
     | '/new-this-week'
+    | '/privacy'
     | '/seekers'
     | '/videos'
     | '/.well-known/oauth-protected-resource'
@@ -252,6 +263,7 @@ export interface FileRouteTypes {
     | '/jobs'
     | '/mcp'
     | '/new-this-week'
+    | '/privacy'
     | '/seekers'
     | '/videos'
     | '/.well-known/oauth-protected-resource'
@@ -275,6 +287,7 @@ export interface RootRouteChildren {
   JobsRoute: typeof JobsRoute
   McpRoute: typeof McpRoute
   NewThisWeekRoute: typeof NewThisWeekRoute
+  PrivacyRoute: typeof PrivacyRoute
   SeekersRoute: typeof SeekersRoute
   VideosRoute: typeof VideosRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
@@ -333,6 +346,13 @@ declare module '@tanstack/react-router' {
       path: '/new-this-week'
       fullPath: '/new-this-week'
       preLoaderRoute: typeof NewThisWeekRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/seekers': {
@@ -458,6 +478,7 @@ const rootRouteChildren: RootRouteChildren = {
   JobsRoute: JobsRoute,
   McpRoute: McpRoute,
   NewThisWeekRoute: NewThisWeekRoute,
+  PrivacyRoute: PrivacyRoute,
   SeekersRoute: SeekersRoute,
   VideosRoute: VideosRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
