@@ -18,6 +18,7 @@ import { Route as McpRouteImport } from './routes/mcp'
 import { Route as NewThisWeekRouteImport } from './routes/new-this-week'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as SeekersRouteImport } from './routes/seekers'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as VideosRouteImport } from './routes/videos'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticated/account'
@@ -73,6 +74,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
 const SeekersRoute = SeekersRouteImport.update({
   id: '/seekers',
   path: '/seekers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const VideosRoute = VideosRouteImport.update({
@@ -150,6 +156,7 @@ export interface FileRoutesByFullPath {
   '/new-this-week': typeof NewThisWeekRoute
   '/privacy': typeof PrivacyRoute
   '/seekers': typeof SeekersRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/videos': typeof VideosRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/account': typeof AuthenticatedAccountRoute
@@ -172,6 +179,7 @@ export interface FileRoutesByTo {
   '/new-this-week': typeof NewThisWeekRoute
   '/privacy': typeof PrivacyRoute
   '/seekers': typeof SeekersRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/videos': typeof VideosRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/account': typeof AuthenticatedAccountRoute
@@ -196,6 +204,7 @@ export interface FileRoutesById {
   '/new-this-week': typeof NewThisWeekRoute
   '/privacy': typeof PrivacyRoute
   '/seekers': typeof SeekersRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/videos': typeof VideosRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/_authenticated/account': typeof AuthenticatedAccountRoute
@@ -220,6 +229,7 @@ export interface FileRouteTypes {
     | '/new-this-week'
     | '/privacy'
     | '/seekers'
+    | '/sitemap.xml'
     | '/videos'
     | '/.well-known/oauth-protected-resource'
     | '/account'
@@ -242,6 +252,7 @@ export interface FileRouteTypes {
     | '/new-this-week'
     | '/privacy'
     | '/seekers'
+    | '/sitemap.xml'
     | '/videos'
     | '/.well-known/oauth-protected-resource'
     | '/account'
@@ -265,6 +276,7 @@ export interface FileRouteTypes {
     | '/new-this-week'
     | '/privacy'
     | '/seekers'
+    | '/sitemap.xml'
     | '/videos'
     | '/.well-known/oauth-protected-resource'
     | '/_authenticated/account'
@@ -289,6 +301,7 @@ export interface RootRouteChildren {
   NewThisWeekRoute: typeof NewThisWeekRoute
   PrivacyRoute: typeof PrivacyRoute
   SeekersRoute: typeof SeekersRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   VideosRoute: typeof VideosRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   BlogSlugRoute: typeof BlogSlugRoute
@@ -360,6 +373,13 @@ declare module '@tanstack/react-router' {
       path: '/seekers'
       fullPath: '/seekers'
       preLoaderRoute: typeof SeekersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/videos': {
@@ -480,6 +500,7 @@ const rootRouteChildren: RootRouteChildren = {
   NewThisWeekRoute: NewThisWeekRoute,
   PrivacyRoute: PrivacyRoute,
   SeekersRoute: SeekersRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   VideosRoute: VideosRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,

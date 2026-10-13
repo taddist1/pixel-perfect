@@ -13,6 +13,7 @@ const T = "إدارة الفيديوهات — قهوتي";
 const D = "إضافة وتنظيم الفيديوهات التعليمية في منصة قهوتي.";
 
 export const Route = createFileRoute("/_authenticated/admin/videos")({
+  staticData: { sitemap: false },
   head: () => ({ meta: [
     { title: T }, { name: "description", content: D }, { name: "robots", content: "noindex" },
     { property: "og:title", content: T }, { property: "og:description", content: D },

@@ -6,6 +6,7 @@ import { criteria, type CriterionKey } from "@/lib/trust";
 import { isAbusive } from "@/lib/moderation";
 
 export const Route = createFileRoute("/cities/$city")({
+  staticData: { sitemap: true },
   head: ({ params }) => {
     const c = params.city;
     const T = `وظائف وكفاءات المقاهي في ${c} — قهوتي`;

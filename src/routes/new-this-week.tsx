@@ -11,6 +11,7 @@ const T = "جديد هاد الأسبوع — وظائف المقاهي فمدي
 const D = "آخر الوظائف اللي تنشرات هاد الأسبوع فالمقاهي والمطاعم فمدينتك.";
 
 export const Route = createFileRoute("/new-this-week")({
+  staticData: { sitemap: true },
   head: () => ({ meta: [{ title: T }, { name: "description", content: D }, { property: "og:title", content: T }, { property: "og:description", content: D }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: NewThisWeek,
 });

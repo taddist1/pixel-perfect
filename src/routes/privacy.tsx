@@ -5,6 +5,7 @@ const T = "سياسة الخصوصية — قهوتي";
 const D = "كيف نجمع ونستخدم ونحمي بياناتك الشخصية في منصة قهوتي، وفقاً للقانون المغربي 09-08 لحماية المعطيات ذات الطابع الشخصي.";
 
 export const Route = createFileRoute("/privacy")({
+  staticData: { sitemap: true },
   head: () => ({
     meta: [
       { title: T },

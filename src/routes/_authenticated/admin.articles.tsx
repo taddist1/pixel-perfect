@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { generateDraft, setDraftPublished } from "@/lib/articles.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/articles")({
+  staticData: { sitemap: false },
   head: () => ({ meta: [{ title: "مولّد المقالات — إدارة قهوتي" }, { name: "description", content: "أداة داخلية لتوليد مسودات مقالات بالدارجة." }, { name: "robots", content: "noindex" }, { property: "og:title", content: "مولّد المقالات — إدارة قهوتي" }, { property: "og:description", content: "أداة داخلية لتوليد مسودات مقالات بالدارجة." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: AdminArticles,
 });

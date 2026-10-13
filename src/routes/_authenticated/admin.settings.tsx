@@ -9,6 +9,7 @@ const T = "إعدادات المدير — قهوتي";
 const D = "تغيير كلمة السر وإدارة المدن وإشعارات منصة قهوتي.";
 
 export const Route = createFileRoute("/_authenticated/admin/settings")({
+  staticData: { sitemap: false },
   head: () => ({ meta: [
     { title: T }, { name: "description", content: D }, { name: "robots", content: "noindex" },
     { property: "og:title", content: T }, { property: "og:description", content: D },

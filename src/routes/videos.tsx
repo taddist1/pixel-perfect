@@ -14,6 +14,7 @@ const D = "شاهد فيديوهات عملية حول تحضير القهوة،
 type Video = Tables<"educational_videos">;
 
 export const Route = createFileRoute("/videos")({
+  staticData: { sitemap: true },
   head: () => ({ meta: [
     { title: T }, { name: "description", content: D },
     { property: "og:title", content: T }, { property: "og:description", content: D },

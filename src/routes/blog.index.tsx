@@ -7,6 +7,7 @@ const T = "مدونة قهوتي — نصائح لعالم المقاهي وال
 const D = "مقالات عملية بالعربية: كيفاش تولي باريستا، صيانة آلات القهوة، وفتح مقهى ناجح في المغرب.";
 
 export const Route = createFileRoute("/blog/")({
+  staticData: { sitemap: true },
   head: () => ({ meta: [{ title: T }, { name: "description", content: D }, { property: "og:title", content: T }, { property: "og:description", content: D }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: Blog,
 });
