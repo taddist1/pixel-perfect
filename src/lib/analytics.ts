@@ -1,6 +1,6 @@
 // Google Analytics loads only after the visitor accepts cookies.
 export const CONSENT_KEY = "qahwati_cookie_consent";
-const MEASUREMENT_ID: string | undefined = import.meta.env.VITE_LOVABLE_CONNECTOR_GOOGLE_ANALYTICS_API_KEY;
+const MEASUREMENT_ID: string | undefined = import.meta.env["VITE_LOVABLE_CONNECTOR_GOOGLE_ANALYTICS_API_KEY"];
 
 declare global {
   interface Window {
