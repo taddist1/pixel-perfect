@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { Cookie } from "lucide-react";
+import { CONSENT_KEY, initAnalytics, trackPageView } from "@/lib/analytics";
 
-const KEY = "qahwati_cookie_consent";
+const KEY = CONSENT_KEY;
 
 export function CookieConsent() {
   const [show, setShow] = useState(false);
@@ -15,6 +16,15 @@ export function CookieConsent() {
     }
   }, []);
 
+  useEffect(() => {
+    initAnalytics();
+  }, []);
+
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  useEffect(() => {
+    trackPageView(pathname);
+  }, [pathname]);
+
   function accept() {
     try {
       localStorage.setItem(KEY, new Date().toISOString());
@@ -22,6 +32,7 @@ export function CookieConsent() {
       /* storage unavailable */
     }
     setShow(false);
+    initAnalytics();
   }
 
   if (!show) return null;
