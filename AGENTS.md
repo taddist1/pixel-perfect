@@ -17,3 +17,4 @@
 - External AI assistants connect via the MCP server in `src/lib/mcp/` (OAuth, tools query as the caller), because user data must stay behind RLS.
 - City lists come from the admin-managed `cities` table via `useCities()` (falls back to `constants.ts`), so admins can edit cities without code changes; admin notification triggers respect toggles in `site_settings`.
 - Phone accounts authenticate as synthetic email `212<9digits>@phone.kahwaty.online` with a password (no SMS OTP, per user's choice); don't switch these to Supabase phone provider — it stays disabled.
+- Email password recovery returns to the public `/reset-password` route; only a validated recovery session enables its form, and successful resets sign out before ordinary login, keeping recovery separate from account navigation.
