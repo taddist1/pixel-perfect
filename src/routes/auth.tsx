@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { oauthReturnPath } from "@/lib/oauth-return-path";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/auth")({
   staticData: { sitemap: false },
@@ -35,6 +36,7 @@ function AuthPage() {
   const [msg, setMsg] = useState("");
   const [busy, setBusy] = useState(false);
   const [unconfirmed, setUnconfirmed] = useState(false);
+  const [forgot, setForgot] = useState(false);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => data.user && go());
@@ -52,6 +54,19 @@ function AuthPage() {
     e.preventDefault();
     setBusy(true);
     setMsg("");
+    if (forgot) {
+      try {
+        const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+          redirectTo: `${window.location.origin}/reset-password`,
+        });
+        setMsg(error ? (error.status === 429 ? "انتظر قليلاً قبل طلب رابط جديد." : "تعذّر إرسال الرابط، حاول مجدداً.") : "إذا كان البريد مسجّلاً، سيصلك رابط لاختيار كلمة سر جديدة. تفقد البريد غير المرغوب فيه أيضاً.");
+      } catch {
+        setMsg("تعذّر الاتصال، حاول مجدداً.");
+      } finally {
+        setBusy(false);
+      }
+      return;
+    }
     if (method === "phone") {
       if (!phoneValid()) {
         setMsg("رقم الهاتف غير صحيح — اكتب 9 أرقام تبدأ بـ 6 أو 7.");
@@ -118,21 +133,23 @@ function AuthPage() {
     <div className="flex min-h-screen items-center justify-center px-5">
       <div className="w-full max-w-md rounded-3xl border bg-card p-8 shadow-sm">
         <Link to="/" translate="no" className="notranslate text-2xl font-black text-primary">قهوتي</Link>
-        <h1 className="mt-4 text-2xl font-black">{mode === "in" ? "تسجيل الدخول" : "إنشاء حساب مجاني"}</h1>
+        <h1 className="mt-4 text-2xl font-black">{forgot ? "استرجاع كلمة السر" : mode === "in" ? "تسجيل الدخول" : "إنشاء حساب مجاني"}</h1>
+        {!forgot && <>
         <button onClick={google} className="mt-6 w-full rounded-xl border-2 py-3 font-bold">المتابعة بحساب Google</button>
         <div className="my-5 text-center text-sm text-muted-foreground">أو</div>
         <div className="mb-4 grid grid-cols-2 gap-2">
           <button type="button" onClick={() => { setMethod("email"); setMsg(""); }} className={methodBtn("email")}>✉️ بالبريد</button>
           <button type="button" onClick={() => { setMethod("phone"); setMsg(""); }} className={methodBtn("phone")}>📱 بالهاتف</button>
         </div>
+        </>}
         <form onSubmit={submit} className="space-y-3">
           {method === "email" ? (
             <>
               {mode === "up" && <input className={input} placeholder="الاسم الكامل" value={name} onChange={(e) => setName(e.target.value)} required />}
               <input className={input} type="email" dir="ltr" placeholder="email@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
-              <input className={input} type="password" dir="ltr" placeholder="••••••" minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} required />
+              {!forgot && <input className={input} type="password" dir="ltr" placeholder="••••••" minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} required />}
               <button disabled={busy} className="w-full rounded-xl bg-primary py-3 font-black text-primary-foreground disabled:opacity-60">
-                {mode === "in" ? "دخول" : "إنشاء الحساب"}
+                {forgot ? (busy ? "جاري الإرسال…" : "إرسال رابط الاسترجاع") : mode === "in" ? "دخول" : "إنشاء الحساب"}
               </button>
             </>
           ) : (
@@ -157,6 +174,7 @@ function AuthPage() {
             </>
           )}
         </form>
+        {mode === "in" && method === "email" && <Button variant="link" className="mt-3 w-full" disabled={busy} onClick={() => { setForgot(!forgot); setUnconfirmed(false); setMsg(""); }}>{forgot ? "العودة إلى تسجيل الدخول" : "نسيت كلمة السر؟"}</Button>}
         {msg && <p className="mt-4 text-center text-sm">{msg}</p>}
         {unconfirmed && (
           <button type="button" disabled={busy} onClick={async () => {
@@ -166,9 +184,9 @@ function AuthPage() {
             setBusy(false);
           }} className="mt-3 w-full rounded-xl border-2 border-primary py-2 text-sm font-bold text-primary disabled:opacity-60">أعد إرسال رسالة التأكيد</button>
         )}
-        <button onClick={() => { setMode(mode === "in" ? "up" : "in"); setMsg(""); }} className="mt-5 w-full text-sm text-muted-foreground underline">
+        {!forgot && <button onClick={() => { setMode(mode === "in" ? "up" : "in"); setMsg(""); }} className="mt-5 w-full text-sm text-muted-foreground underline">
           {mode === "in" ? "ما عندكش حساب؟ سجّل الآن" : "عندك حساب؟ دخول"}
-        </button>
+        </button>}
       </div>
     </div>
   );
