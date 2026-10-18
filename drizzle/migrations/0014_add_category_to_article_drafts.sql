@@ -1,0 +1,1 @@
+ALTER TABLE public.article_drafts ADD COLUMN category text NOT NULL DEFAULT 'القهوة';

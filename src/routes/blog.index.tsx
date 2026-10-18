@@ -1,7 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { articles } from "@/lib/articles";
 import { supabase } from "@/integrations/supabase/client";
+
+const categories = ["الكل", "القهوة", "الصيانة", "التسيير", "الخدمة", "التكوين"] as const;
 
 const T = "مدونة قهوتي — نصائح لعالم المقاهي والمطاعم";
 const D = "مقالات عملية بالعربية: كيفاش تولي باريستا، صيانة آلات القهوة، وفتح مقهى ناجح في المغرب.";
@@ -16,26 +19,39 @@ function Blog() {
   const published = useQuery({
     queryKey: ["published-drafts"],
     queryFn: async () =>
-      (await supabase.from("article_drafts").select("id, slug, title, seo_description, published_at").eq("is_published", true).order("published_at", { ascending: false })).data ?? [],
+      (await supabase.from("article_drafts").select("id, slug, title, seo_description, category, published_at").eq("is_published", true).order("published_at", { ascending: false })).data ?? [],
   });
+
+  const [cat, setCat] = useState<(typeof categories)[number]>("الكل");
+  const draftsFiltered = (published.data ?? []).filter((d) => cat === "الكل" || d.category === cat);
+  const staticFiltered = articles.filter((a) => cat === "الكل" || a.category === cat);
 
   return (
     <main dir="rtl" className="notranslate mx-auto max-w-4xl px-4 py-10" translate="no">
       <Link to="/" className="text-sm text-muted-foreground">← الرئيسية</Link>
       <h1 className="mt-4 text-3xl font-black">مدونة قهوتي</h1>
       <p className="mt-2 text-muted-foreground">نصائح ودلائل لكل من يشتغل في المقاهي والمطاعم.</p>
+      <div className="mt-6 flex flex-wrap gap-2">
+        {categories.map((c) => (
+          <button key={c} onClick={() => setCat(c)}
+            className={`rounded-full border px-4 py-1.5 text-sm font-bold transition ${cat === c ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card hover:border-primary"}`}>
+            {c}
+          </button>
+        ))}
+      </div>
       <div className="mt-8 grid gap-4 md:grid-cols-2">
-        {published.data?.map((d) => (
+        {draftsFiltered.map((d) => (
           <Link key={d.id} to="/blog/$slug" params={{ slug: d.slug! }} className="rounded-2xl border border-border bg-card p-5 transition hover:border-primary">
-            <span className="rounded-full bg-primary px-2 py-0.5 text-xs font-bold text-primary-foreground">جديد</span>
+            <span className="rounded-full bg-primary px-2 py-0.5 text-xs font-bold text-primary-foreground">{d.category}</span>
             <h2 className="mt-2 text-lg font-black">{d.title}</h2>
             <p className="mt-2 text-sm text-muted-foreground">{d.seo_description}</p>
             <span className="mt-3 inline-block text-sm font-bold text-accent">اقرأ المقال ←</span>
           </Link>
         ))}
-        {articles.map((a) => (
+        {staticFiltered.map((a) => (
           <Link key={a.slug} to="/blog/$slug" params={{ slug: a.slug }} className="rounded-2xl border border-border bg-card p-5 transition hover:border-primary">
-            <h2 className="text-lg font-black">{a.title}</h2>
+            <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-bold text-primary">{a.category}</span>
+            <h2 className="mt-2 text-lg font-black">{a.title}</h2>
             <p className="mt-2 text-sm text-muted-foreground">{a.excerpt}</p>
             <span className="mt-3 inline-block text-sm font-bold text-accent">اقرأ المقال ←</span>
           </Link>
