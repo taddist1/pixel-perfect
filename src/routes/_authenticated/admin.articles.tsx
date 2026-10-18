@@ -101,7 +101,14 @@ function AdminArticles() {
                   <p className="mt-1"><b>وصف SEO:</b> {d.seo_description}</p>
                 </div>
                 <div className="whitespace-pre-wrap leading-8">{d.content}</div>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <label className="flex items-center gap-2 text-sm font-bold">
+                    التصنيف:
+                    <select value={d.category} onChange={async (e) => { await supabase.from("article_drafts").update({ category: e.target.value }).eq("id", d.id); qc.invalidateQueries({ queryKey: ["drafts"] }); }}
+                      className="rounded-md border border-input bg-background px-3 py-1.5 text-sm">
+                      {["القهوة", "الصيانة", "التسيير", "الخدمة", "التكوين"].map((c) => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                  </label>
                   {d.is_published ? (
                     <>
                       <Link to="/blog/$slug" params={{ slug: d.slug! }} className="rounded-full bg-primary px-4 py-1.5 text-sm font-bold text-primary-foreground">شوف المقال فالمدونة ←</Link>
