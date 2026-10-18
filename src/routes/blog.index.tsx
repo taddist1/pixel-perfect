@@ -1,7 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { articles } from "@/lib/articles";
 import { supabase } from "@/integrations/supabase/client";
+
+const categories = ["الكل", "القهوة", "الصيانة", "التسيير", "الخدمة", "التكوين"] as const;
 
 const T = "مدونة قهوتي — نصائح لعالم المقاهي والمطاعم";
 const D = "مقالات عملية بالعربية: كيفاش تولي باريستا، صيانة آلات القهوة، وفتح مقهى ناجح في المغرب.";
