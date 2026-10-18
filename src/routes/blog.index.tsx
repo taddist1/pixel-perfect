@@ -19,8 +19,12 @@ function Blog() {
   const published = useQuery({
     queryKey: ["published-drafts"],
     queryFn: async () =>
-      (await supabase.from("article_drafts").select("id, slug, title, seo_description, published_at").eq("is_published", true).order("published_at", { ascending: false })).data ?? [],
+      (await supabase.from("article_drafts").select("id, slug, title, seo_description, category, published_at").eq("is_published", true).order("published_at", { ascending: false })).data ?? [],
   });
+
+  const [cat, setCat] = useState<(typeof categories)[number]>("الكل");
+  const draftsFiltered = (published.data ?? []).filter((d) => cat === "الكل" || d.category === cat);
+  const staticFiltered = articles.filter((a) => cat === "الكل" || a.category === cat);
 
   return (
     <main dir="rtl" className="notranslate mx-auto max-w-4xl px-4 py-10" translate="no">
