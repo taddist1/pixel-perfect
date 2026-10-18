@@ -99,6 +99,13 @@
       "when": 1791749103083,
       "tag": "0013_admin_settings_cities",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1792356094435,
+      "tag": "0014_add_category_to_article_drafts",
+      "breakpoints": true
     }
   ]
 }
