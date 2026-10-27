@@ -103,6 +103,9 @@ function VideosPage() {
                     <span className="text-xs font-bold text-primary">{v.category}</span>
                     <h3 className="mt-1 text-lg font-black leading-7">{v.title}</h3>
                     {v.description && <p className="mt-2 text-sm leading-6 text-muted-foreground">{v.description}</p>}
+                    <div className="mt-3">
+                      <ShareButtons text={`${v.title} — قهوتي`} />
+                    </div>
                   </div>
                 </article>
               ))}
@@ -126,6 +129,9 @@ function VideosPage() {
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                 allowFullScreen
               />
+            </div>
+            <div className="mt-3">
+              <ShareButtons text={`${active.title} — قهوتي`} url={youtubeWatchUrl(active.youtube_id)} />
             </div>
           </div>
         </div>
