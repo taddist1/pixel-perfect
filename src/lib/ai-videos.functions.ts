@@ -57,7 +57,7 @@ export const advanceAiVideo = createServerFn({ method: "POST" })
     const scenes = row.scenes as unknown as Scene[];
     const total = scenes.length;
     const idx = scenes.findIndex((s) => s.status !== "done");
-    const save = (patch: { scenes?: Scene[]; status?: string; error?: string }) => context.supabase.from("ai_videos").update({ ...patch, scenes: patch.scenes as unknown as Json | undefined }).eq("id", data.id);
+    const save = (patch: { scenes?: Scene[]; status?: string; error?: string }) => context.supabase.from("ai_videos").update(patch as unknown as { scenes?: Json; status?: string; error?: string }).eq("id", data.id);
     if (idx === -1) {
       await save({ status: "ready" });
       return { status: "ready", done: total, total };
