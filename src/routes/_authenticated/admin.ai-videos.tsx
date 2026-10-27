@@ -35,6 +35,7 @@ function AdminAiVideos() {
   const [topic, setTopic] = useState("");
   const [category, setCategory] = useState<(typeof aiVideoCategories)[number]>("القهوة");
   const [duration, setDuration] = useState(60);
+  const [script, setScript] = useState("");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [preview, setPreview] = useState<{ id: string; urls: string[] } | null>(null);
@@ -89,8 +90,9 @@ function AdminAiVideos() {
     e.preventDefault();
     setBusy(true); setMessage("");
     try {
-      await create({ data: { topic: topic.trim(), category, duration } });
+      await create({ data: { topic: topic.trim(), category, duration, script: script.trim() || undefined } });
       setTopic("");
+      setScript("");
       setMessage("تكتب السيناريو، وبدا توليد المقاطع. خلي الصفحة مفتوحة حتى يكمل.");
       qc.invalidateQueries({ queryKey: ["admin-ai-videos"] });
     } catch (err) {
@@ -119,6 +121,21 @@ function AdminAiVideos() {
         <div className="space-y-2">
           <Label htmlFor="ai-topic">الموضوع</Label>
           <Input id="ai-topic" required minLength={5} maxLength={300} value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="مثال: كيفاش تنظف رأس آلة الإسبريسو كل نهار" />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="ai-script">السيناريو (اختياري)</Label>
+          <textarea
+            id="ai-script"
+            rows={5}
+            maxLength={5000}
+            value={script}
+            onChange={(e) => setScript(e.target.value)}
+            placeholder="كتب النص بالدارجة هنا، وغادي يتوزع على المقاطع حسب المدة. إذا خليتيه خاوي، الذكاء الاصطناعي هو لي كيكتب السيناريو."
+            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+          />
+          {script.trim() && (
+            <p className="text-xs text-muted-foreground">غادي يتوزع على {Math.ceil(duration / 10)} مقاطع (كل مقطع 10 ثواني).</p>
+          )}
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">

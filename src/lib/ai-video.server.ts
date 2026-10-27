@@ -1,6 +1,6 @@
 import { createOpenAI } from "@ai-sdk/openai";
 import { generateText } from "ai";
-import { AI_VIDEO_SCENE_SECONDS, sceneCount } from "./ai-video-rules";
+import { AI_VIDEO_SCENE_SECONDS, sceneCount, splitNarration } from "./ai-video-rules";
 
 const GATEWAY = "https://ai.gateway.lovable.dev/v1";
 const VIDEO_MODEL = "google/gemini-omni-1.1-flash";
@@ -59,6 +59,56 @@ export async function writeScript(topic: string, category: string, duration: num
     title: d.title.slice(0, 140),
     description: (d.description ?? "").slice(0, 500),
     scenes: scenes.map<Scene>((s) => ({ prompt: s.prompt, narration: s.narration ?? "", job_id: null, path: null, status: "pending" })),
+  };
+}
+
+const MANUAL_SYSTEM = `You turn a manually written Moroccan Darija narration into visual prompts for short realistic video clips for "Qahwati", a Moroccan platform for cafe and restaurant workers.
+Return JSON only: {"title":"Arabic title","description":"short Arabic description","prompts":["..."]} with exactly one prompt per given narration part, in the same order.
+Rules for each prompt (each part is one ${AI_VIDEO_SCENE_SECONDS}-second realistic clip):
+- English, realistic cinematic description of a Moroccan cafe setting showing the action the narration teaches: subject, action, camera move, lighting. Keep the same presenter (a Moroccan barista/technician/waiter in a dark green apron) across prompts.
+- If the part has text, include it verbatim like: The presenter says in Moroccan Darija: "<part>". Audio: his voice close, soft cafe ambience. If the part is empty, continue the previous action without speech.
+- No music. No captions, no on-screen text. Single continuous shot, no scene cuts.`;
+
+/** Builds scenes from a narration the admin wrote by hand, distributed across the clips. */
+export async function scriptFromManual(topic: string, category: string, duration: number, narration: string) {
+  const apiKey = key();
+  const provider = createOpenAI({ baseURL: GATEWAY, apiKey, headers: { "Lovable-API-Key": apiKey } });
+  const n = sceneCount(duration);
+  const parts = splitNarration(narration, n);
+  const fallbackPrompt = (part: string) =>
+    `Realistic cinematic shot in a Moroccan cafe about: ${topic}. A Moroccan presenter in a dark green apron demonstrates the step.` +
+    (part ? ` The presenter says in Moroccan Darija: "${part}". Audio: his voice close, soft cafe ambience.` : "") +
+    " No music. No captions, no on-screen text. Single continuous shot.";
+  let title = topic.slice(0, 140);
+  let description = "";
+  let prompts: string[] = [];
+  try {
+    const { text } = await generateText({
+      model: provider.responses("openai/gpt-6-astra"),
+      system: MANUAL_SYSTEM,
+      prompt: `Category: ${category}\nTopic: ${topic}\nNarration parts (JSON): ${JSON.stringify(parts)}`,
+      providerOptions: { openai: { reasoningEffort: "low", store: false } },
+    });
+    const match = text.match(/\{[\s\S]*\}/);
+    if (match) {
+      const d = JSON.parse(match[0]) as { title?: string; description?: string; prompts?: string[] };
+      if (d.title) title = d.title.slice(0, 140);
+      description = (d.description ?? "").slice(0, 500);
+      prompts = (d.prompts ?? []).filter((p) => typeof p === "string" && p.trim());
+    }
+  } catch {
+    // Keep the manual narration usable even if prompt writing fails.
+  }
+  return {
+    title,
+    description,
+    scenes: parts.map<Scene>((part, i) => ({
+      prompt: prompts[i]?.trim() || fallbackPrompt(part),
+      narration: part,
+      job_id: null,
+      path: null,
+      status: "pending",
+    })),
   };
 }
 
