@@ -7,19 +7,25 @@ export function ClipPlayer({ urls, autoPlay = false }: { urls: string[]; autoPla
   if (!urls.length) return null;
   return (
     <div className="space-y-1">
-      <video
-        key={i}
-        src={urls[i]}
-        controls
-        playsInline
-        autoPlay={play}
-        onPlay={() => setPlay(true)}
-        onEnded={() => {
-          if (i + 1 < urls.length) setI(i + 1);
-          else { setPlay(false); setI(0); }
-        }}
-        className="aspect-video w-full rounded-lg bg-muted"
-      />
+      <div className="relative overflow-hidden rounded-lg bg-muted">
+        <video
+          key={i}
+          src={urls[i]}
+          controls
+          playsInline
+          autoPlay={play}
+          onPlay={() => setPlay(true)}
+          onEnded={() => {
+            if (i + 1 < urls.length) setI(i + 1);
+            else { setPlay(false); setI(0); }
+          }}
+          className="aspect-video w-full"
+        />
+        <div className="video-watermark pointer-events-none absolute right-3 top-3 select-none text-right" aria-hidden="true">
+          <span translate="no" className="notranslate block text-lg font-black leading-6">قهوتي</span>
+          <span dir="ltr" className="block text-[11px] font-bold tracking-wide">www.kahwaty.online</span>
+        </div>
+      </div>
       {urls.length > 1 && (
         <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
           <span>الجزء {i + 1} من {urls.length}</span>
