@@ -28,6 +28,7 @@ import { Route as BlogIndexRouteImport } from './routes/blog.index'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as CitiesCityRouteImport } from './routes/cities.$city'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
+import { Route as AuthenticatedAdminAiVideosRouteImport } from './routes/_authenticated/admin.ai-videos'
 import { Route as AuthenticatedAdminArticlesRouteImport } from './routes/_authenticated/admin.articles'
 import { Route as AuthenticatedAdminModerationRouteImport } from './routes/_authenticated/admin.moderation'
 import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authenticated/admin.settings'
@@ -128,6 +129,12 @@ const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
   path: '/.lovable/oauth/consent',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAdminAiVideosRoute =
+  AuthenticatedAdminAiVideosRouteImport.update({
+    id: '/admin/ai-videos',
+    path: '/admin/ai-videos',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminArticlesRoute =
   AuthenticatedAdminArticlesRouteImport.update({
     id: '/admin/articles',
@@ -172,6 +179,7 @@ export interface FileRoutesByFullPath {
   '/cities/$city': typeof CitiesCityRoute
   '/blog/': typeof BlogIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/admin/ai-videos': typeof AuthenticatedAdminAiVideosRoute
   '/admin/articles': typeof AuthenticatedAdminArticlesRoute
   '/admin/moderation': typeof AuthenticatedAdminModerationRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
@@ -196,6 +204,7 @@ export interface FileRoutesByTo {
   '/cities/$city': typeof CitiesCityRoute
   '/blog': typeof BlogIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/admin/ai-videos': typeof AuthenticatedAdminAiVideosRoute
   '/admin/articles': typeof AuthenticatedAdminArticlesRoute
   '/admin/moderation': typeof AuthenticatedAdminModerationRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
@@ -222,6 +231,7 @@ export interface FileRoutesById {
   '/cities/$city': typeof CitiesCityRoute
   '/blog/': typeof BlogIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/_authenticated/admin/ai-videos': typeof AuthenticatedAdminAiVideosRoute
   '/_authenticated/admin/articles': typeof AuthenticatedAdminArticlesRoute
   '/_authenticated/admin/moderation': typeof AuthenticatedAdminModerationRoute
   '/_authenticated/admin/settings': typeof AuthenticatedAdminSettingsRoute
@@ -248,6 +258,7 @@ export interface FileRouteTypes {
     | '/cities/$city'
     | '/blog/'
     | '/.lovable/oauth/consent'
+    | '/admin/ai-videos'
     | '/admin/articles'
     | '/admin/moderation'
     | '/admin/settings'
@@ -272,6 +283,7 @@ export interface FileRouteTypes {
     | '/cities/$city'
     | '/blog'
     | '/.lovable/oauth/consent'
+    | '/admin/ai-videos'
     | '/admin/articles'
     | '/admin/moderation'
     | '/admin/settings'
@@ -297,6 +309,7 @@ export interface FileRouteTypes {
     | '/cities/$city'
     | '/blog/'
     | '/.lovable/oauth/consent'
+    | '/_authenticated/admin/ai-videos'
     | '/_authenticated/admin/articles'
     | '/_authenticated/admin/moderation'
     | '/_authenticated/admin/settings'
@@ -458,6 +471,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DotlovableOauthConsentRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin/ai-videos': {
+      id: '/_authenticated/admin/ai-videos'
+      path: '/admin/ai-videos'
+      fullPath: '/admin/ai-videos'
+      preLoaderRoute: typeof AuthenticatedAdminAiVideosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/articles': {
       id: '/_authenticated/admin/articles'
       path: '/admin/articles'
@@ -492,6 +512,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAccountRoute: typeof AuthenticatedAccountRoute
   AuthenticatedPostJobRoute: typeof AuthenticatedPostJobRoute
+  AuthenticatedAdminAiVideosRoute: typeof AuthenticatedAdminAiVideosRoute
   AuthenticatedAdminArticlesRoute: typeof AuthenticatedAdminArticlesRoute
   AuthenticatedAdminModerationRoute: typeof AuthenticatedAdminModerationRoute
   AuthenticatedAdminSettingsRoute: typeof AuthenticatedAdminSettingsRoute
@@ -501,6 +522,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAccountRoute: AuthenticatedAccountRoute,
   AuthenticatedPostJobRoute: AuthenticatedPostJobRoute,
+  AuthenticatedAdminAiVideosRoute: AuthenticatedAdminAiVideosRoute,
   AuthenticatedAdminArticlesRoute: AuthenticatedAdminArticlesRoute,
   AuthenticatedAdminModerationRoute: AuthenticatedAdminModerationRoute,
   AuthenticatedAdminSettingsRoute: AuthenticatedAdminSettingsRoute,
