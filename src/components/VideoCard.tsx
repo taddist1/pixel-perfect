@@ -39,6 +39,11 @@ export function VideoCard({ video, onPlay }: { video: Video; onPlay: (video: Vid
               <Share2 aria-hidden="true" />
             </a>
           </Button>
+          <Button asChild variant="outline" size="icon">
+            <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(youtubeWatchUrl(video.youtube_id))}`} target="_blank" rel="noopener noreferrer" aria-label="شارك على فيسبوك" title="شارك على فيسبوك">
+              <Share2 aria-hidden="true" />
+            </a>
+          </Button>
         </div>
       </div>
     </article>

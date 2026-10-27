@@ -6,9 +6,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { VideoCard } from "@/components/VideoCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { videoCategories } from "@/lib/youtube";
+import { videoCategories, youtubeWatchUrl } from "@/lib/youtube";
 import type { Tables } from "@/integrations/supabase/types";
 import { ClipPlayer } from "@/components/ClipPlayer";
+import { ShareButtons } from "@/components/ShareButtons";
 import { listPublishedAiVideos } from "@/lib/ai-videos.functions";
 
 const T = "فيديوهات تعليمية للمقاهي والمطاعم — قهوتي";
@@ -102,6 +103,9 @@ function VideosPage() {
                     <span className="text-xs font-bold text-primary">{v.category}</span>
                     <h3 className="mt-1 text-lg font-black leading-7">{v.title}</h3>
                     {v.description && <p className="mt-2 text-sm leading-6 text-muted-foreground">{v.description}</p>}
+                    <div className="mt-3">
+                      <ShareButtons text={`${v.title} — قهوتي`} />
+                    </div>
                   </div>
                 </article>
               ))}
@@ -125,6 +129,9 @@ function VideosPage() {
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                 allowFullScreen
               />
+            </div>
+            <div className="mt-3">
+              <ShareButtons text={`${active.title} — قهوتي`} url={youtubeWatchUrl(active.youtube_id)} />
             </div>
           </div>
         </div>
