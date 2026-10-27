@@ -26,12 +26,15 @@ export const createAiVideo = createServerFn({ method: "POST" })
       topic: z.string().trim().min(5).max(300),
       category: z.enum(aiVideoCategories),
       duration: z.number().int().min(AI_VIDEO_MIN_SECONDS).max(AI_VIDEO_MAX_SECONDS),
+      script: z.string().trim().max(5000).optional(),
     }).parse(d),
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const { writeScript } = await import("./ai-video.server");
-    const script = await writeScript(data.topic, data.category, data.duration);
+    const ai = await import("./ai-video.server");
+    const script = data.script
+      ? await ai.scriptFromManual(data.topic, data.category, data.duration, data.script)
+      : await ai.writeScript(data.topic, data.category, data.duration);
     const { data: row, error } = await context.supabase
       .from("ai_videos")
       .insert({
