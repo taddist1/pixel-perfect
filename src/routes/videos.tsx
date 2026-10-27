@@ -6,9 +6,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { VideoCard } from "@/components/VideoCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { videoCategories } from "@/lib/youtube";
+import { videoCategories, youtubeWatchUrl } from "@/lib/youtube";
 import type { Tables } from "@/integrations/supabase/types";
 import { ClipPlayer } from "@/components/ClipPlayer";
+import { ShareButtons } from "@/components/ShareButtons";
 import { listPublishedAiVideos } from "@/lib/ai-videos.functions";
 
 const T = "فيديوهات تعليمية للمقاهي والمطاعم — قهوتي";
