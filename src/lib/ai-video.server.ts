@@ -1,6 +1,6 @@
 import { createOpenAI } from "@ai-sdk/openai";
 import { generateText } from "ai";
-import { AI_VIDEO_SCENE_SECONDS, sceneCount } from "./ai-video-rules";
+import { AI_VIDEO_SCENE_SECONDS, sceneCount, splitNarration } from "./ai-video-rules";
 
 const GATEWAY = "https://ai.gateway.lovable.dev/v1";
 const VIDEO_MODEL = "google/gemini-omni-1.1-flash";
