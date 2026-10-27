@@ -1,4 +1,4 @@
-// Google Analytics loads only after the visitor accepts cookies.
+// Consent Mode loads on public site hosts; cookies require explicit consent.
 export const CONSENT_KEY = "qahwati_cookie_consent";
 const MEASUREMENT_ID: string | undefined = import.meta.env["VITE_LOVABLE_CONNECTOR_GOOGLE_ANALYTICS_API_KEY"];
 
@@ -10,6 +10,8 @@ declare global {
 }
 
 let loaded = false;
+let lastPagePath: string | undefined;
+const PUBLIC_HOSTS = new Set(["kahwaty.online", "www.kahwaty.online", "kawaty-pro.lovable.app"]);
 
 export function hasConsent() {
   try {
@@ -22,7 +24,7 @@ export function hasConsent() {
 // Consent Mode v2: the tag always loads (so Google can detect it) but
 // stores no cookies until the visitor accepts.
 export function initAnalytics() {
-  if (typeof window === "undefined" || !MEASUREMENT_ID) return;
+  if (typeof window === "undefined" || !MEASUREMENT_ID || !PUBLIC_HOSTS.has(window.location.hostname)) return;
   if (loaded) {
     if (hasConsent()) window.gtag?.("consent", "update", { analytics_storage: "granted" });
     return;
@@ -46,9 +48,16 @@ export function initAnalytics() {
   document.head.appendChild(s);
   window.gtag("set", "developer_id.dZjgwMW", true);
   window.gtag("js", new Date());
-  window.gtag("config", MEASUREMENT_ID, { anonymize_ip: true });
+  // The router owns page views. Do not also send an automatic initial view.
+  window.gtag("config", MEASUREMENT_ID, { send_page_view: false });
 }
 
 export function trackPageView(path: string) {
-  if (loaded && window.gtag) window.gtag("event", "page_view", { page_path: path });
+  if (typeof window === "undefined" || !loaded || !window.gtag || lastPagePath === path) return;
+  lastPagePath = path;
+  window.gtag("event", "page_view", {
+    page_path: path,
+    page_location: new URL(path, window.location.origin).href,
+    page_title: document.title,
+  });
 }

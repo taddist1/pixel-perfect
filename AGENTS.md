@@ -18,3 +18,4 @@
 - City lists come from the admin-managed `cities` table via `useCities()` (falls back to `constants.ts`), so admins can edit cities without code changes; admin notification triggers respect toggles in `site_settings`.
 - Phone accounts authenticate as synthetic email `212<9digits>@phone.kahwaty.online` with a password (no SMS OTP, per user's choice); don't switch these to Supabase phone provider — it stays disabled.
 - Email password recovery returns to the public `/reset-password` route; only a validated recovery session enables its form, and successful resets sign out before ordinary login, keeping recovery separate from account navigation.
+- Analytics page views are router-owned with automatic initial views disabled and consecutive duplicate paths suppressed; only public site hosts load the tag, so preview activity does not pollute production reports. Keep GA4 enhanced browser-history page views disabled to avoid a second navigation source.
