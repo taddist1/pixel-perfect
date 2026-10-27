@@ -99,7 +99,10 @@ function AdminVideos() {
           <Link to="/videos" className="text-sm text-muted-foreground">← مكتبة الفيديوهات</Link>
           <h1 className="mt-3 text-3xl font-black">إدارة الفيديوهات</h1>
         </div>
-        <Button asChild variant="outline"><Link to="/admin/articles">مولّد المقالات</Link></Button>
+        <div className="flex gap-2">
+          <Button asChild><Link to="/admin/ai-videos">مولّد الفيديو بالذكاء الاصطناعي</Link></Button>
+          <Button asChild variant="outline"><Link to="/admin/articles">مولّد المقالات</Link></Button>
+        </div>
       </div>
 
       <form onSubmit={submit} className="mt-7 space-y-5 rounded-lg border border-border bg-card p-5">

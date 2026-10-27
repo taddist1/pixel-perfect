@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { videoCategories } from "@/lib/youtube";
 import type { Tables } from "@/integrations/supabase/types";
+import { ClipPlayer } from "@/components/ClipPlayer";
+import { listPublishedAiVideos } from "@/lib/ai-videos.functions";
 
 const T = "فيديوهات تعليمية للمقاهي والمطاعم — قهوتي";
 const D = "شاهد فيديوهات عملية حول تحضير القهوة، صيانة الآلات، تسيير المقاهي وتطوير مهارات العمل في المغرب.";
@@ -35,6 +37,8 @@ function VideosPage() {
       return data;
     },
   });
+  const aiVideos = useQuery({ queryKey: ["ai-videos-public"], queryFn: () => listPublishedAiVideos(), staleTime: 30 * 60 * 1000 });
+  const term = (q: string) => q.trim().toLowerCase();
 
   const filtered = useMemo(() => {
     const term = query.trim().toLowerCase();
@@ -86,6 +90,24 @@ function VideosPage() {
         <div className="mt-7 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((video) => <VideoCard key={video.id} video={video} onPlay={setActive} />)}
         </div>
+
+        {(aiVideos.data?.length ?? 0) > 0 && (
+          <div className="mt-12">
+            <h2 className="text-2xl font-black">فيديوهات من إنتاج <span translate="no" className="notranslate">قهوتي</span></h2>
+            <div className="mt-5 grid gap-5 sm:grid-cols-2">
+              {aiVideos.data!.filter((v) => !term(query) || `${v.title} ${v.description}`.toLowerCase().includes(term(query))).map((v) => (
+                <article key={v.id} className="overflow-hidden rounded-lg border border-border bg-card">
+                  <ClipPlayer urls={v.urls} />
+                  <div className="p-4">
+                    <span className="text-xs font-bold text-primary">{v.category}</span>
+                    <h3 className="mt-1 text-lg font-black leading-7">{v.title}</h3>
+                    {v.description && <p className="mt-2 text-sm leading-6 text-muted-foreground">{v.description}</p>}
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        )}
       </section>
 
       {active && (
