@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_videos: {
+        Row: {
+          category: string
+          created_at: string
+          created_by: string | null
+          description: string
+          duration_seconds: number
+          error: string | null
+          id: string
+          is_published: boolean
+          scenes: Json
+          status: string
+          title: string
+          topic: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          duration_seconds: number
+          error?: string | null
+          id?: string
+          is_published?: boolean
+          scenes?: Json
+          status?: string
+          title?: string
+          topic: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          duration_seconds?: number
+          error?: string | null
+          id?: string
+          is_published?: boolean
+          scenes?: Json
+          status?: string
+          title?: string
+          topic?: string
+        }
+        Relationships: []
+      }
       article_drafts: {
         Row: {
           author_id: string | null
