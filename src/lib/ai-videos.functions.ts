@@ -3,8 +3,9 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { aiVideoCategories, AI_VIDEO_MAX_SECONDS, AI_VIDEO_MIN_SECONDS } from "./ai-video-rules";
 import type { Json } from "@/integrations/supabase/types";
+import { generationConsent, MAX_REFERENCE_BYTES, type ReferenceImage } from "./ai-video-continuity";
 
-type Scene = { prompt: string; narration: string; job_id: string | null; path: string | null; status: string };
+type Scene = { prompt: string; narration: string; job_id: string | null; path: string | null; status: string; reference_image?: ReferenceImage };
 
 async function assertAdmin(context: { supabase: any; userId: string }) {
   const { data } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
@@ -27,6 +28,11 @@ export const createAiVideo = createServerFn({ method: "POST" })
       category: z.enum(aiVideoCategories),
       duration: z.number().int().min(AI_VIDEO_MIN_SECONDS).max(AI_VIDEO_MAX_SECONDS),
       script: z.string().trim().max(5000).optional(),
+      referenceImage: z.object({
+        data: z.string().max(4 * Math.ceil(MAX_REFERENCE_BYTES / 3)).regex(/^[A-Za-z0-9+/]+={0,2}$/),
+        mime_type: z.enum(["image/jpeg", "image/png", "image/webp"]),
+      }).optional(),
+      consent: generationConsent,
     }).parse(d),
   )
   .handler(async ({ data, context }) => {
@@ -35,6 +41,7 @@ export const createAiVideo = createServerFn({ method: "POST" })
     const script = data.script
       ? await ai.scriptFromManual(data.topic, data.category, data.duration, data.script)
       : await ai.writeScript(data.topic, data.category, data.duration);
+    if (script.scenes[0] && data.referenceImage) script.scenes[0].reference_image = data.referenceImage;
     const { data: row, error } = await context.supabase
       .from("ai_videos")
       .insert({
@@ -51,7 +58,7 @@ export const createAiVideo = createServerFn({ method: "POST" })
 /** Moves generation forward by one step; the admin page calls it repeatedly. */
 export const advanceAiVideo = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({ id: z.string().uuid() }).parse(d))
+  .inputValidator((d) => z.object({ id: z.string().uuid(), consent: generationConsent }).parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     const { data: row, error } = await context.supabase.from("ai_videos").select("*").eq("id", data.id).single();
@@ -66,10 +73,20 @@ export const advanceAiVideo = createServerFn({ method: "POST" })
       return { status: "ready", done: total, total };
     }
     const ai = await import("./ai-video.server");
-    const scene = scenes[idx]!;
+    const scene = scenes[idx];
+    if (!scene) throw new Error("المقطع ما كاينش.");
     try {
       if (!scene.job_id) {
-        scene.job_id = await ai.startClip(scene.prompt);
+        let previousVideo: string | undefined;
+        if (idx > 0) {
+          const previous = scenes[idx - 1];
+          if (previous?.status !== "done" || !previous.path) throw new Error("خاص المقطع السابق يكمل قبل توليد التالي.");
+          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+          const { data: clip, error: downloadError } = await supabaseAdmin.storage.from("ai-videos").download(previous.path);
+          if (downloadError || !clip) throw new Error("ما قدرناش نحمّلو المرجع السابق؛ توقف التوليد بلا إنشاء مقطع جديد.");
+          previousVideo = Buffer.from(await clip.arrayBuffer()).toString("base64");
+        }
+        scene.job_id = await ai.startClip(scene.prompt, previousVideo, scenes[0]?.reference_image);
         scene.status = "running";
       } else {
         const job = await ai.pollClip(scene.job_id);

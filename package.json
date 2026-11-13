@@ -19,6 +19,7 @@
   "dependencies": {
     "@ai-sdk/openai": "^4.0.83",
     "@hookform/resolvers": "^5.2.2",
+    "@lovable.dev/ai-gateway": "^0.1.11",
     "@lovable.dev/cloud-auth-js": "^1.1.2",
     "@lovable.dev/mcp-js": "^3.0.5",
     "@pushforge/builder": "^2.0.5",

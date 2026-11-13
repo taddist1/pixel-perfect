@@ -1,9 +1,6 @@
-import { createOpenAI } from "@ai-sdk/openai";
-import { generateText } from "ai";
+import { downloadVideo, generateResponse, generateVideo, getVideo, GatewayError } from "@lovable.dev/ai-gateway";
 import { AI_VIDEO_SCENE_SECONDS, sceneCount, splitNarration } from "./ai-video-rules";
-
-const GATEWAY = "https://ai.gateway.lovable.dev/v1";
-const VIDEO_MODEL = "google/gemini-omni-1.1-flash";
+import { CONTINUITY, continuousClipRequest, type ReferenceImage } from "./ai-video-continuity";
 
 export type Scene = {
   prompt: string;
@@ -11,12 +8,16 @@ export type Scene = {
   job_id: string | null;
   path: string | null;
   status: "pending" | "running" | "done" | "failed";
+  reference_image?: ReferenceImage;
 };
 
-function key() {
-  const apiKey = process.env["LOVABLE_API_KEY"];
-  if (!apiKey) throw new Error("مفتاح الذكاء الاصطناعي غير مُعدّ.");
-  return apiKey;
+async function scriptText(system: string, input: string) {
+  const response = await generateResponse({
+    model: "openai/gpt-6-astra", instructions: system, input,
+    reasoning: { effort: "low" },
+  });
+  return response.output.flatMap((item) => item.type === "message"
+    ? item.content.flatMap((part) => part.type === "output_text" ? [part.text] : []) : []).join("");
 }
 
 function friendly(status: number, message?: string): Error {
@@ -32,20 +33,15 @@ Return JSON only: {"title":"Arabic title","description":"short Arabic descriptio
 Rules for each scene (each scene is one ${AI_VIDEO_SCENE_SECONDS}-second realistic clip):
 - "narration": one short sentence in Moroccan Darija written in Arabic letters (max ~20 words), teaching one concrete step.
 - "prompt": English, realistic cinematic description of a Moroccan cafe setting showing exactly that step: subject, action, camera move, lighting. Keep the same presenter (a Moroccan barista/technician/waiter in a dark green apron) across scenes. Include the spoken line verbatim like: The presenter says in Moroccan Darija: "<narration>". Audio: his voice close, soft cafe ambience. No music. No captions, no on-screen text. Single continuous shot, no scene cuts.
-- Scenes follow a logical teaching order; no invented prices or statistics.`;
+- Scenes follow a logical teaching order; no invented prices or statistics.
+- Every scene starts with the pose and object positions at the end of the preceding scene. No new establishing shots or presenter introductions. Keep one steady camera and continuous actions.
+${CONTINUITY}`;
 
 export async function writeScript(topic: string, category: string, duration: number) {
-  const apiKey = key();
-  const provider = createOpenAI({ baseURL: GATEWAY, apiKey, headers: { "Lovable-API-Key": apiKey } });
   const n = sceneCount(duration);
   let text: string;
   try {
-    ({ text } = await generateText({
-      model: provider.responses("openai/gpt-6-astra"),
-      system: SYSTEM,
-      prompt: `Category: ${category}\nTopic: ${topic}\nWrite exactly ${n} scenes.`,
-      providerOptions: { openai: { reasoningEffort: "low", store: false } },
-    }));
+    text = await scriptText(SYSTEM, `Category: ${category}\nTopic: ${topic}\nWrite exactly ${n} scenes.`);
   } catch (e) {
     throw friendly((e as { statusCode?: number })?.statusCode ?? 500);
   }
@@ -67,12 +63,12 @@ Return JSON only: {"title":"Arabic title","description":"short Arabic descriptio
 Rules for each prompt (each part is one ${AI_VIDEO_SCENE_SECONDS}-second realistic clip):
 - English, realistic cinematic description of a Moroccan cafe setting showing the action the narration teaches: subject, action, camera move, lighting. Keep the same presenter (a Moroccan barista/technician/waiter in a dark green apron) across prompts.
 - If the part has text, include it verbatim like: The presenter says in Moroccan Darija: "<part>". Audio: his voice close, soft cafe ambience. If the part is empty, continue the previous action without speech.
-- No music. No captions, no on-screen text. Single continuous shot, no scene cuts.`;
+- No music. No captions, no on-screen text. Single continuous shot, no scene cuts.
+- Link every action to the ending pose of the previous part. Do not change camera position or reintroduce the presenter.
+${CONTINUITY}`;
 
 /** Builds scenes from a narration the admin wrote by hand, distributed across the clips. */
 export async function scriptFromManual(topic: string, category: string, duration: number, narration: string) {
-  const apiKey = key();
-  const provider = createOpenAI({ baseURL: GATEWAY, apiKey, headers: { "Lovable-API-Key": apiKey } });
   const n = sceneCount(duration);
   const parts = splitNarration(narration, n);
   const fallbackPrompt = (part: string) =>
@@ -83,12 +79,7 @@ export async function scriptFromManual(topic: string, category: string, duration
   let description = "";
   let prompts: string[] = [];
   try {
-    const { text } = await generateText({
-      model: provider.responses("openai/gpt-6-astra"),
-      system: MANUAL_SYSTEM,
-      prompt: `Category: ${category}\nTopic: ${topic}\nNarration parts (JSON): ${JSON.stringify(parts)}`,
-      providerOptions: { openai: { reasoningEffort: "low", store: false } },
-    });
+    const text = await scriptText(MANUAL_SYSTEM, `Category: ${category}\nTopic: ${topic}\nNarration parts (JSON): ${JSON.stringify(parts)}`);
     const match = text.match(/\{[\s\S]*\}/);
     if (match) {
       const d = JSON.parse(match[0]) as { title?: string; description?: string; prompts?: string[] };
@@ -112,40 +103,27 @@ export async function scriptFromManual(topic: string, category: string, duration
   };
 }
 
-async function gateway(path: string, init?: RequestInit) {
-  const res = await fetch(`${GATEWAY}${path}`, {
-    ...init,
-    headers: { Authorization: `Bearer ${key()}`, "Content-Type": "application/json", ...(init?.headers ?? {}) },
-  });
-  return res;
-}
-
-export async function startClip(prompt: string): Promise<string> {
-  const res = await gateway("/videos", {
-    method: "POST",
-    body: JSON.stringify({
-      model: VIDEO_MODEL,
-      input: prompt,
-      response_format: { type: "video", resolution: "720p", duration: `${AI_VIDEO_SCENE_SECONDS}s`, aspect_ratio: "16:9" },
-    }),
-  });
-  const body = (await res.json().catch(() => null)) as { id?: string; message?: string } | null;
-  if (!res.ok || !body?.id) throw friendly(res.status, body?.message);
-  return body.id;
+export async function startClip(prompt: string, previousVideo?: string, referenceImage?: ReferenceImage): Promise<string> {
+  try {
+    const body = await generateVideo(continuousClipRequest(prompt, previousVideo, referenceImage));
+    if (!body.id) throw new Error("المولّد لم يرجع رقم المقطع؛ لا تعاود التوليد قبل التحقق من الطلب.");
+    return body.id;
+  } catch (error) {
+    if (error instanceof GatewayError) {
+      if (error.outcome === "unknown") throw new Error("قد يكون التوليد بدأ؛ تحقق من الطلب قبل إعادة المحاولة لتفادي تكلفة مكررة.");
+      throw friendly(error.httpStatus ?? 500);
+    }
+    throw error;
+  }
 }
 
 export async function pollClip(id: string) {
-  const res = await gateway(`/videos/${encodeURIComponent(id)}`);
-  const body = (await res.json().catch(() => null)) as { status?: string; error?: { message?: string }; message?: string } | null;
-  if (!res.ok) {
-    if (res.status === 429 || res.status >= 500) return { status: "in_progress" as const };
-    throw friendly(res.status, body?.message);
-  }
-  return { status: (body?.status ?? "in_progress") as string, error: body?.error?.message };
+  const body = await getVideo(id);
+  if (!body || typeof body !== "object" || !("status" in body) || typeof body.status !== "string") throw new Error("ما قدرناش نتحققو من حالة المقطع.");
+  const error = "error" in body && body.error && typeof body.error === "object" && "message" in body.error && typeof body.error.message === "string" ? body.error.message : undefined;
+  return { status: body.status, error };
 }
 
 export async function downloadClip(id: string): Promise<ArrayBuffer> {
-  const res = await fetch(`${GATEWAY}/videos/${encodeURIComponent(id)}/content`, { headers: { Authorization: `Bearer ${key()}` } });
-  if (!res.ok) throw new Error("ما قدرناش نحمّلو المقطع.");
-  return res.arrayBuffer();
+  return (await (await downloadVideo(id)).blob()).arrayBuffer();
 }

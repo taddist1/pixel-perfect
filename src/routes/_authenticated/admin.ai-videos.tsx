@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { ClipPlayer } from "@/components/ClipPlayer";
 import { advanceAiVideo, createAiVideo, getAiVideoClips, retryAiVideo } from "@/lib/ai-videos.functions";
 import { aiVideoCategories, AI_VIDEO_MAX_SECONDS } from "@/lib/ai-video-rules";
+import { MAX_REFERENCE_BYTES, type ReferenceImage } from "@/lib/ai-video-continuity";
 
 const T = "مولّد الفيديوهات بالذكاء الاصطناعي — قهوتي";
 const D = "إنشاء فيديوهات تعليمية بالذكاء الاصطناعي في مواضيع القهوة والصيانة والباريستا والنادل.";
@@ -36,6 +37,8 @@ function AdminAiVideos() {
   const [category, setCategory] = useState<(typeof aiVideoCategories)[number]>("القهوة");
   const [duration, setDuration] = useState(60);
   const [script, setScript] = useState("");
+  const [referenceImage, setReferenceImage] = useState<ReferenceImage | undefined>();
+  const [approvedId, setApprovedId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [preview, setPreview] = useState<{ id: string; urls: string[] } | null>(null);
@@ -62,13 +65,13 @@ function AdminAiVideos() {
 
   const generating = videos.data?.find((v) => v.status === "generating");
   useEffect(() => {
-    if (!generating || running.current) return;
+    if (!generating || generating.id !== approvedId || running.current) return;
     running.current = true;
     let stop = false;
     (async () => {
       while (!stop) {
         try {
-          const r = await advance({ data: { id: generating.id } });
+          const r = await advance({ data: { id: generating.id, consent: true } });
           if (r.status !== "generating") break;
         } catch (e) {
           setMessage(e instanceof Error ? e.message : "وقع خطأ.");
@@ -81,16 +84,18 @@ function AdminAiVideos() {
       qc.invalidateQueries({ queryKey: ["admin-ai-videos"] });
     })();
     return () => { stop = true; };
-  }, [generating?.id]);
+  }, [generating?.id, approvedId]);
 
   if (role.isLoading) return <main dir="rtl" className="p-10 text-center">جاري التحقق...</main>;
   if (!role.data) return <main dir="rtl" className="p-10 text-center">هاد الصفحة خاصة بمسؤولي الموقع. <Link to="/" className="text-primary">الرئيسية</Link></main>;
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!window.confirm("توليد الفيديو عنده تكلفة وكتزيد حسب عدد المقاطع. واش كتوافق على توليد هاد الفيديو دابا؟")) return;
     setBusy(true); setMessage("");
     try {
-      await create({ data: { topic: topic.trim(), category, duration, script: script.trim() || undefined } });
+      const result = await create({ data: { topic: topic.trim(), category, duration, script: script.trim() || undefined, referenceImage, consent: true } });
+      setApprovedId(result.id);
       setTopic("");
       setScript("");
       setMessage("تكتب السيناريو، وبدا توليد المقاطع. خلي الصفحة مفتوحة حتى يكمل.");
@@ -137,6 +142,28 @@ function AdminAiVideos() {
             <p className="text-xs text-muted-foreground">غادي يتوزع على {Math.ceil(duration / 10)} مقاطع (كل مقطع 10 ثواني).</p>
           )}
         </div>
+        <div className="space-y-2">
+          <Label htmlFor="ai-reference">صورة مرجعية للشخص والمكان (اختياري)</Label>
+          <Input id="ai-reference" type="file" accept="image/jpeg,image/png,image/webp" onChange={async (e) => {
+            const file = e.target.files?.[0];
+            setReferenceImage(undefined);
+            if (!file) return;
+            if (file.size > MAX_REFERENCE_BYTES || !["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+              setMessage("اختار صورة JPG أو PNG أو WebP ما تفوتش 1 ميغابايت.");
+              e.target.value = "";
+              return;
+            }
+            const data = await new Promise<string>((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onload = () => typeof reader.result === "string" ? resolve(reader.result.split(",")[1] ?? "") : reject(new Error("الصورة ما تقراتش."));
+              reader.onerror = () => reject(new Error("الصورة ما تقراتش."));
+              reader.readAsDataURL(file);
+            }).catch(() => "");
+            if (!data) { setMessage("الصورة ما تقراتش، عاود الاختيار."); return; }
+            setReferenceImage({ data, mime_type: file.type as ReferenceImage["mime_type"] });
+          }} />
+          {referenceImage && <img alt="الصورة المرجعية" src={`data:${referenceImage.mime_type};base64,${referenceImage.data}`} className="h-32 max-w-full rounded-md object-contain" />}
+        </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="ai-category">التصنيف</Label>
@@ -168,19 +195,25 @@ function AdminAiVideos() {
                   <div className="flex gap-2 text-xs"><span className="font-bold text-primary">{v.category}</span><span className="text-muted-foreground">{v.duration_seconds} ثانية</span></div>
                   <h3 className="mt-1 font-black">{v.title || v.topic}</h3>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    {v.status === "generating" && `جاري التوليد: ${done} من ${scenes.length} مقاطع`}
+                    {v.status === "generating" && `${approvedId === v.id ? "جاري التوليد" : "متوقف بانتظار موافقتك"}: ${done} من ${scenes.length} مقاطع`}
                     {v.status === "ready" && (v.is_published ? "منشور في صفحة الفيديوهات" : "جاهز — غير منشور")}
                     {v.status === "failed" && `توقف: ${v.error ?? ""}`}
                   </p>
                 </div>
                 <div className="flex gap-2">
+                  {v.status === "generating" && approvedId !== v.id && <Button type="button" variant="outline" onClick={() => {
+                    if (window.confirm("المتابعة قد تولّد المقاطع المتبقية بتكلفة إضافية. واش كتوافق؟")) setApprovedId(v.id);
+                  }}><Play aria-hidden="true" />متابعة</Button>}
                   {v.status === "ready" && (
                     <>
                       <Button type="button" variant="outline" size="icon" title="شاهد" aria-label="شاهد" onClick={async () => setPreview({ id: v.id, urls: (await clips({ data: { id: v.id } })).urls })}><Play aria-hidden="true" /></Button>
                       <Button type="button" variant="outline" size="icon" title={v.is_published ? "إخفاء" : "نشر"} aria-label={v.is_published ? "إخفاء" : "نشر"} onClick={() => togglePublished(v.id, !v.is_published)}>{v.is_published ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}</Button>
                     </>
                   )}
-                  {v.status === "failed" && <Button type="button" variant="outline" size="icon" title="كمّل التوليد" aria-label="كمّل التوليد" disabled={!!generating} onClick={async () => { await retry({ data: { id: v.id } }); qc.invalidateQueries({ queryKey: ["admin-ai-videos"] }); }}><RotateCcw aria-hidden="true" /></Button>}
+                  {v.status === "failed" && <Button type="button" variant="outline" size="icon" title="كمّل التوليد" aria-label="كمّل التوليد" disabled={!!generating} onClick={async () => {
+                    if (!window.confirm("إعادة المحاولة قد تولّد مقاطع بتكلفة إضافية. واش كتوافق؟")) return;
+                    await retry({ data: { id: v.id } }); setApprovedId(v.id); qc.invalidateQueries({ queryKey: ["admin-ai-videos"] });
+                  }}><RotateCcw aria-hidden="true" /></Button>}
                   <Button type="button" variant="destructive" size="icon" title="حذف" aria-label="حذف" onClick={() => remove(v.id)}><Trash2 aria-hidden="true" /></Button>
                 </div>
               </div>
