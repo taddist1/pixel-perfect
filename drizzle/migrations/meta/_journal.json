@@ -127,6 +127,13 @@
       "when": 1795031829479,
       "tag": "0017_allow_uploaded_educational_videos",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1795032091249,
+      "tag": "0018_restrict_educational_videos_storage_read",
+      "breakpoints": true
     }
   ]
 }
