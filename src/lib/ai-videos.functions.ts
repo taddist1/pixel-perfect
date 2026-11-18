@@ -5,7 +5,7 @@ import { aiVideoCategories, AI_VIDEO_MAX_SECONDS, AI_VIDEO_MIN_SECONDS } from ".
 import type { Json } from "@/integrations/supabase/types";
 import { generationConsent, MAX_REFERENCE_BYTES, type ReferenceImage } from "./ai-video-continuity";
 
-type Scene = { prompt: string; narration: string; job_id: string | null; path: string | null; status: string; reference_image?: ReferenceImage };
+type Scene = { prompt: string; narration: string; job_id: string | null; path: string | null; status: string; reference_image?: ReferenceImage; no_video_ref?: boolean };
 
 async function assertAdmin(context: { supabase: any; userId: string }) {
   const { data } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
@@ -78,7 +78,7 @@ export const advanceAiVideo = createServerFn({ method: "POST" })
     try {
       if (!scene.job_id) {
         let previousVideo: string | undefined;
-        if (idx > 0) {
+        if (idx > 0 && !scene.no_video_ref) {
           const previous = scenes[idx - 1];
           if (previous?.status !== "done" || !previous.path) throw new Error("خاص المقطع السابق يكمل قبل توليد التالي.");
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -90,6 +90,14 @@ export const advanceAiVideo = createServerFn({ method: "POST" })
         scene.status = "running";
       } else {
         const job = await ai.pollClip(scene.job_id);
+        if (job.status === "failed" && idx > 0 && !scene.no_video_ref && /speech edit/i.test(job.error ?? "")) {
+          // The model refuses spoken reference clips; restart this part from the shared image + continuity text only.
+          scene.no_video_ref = true;
+          scene.job_id = null;
+          scene.status = "pending";
+          await save({ scenes });
+          return { status: "generating", done: idx, total };
+        }
         if (job.status === "failed") {
           scene.status = "failed";
           await save({ scenes, status: "failed", error: job.error ?? "فشل توليد أحد المقاطع." });
