@@ -6,7 +6,9 @@ import type { Tables } from "@/integrations/supabase/types";
 type Video = Tables<"educational_videos">;
 
 export function VideoCard({ video, onPlay }: { video: Video; onPlay: (video: Video) => void }) {
-  const shareText = encodeURIComponent(`${video.title} — قهوتي ${youtubeWatchUrl(video.youtube_id)}`);
+  const isYoutube = Boolean(video.youtube_id);
+  const shareUrl = isYoutube ? youtubeWatchUrl(video.youtube_id!) : window.location.origin + "/videos";
+  const shareText = encodeURIComponent(`${video.title} — قهوتي ${shareUrl}`);
 
   return (
     <article className="overflow-hidden rounded-lg border border-border bg-card">
@@ -16,12 +18,16 @@ export function VideoCard({ video, onPlay }: { video: Video; onPlay: (video: Vid
         className="group relative block aspect-video w-full overflow-hidden bg-muted text-right"
         aria-label={`شغّل ${video.title}`}
       >
-        <img
-          src={youtubeThumbnail(video.youtube_id)}
-          alt=""
-          className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
-          loading="lazy"
-        />
+        {isYoutube ? (
+          <img
+            src={youtubeThumbnail(video.youtube_id!)}
+            alt=""
+            className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+            loading="lazy"
+          />
+        ) : (
+          <span className="block h-full w-full bg-secondary" aria-hidden="true" />
+        )}
         <span className="absolute inset-0 grid place-items-center bg-foreground/15 transition group-hover:bg-foreground/25">
           <span className="grid size-14 place-items-center rounded-full bg-accent text-accent-foreground shadow-lg">
             <Play className="size-6 fill-current" aria-hidden="true" />
@@ -40,7 +46,7 @@ export function VideoCard({ video, onPlay }: { video: Video; onPlay: (video: Vid
             </a>
           </Button>
           <Button asChild variant="outline" size="icon">
-            <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(youtubeWatchUrl(video.youtube_id))}`} target="_blank" rel="noopener noreferrer" aria-label="شارك على فيسبوك" title="شارك على فيسبوك">
+            <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`} target="_blank" rel="noopener noreferrer" aria-label="شارك على فيسبوك" title="شارك على فيسبوك">
               <Share2 aria-hidden="true" />
             </a>
           </Button>

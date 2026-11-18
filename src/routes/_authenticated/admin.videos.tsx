@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Eye, EyeOff, Trash2 } from "lucide-react";
+import { Eye, EyeOff, Trash2, Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +25,8 @@ export const Route = createFileRoute("/_authenticated/admin/videos")({
 function AdminVideos() {
   const queryClient = useQueryClient();
   const [url, setUrl] = useState("");
+  const [mode, setMode] = useState<"youtube" | "upload">("youtube");
+  const [file, setFile] = useState<File | null>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("القهوة");
@@ -58,12 +60,24 @@ function AdminVideos() {
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
-    const id = extractYouTubeId(url);
-    if (!id) { setMessage("رابط YouTube غير صحيح."); return; }
     setBusy(true); setMessage("");
+    let youtubeId: string | null = null;
+    let videoPath: string | null = null;
+    if (mode === "youtube") {
+      youtubeId = extractYouTubeId(url);
+      if (!youtubeId) { setBusy(false); setMessage("رابط YouTube غير صحيح."); return; }
+    } else {
+      if (!file) { setBusy(false); setMessage("اختر ملف فيديو من جهازك."); return; }
+      if (file.size > 500 * 1024 * 1024) { setBusy(false); setMessage("حجم الفيديو أكبر من 500 ميغابايت."); return; }
+      const ext = (file.name.split(".").pop() ?? "mp4").toLowerCase().replace(/[^a-z0-9]/g, "") || "mp4";
+      videoPath = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      const { error: upError } = await supabase.storage.from("educational-videos").upload(videoPath, file, { contentType: file.type || "video/mp4" });
+      if (upError) { setBusy(false); setMessage("ما ترفعش الفيديو: " + upError.message); return; }
+    }
     const { error } = await supabase.from("educational_videos").insert({
-      youtube_url: `https://www.youtube.com/watch?v=${id}`,
-      youtube_id: id,
+      youtube_url: youtubeId ? `https://www.youtube.com/watch?v=${youtubeId}` : null,
+      youtube_id: youtubeId,
+      video_path: videoPath,
       title: title.trim(),
       description: description.trim(),
       category,
@@ -71,10 +85,11 @@ function AdminVideos() {
     });
     setBusy(false);
     if (error) { setMessage(error.message); return; }
-    setUrl(""); setTitle(""); setDescription(""); setPublished(true);
+    setUrl(""); setFile(null); setTitle(""); setDescription(""); setPublished(true);
     setMessage("تمت إضافة الفيديو بنجاح.");
     queryClient.invalidateQueries({ queryKey: ["admin-educational-videos"] });
     queryClient.invalidateQueries({ queryKey: ["educational-videos"] });
+    queryClient.invalidateQueries({ queryKey: ["educational-video-urls"] });
   };
 
   const togglePublished = async (id: string, next: boolean) => {
@@ -84,9 +99,10 @@ function AdminVideos() {
     queryClient.invalidateQueries({ queryKey: ["educational-videos"] });
   };
 
-  const remove = async (id: string) => {
+  const remove = async (id: string, videoPath: string | null) => {
     if (!window.confirm("واش متأكد بغيتي تحذف هاد الفيديو؟")) return;
     const { error } = await supabase.from("educational_videos").delete().eq("id", id);
+    if (!error && videoPath) await supabase.storage.from("educational-videos").remove([videoPath]);
     if (error) { setMessage(error.message); return; }
     queryClient.invalidateQueries({ queryKey: ["admin-educational-videos"] });
     queryClient.invalidateQueries({ queryKey: ["educational-videos"] });
@@ -106,12 +122,24 @@ function AdminVideos() {
       </div>
 
       <form onSubmit={submit} className="mt-7 space-y-5 rounded-lg border border-border bg-card p-5">
-        <div className="space-y-2">
-          <Label htmlFor="youtube-url">رابط YouTube</Label>
-          <Input id="youtube-url" type="url" required value={url} onChange={(event) => setUrl(event.target.value)} placeholder="https://www.youtube.com/watch?v=..." dir="ltr" />
-          {url && !youtubeId && <p className="text-sm text-destructive">دخل رابط YouTube صحيح.</p>}
+        <div className="flex gap-2">
+          <Button type="button" size="sm" variant={mode === "youtube" ? "default" : "outline"} onClick={() => setMode("youtube")}>رابط YouTube</Button>
+          <Button type="button" size="sm" variant={mode === "upload" ? "default" : "outline"} onClick={() => setMode("upload")}><Upload aria-hidden="true" />رفع من الجهاز</Button>
         </div>
-        {youtubeId && <img src={youtubeThumbnail(youtubeId)} alt="معاينة الفيديو" className="aspect-video w-full max-w-sm rounded-md object-cover" />}
+        {mode === "youtube" ? (
+          <div className="space-y-2">
+            <Label htmlFor="youtube-url">رابط YouTube</Label>
+            <Input id="youtube-url" type="url" value={url} onChange={(event) => setUrl(event.target.value)} placeholder="https://www.youtube.com/watch?v=..." dir="ltr" />
+            {url && !youtubeId && <p className="text-sm text-destructive">دخل رابط YouTube صحيح.</p>}
+          </div>
+        ) : (
+          <div className="space-y-2">
+            <Label htmlFor="video-file">ملف الفيديو (حتى 500 ميغابايت)</Label>
+            <Input id="video-file" type="file" accept="video/*" onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
+            {file && <p className="text-sm text-muted-foreground">{file.name} — {(file.size / (1024 * 1024)).toFixed(1)} ميغابايت</p>}
+          </div>
+        )}
+        {mode === "youtube" && youtubeId && <img src={youtubeThumbnail(youtubeId)} alt="معاينة الفيديو" className="aspect-video w-full max-w-sm rounded-md object-cover" />}
         <div className="space-y-2">
           <Label htmlFor="video-title">العنوان</Label>
           <Input id="video-title" required minLength={3} maxLength={140} value={title} onChange={(event) => setTitle(event.target.value)} placeholder="مثال: الطريقة الصحيحة لتنظيف آلة الإسبريسو" />
@@ -133,7 +161,7 @@ function AdminVideos() {
           </label>
         </div>
         {message && <p className={message.includes("بنجاح") ? "text-sm font-bold text-primary" : "text-sm font-bold text-destructive"}>{message}</p>}
-        <Button type="submit" disabled={busy || !youtubeId || title.trim().length < 3}>{busy ? "جاري الحفظ..." : "إضافة الفيديو"}</Button>
+        <Button type="submit" disabled={busy || (mode === "youtube" ? !youtubeId : !file) || title.trim().length < 3}>{busy ? "جاري الحفظ..." : "إضافة الفيديو"}</Button>
       </form>
 
       <h2 className="mt-10 text-xl font-black">كل الفيديوهات</h2>
@@ -142,16 +170,20 @@ function AdminVideos() {
         {videos.data?.length === 0 && <p className="text-muted-foreground">ما كاين حتى فيديو.</p>}
         {videos.data?.map((video) => (
           <article key={video.id} className="flex flex-col gap-4 rounded-lg border border-border bg-card p-4 sm:flex-row sm:items-center">
-            <img src={youtubeThumbnail(video.youtube_id)} alt="" className="aspect-video w-full rounded-md object-cover sm:w-40" />
+            {video.youtube_id ? (
+              <img src={youtubeThumbnail(video.youtube_id)} alt="" className="aspect-video w-full rounded-md object-cover sm:w-40" />
+            ) : (
+              <span className="grid aspect-video w-full place-items-center rounded-md bg-secondary sm:w-40"><Upload className="size-6 text-muted-foreground" aria-hidden="true" /></span>
+            )}
             <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2"><span className="text-xs font-bold text-primary">{video.category}</span><span className="text-xs text-muted-foreground">{video.is_published ? "منشور" : "مسودة"}</span></div>
+              <div className="flex items-center gap-2"><span className="text-xs font-bold text-primary">{video.category}</span><span className="text-xs text-muted-foreground">{video.is_published ? "منشور" : "مسودة"}</span>{video.video_path && <span className="text-xs text-muted-foreground">· مرفوع من الجهاز</span>}</div>
               <h3 className="mt-1 font-black">{video.title}</h3>
             </div>
             <div className="flex gap-2">
               <Button type="button" variant="outline" size="icon" onClick={() => togglePublished(video.id, !video.is_published)} aria-label={video.is_published ? "إخفاء الفيديو" : "نشر الفيديو"} title={video.is_published ? "إخفاء" : "نشر"}>
                 {video.is_published ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
               </Button>
-              <Button type="button" variant="destructive" size="icon" onClick={() => remove(video.id)} aria-label="حذف الفيديو" title="حذف"><Trash2 aria-hidden="true" /></Button>
+              <Button type="button" variant="destructive" size="icon" onClick={() => remove(video.id, video.video_path)} aria-label="حذف الفيديو" title="حذف"><Trash2 aria-hidden="true" /></Button>
             </div>
           </article>
         ))}

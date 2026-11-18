@@ -11,6 +11,7 @@ import type { Tables } from "@/integrations/supabase/types";
 import { ClipPlayer } from "@/components/ClipPlayer";
 import { ShareButtons } from "@/components/ShareButtons";
 import { listPublishedAiVideos } from "@/lib/ai-videos.functions";
+import { getEducationalVideoUrls } from "@/lib/educational-videos.functions";
 
 const T = "فيديوهات تعليمية للمقاهي والمطاعم — قهوتي";
 const D = "شاهد فيديوهات عملية حول تحضير القهوة، صيانة الآلات، تسيير المقاهي وتطوير مهارات العمل في المغرب.";
@@ -39,6 +40,13 @@ function VideosPage() {
     },
   });
   const aiVideos = useQuery({ queryKey: ["ai-videos-public"], queryFn: () => listPublishedAiVideos(), staleTime: 30 * 60 * 1000 });
+  const uploadedPaths = (videos.data ?? []).map((v) => v.video_path).filter((p): p is string => Boolean(p));
+  const uploadedUrls = useQuery({
+    queryKey: ["educational-video-urls", uploadedPaths],
+    enabled: uploadedPaths.length > 0,
+    staleTime: 60 * 60 * 1000,
+    queryFn: async () => (await getEducationalVideoUrls({ data: { paths: uploadedPaths } })).urls,
+  });
   const term = (q: string) => q.trim().toLowerCase();
 
   const filtered = useMemo(() => {
@@ -116,16 +124,28 @@ function VideosPage() {
               <Button type="button" variant="secondary" size="icon" onClick={() => setActive(null)} aria-label="إغلاق الفيديو" title="إغلاق"><X aria-hidden="true" /></Button>
             </div>
             <div className="aspect-video overflow-hidden rounded-lg bg-foreground">
-              <iframe
-                className="h-full w-full"
-                src={`https://www.youtube-nocookie.com/embed/${active.youtube_id}?autoplay=1&rel=0`}
-                title={active.title}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-              />
+              {active.youtube_id ? (
+                <iframe
+                  className="h-full w-full"
+                  src={`https://www.youtube-nocookie.com/embed/${active.youtube_id}?autoplay=1&rel=0`}
+                  title={active.title}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                />
+              ) : active.video_path && uploadedUrls.data?.[active.video_path] ? (
+                <div className="relative h-full w-full">
+                  <video className="h-full w-full" src={uploadedUrls.data[active.video_path]} controls autoPlay playsInline />
+                  <div className="video-watermark pointer-events-none absolute right-3 top-3 select-none text-right" aria-hidden="true">
+                    <span translate="no" className="notranslate block text-lg font-black leading-6">قهوتي</span>
+                    <span dir="ltr" className="block text-[11px] font-bold tracking-wide">www.kahwaty.online</span>
+                  </div>
+                </div>
+              ) : (
+                <p className="grid h-full place-items-center text-primary-foreground">جاري تجهيز الفيديو...</p>
+              )}
             </div>
             <div className="mt-3">
-              <ShareButtons text={`${active.title} — قهوتي`} url={youtubeWatchUrl(active.youtube_id)} />
+              <ShareButtons text={`${active.title} — قهوتي`} url={active.youtube_id ? youtubeWatchUrl(active.youtube_id) : undefined} />
             </div>
           </div>
         </div>

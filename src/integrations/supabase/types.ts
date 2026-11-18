@@ -131,8 +131,9 @@ export type Database = {
           id: string
           is_published: boolean
           title: string
-          youtube_id: string
-          youtube_url: string
+          video_path: string | null
+          youtube_id: string | null
+          youtube_url: string | null
         }
         Insert: {
           category?: string
@@ -142,8 +143,9 @@ export type Database = {
           id?: string
           is_published?: boolean
           title: string
-          youtube_id: string
-          youtube_url: string
+          video_path?: string | null
+          youtube_id?: string | null
+          youtube_url?: string | null
         }
         Update: {
           category?: string
@@ -153,8 +155,9 @@ export type Database = {
           id?: string
           is_published?: boolean
           title?: string
-          youtube_id?: string
-          youtube_url?: string
+          video_path?: string | null
+          youtube_id?: string | null
+          youtube_url?: string | null
         }
         Relationships: []
       }

@@ -1,4 +1,4 @@
-export function ShareButtons({ text, url }: { text: string; url?: string }) {
+export function ShareButtons({ text, url }: { text: string; url?: string | undefined }) {
   const shareUrl = url ?? (typeof window !== "undefined" ? window.location.href : "");
   const wa = `https://wa.me/?text=${encodeURIComponent(`${text} ${shareUrl}`)}`;
   const fb = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;

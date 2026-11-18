@@ -215,7 +215,7 @@ function Index() {
               {videos.map((video) => (
                 <Link key={video.id} to="/videos" className="group overflow-hidden rounded-lg border border-border bg-card">
                   <div className="relative aspect-video overflow-hidden bg-secondary">
-                    <img src={youtubeThumbnail(video.youtube_id)} alt="" className="h-full w-full object-cover transition duration-300 group-hover:scale-105" loading="lazy" />
+                    {video.youtube_id && <img src={youtubeThumbnail(video.youtube_id)} alt="" className="h-full w-full object-cover transition duration-300 group-hover:scale-105" loading="lazy" />}
                     <span className="absolute inset-0 grid place-items-center bg-foreground/15"><span className="grid size-12 place-items-center rounded-full bg-accent text-accent-foreground"><Play className="size-5 fill-current" aria-hidden="true" /></span></span>
                   </div>
                   <div className="p-4"><span className="text-xs font-bold text-primary">{video.category}</span><h3 className="mt-1 line-clamp-2 font-black">{video.title}</h3></div>
