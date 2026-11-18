@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ClipPlayer } from "@/components/ClipPlayer";
 import { advanceAiVideo, createAiVideo, getAiVideoClips, retryAiVideo } from "@/lib/ai-videos.functions";
-import { aiVideoCategories, AI_VIDEO_MAX_SECONDS } from "@/lib/ai-video-rules";
+import { aiVideoCategories, AI_VIDEO_MAX_SECONDS, narrationTiming } from "@/lib/ai-video-rules";
 import { MAX_REFERENCE_BYTES, type ReferenceImage } from "@/lib/ai-video-continuity";
 
 const T = "مولّد الفيديوهات بالذكاء الاصطناعي — قهوتي";
@@ -35,8 +35,8 @@ function AdminAiVideos() {
   const clips = useServerFn(getAiVideoClips);
   const [topic, setTopic] = useState("");
   const [category, setCategory] = useState<(typeof aiVideoCategories)[number]>("القهوة");
-  const [duration, setDuration] = useState(60);
   const [script, setScript] = useState("");
+  const timing = narrationTiming(script);
   const [referenceImage, setReferenceImage] = useState<ReferenceImage | undefined>();
   const [approvedId, setApprovedId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -91,10 +91,13 @@ function AdminAiVideos() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!window.confirm("توليد الفيديو عنده تكلفة وكتزيد حسب عدد المقاطع. واش كتوافق على توليد هاد الفيديو دابا؟")) return;
+    if (timing.tooLong) { setMessage("السيناريو طويل على 180 ثانية؛ اختصره إلى 360 كلمة أو أقل."); return; }
+    if (!window.confirm(script.trim()
+      ? `المدة المقدّرة ${timing.seconds} ثانية (${timing.scenes} مقاطع). التوليد عنده تكلفة. واش كتوافق؟`
+      : "المدة غادي تتحسب من السيناريو المكتوب تلقائياً، بحد أقصى 180 ثانية (18 مقطع). التوليد عنده تكلفة حسب عدد المقاطع. واش كتوافق؟")) return;
     setBusy(true); setMessage("");
     try {
-      const result = await create({ data: { topic: topic.trim(), category, duration, script: script.trim() || undefined, referenceImage, consent: true } });
+      const result = await create({ data: { topic: topic.trim(), category, script: script.trim() || undefined, referenceImage, consent: true } });
       setApprovedId(result.id);
       setTopic("");
       setScript("");
@@ -135,11 +138,11 @@ function AdminAiVideos() {
             maxLength={5000}
             value={script}
             onChange={(e) => setScript(e.target.value)}
-            placeholder="كتب النص بالدارجة هنا، وغادي يتوزع على المقاطع حسب المدة. إذا خليتيه خاوي، الذكاء الاصطناعي هو لي كيكتب السيناريو."
+            placeholder="كتب النص بالدارجة هنا..."
             className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
           />
           {script.trim() && (
-            <p className="text-xs text-muted-foreground">غادي يتوزع على {Math.ceil(duration / 10)} مقاطع (كل مقطع 10 ثواني).</p>
+            <p role="status" className={`text-xs ${timing.tooLong ? "text-destructive" : "text-muted-foreground"}`}>{timing.tooLong ? "السيناريو طويل على 180 ثانية؛ اختصره إلى 360 كلمة أو أقل." : `${timing.words} كلمة · ${timing.scenes} مقاطع`}</p>
           )}
         </div>
         <div className="space-y-2">
@@ -172,12 +175,12 @@ function AdminAiVideos() {
             </select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="ai-duration">المدة: {duration} ثانية</Label>
-            <input id="ai-duration" type="range" min={10} max={AI_VIDEO_MAX_SECONDS} step={10} value={duration} onChange={(e) => setDuration(Number(e.target.value))} className="w-full accent-primary" />
+            <Label>المدة التلقائية المقدّرة</Label>
+            <output aria-label="المدة التلقائية المقدّرة" className="block text-sm font-bold" aria-live="polite">{script.trim() ? `${timing.seconds} ثانية` : "تُحدد بعد كتابة السيناريو تلقائياً"}</output>
           </div>
         </div>
         {message && <p className="text-sm font-bold text-primary">{message}</p>}
-        <Button type="submit" disabled={busy || !!generating || topic.trim().length < 5}>
+        <Button type="submit" disabled={busy || !!generating || topic.trim().length < 5 || timing.tooLong}>
           <Sparkles aria-hidden="true" />{busy ? "جاري كتابة السيناريو..." : generating ? "كاين فيديو كيتولّد دابا" : "ولّد الفيديو"}
         </Button>
       </form>

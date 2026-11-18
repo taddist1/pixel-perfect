@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { aiVideoCategories, AI_VIDEO_MAX_SECONDS, AI_VIDEO_MIN_SECONDS } from "./ai-video-rules";
+import { aiVideoCategories, AI_VIDEO_SCENE_SECONDS, timedNarration } from "./ai-video-rules";
 import type { Json } from "@/integrations/supabase/types";
 import { generationConsent, MAX_REFERENCE_BYTES, type ReferenceImage } from "./ai-video-continuity";
 
@@ -26,7 +26,6 @@ export const createAiVideo = createServerFn({ method: "POST" })
     z.object({
       topic: z.string().trim().min(5).max(300),
       category: z.enum(aiVideoCategories),
-      duration: z.number().int().min(AI_VIDEO_MIN_SECONDS).max(AI_VIDEO_MAX_SECONDS),
       script: z.string().trim().max(5000).optional(),
       referenceImage: z.object({
         data: z.string().max(4 * Math.ceil(MAX_REFERENCE_BYTES / 3)).regex(/^[A-Za-z0-9+/]+={0,2}$/),
@@ -37,15 +36,17 @@ export const createAiVideo = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
+    // Validate before any paid script-writing request, independently of the browser.
+    if (data.script) timedNarration(data.script);
     const ai = await import("./ai-video.server");
     const script = data.script
-      ? await ai.scriptFromManual(data.topic, data.category, data.duration, data.script)
-      : await ai.writeScript(data.topic, data.category, data.duration);
+      ? await ai.scriptFromManual(data.topic, data.category, data.script)
+      : await ai.writeScript(data.topic, data.category);
     if (script.scenes[0] && data.referenceImage) script.scenes[0].reference_image = data.referenceImage;
     const { data: row, error } = await context.supabase
       .from("ai_videos")
       .insert({
-        topic: data.topic, category: data.category, duration_seconds: data.duration,
+        topic: data.topic, category: data.category, duration_seconds: script.scenes.length * AI_VIDEO_SCENE_SECONDS,
         title: script.title, description: script.description,
         scenes: script.scenes as unknown as Json, status: "generating", created_by: context.userId,
       })

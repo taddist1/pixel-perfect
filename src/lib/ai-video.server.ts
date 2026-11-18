@@ -1,5 +1,5 @@
 import { downloadVideo, generateResponse, generateVideo, getVideo, GatewayError } from "@lovable.dev/ai-gateway";
-import { AI_VIDEO_SCENE_SECONDS, sceneCount, splitNarration } from "./ai-video-rules";
+import { AI_VIDEO_SCENE_SECONDS, timedNarration } from "./ai-video-rules";
 import { CONTINUITY, continuousClipRequest, type ReferenceImage } from "./ai-video-continuity";
 
 export type Scene = {
@@ -37,11 +37,10 @@ Rules for each scene (each scene is one ${AI_VIDEO_SCENE_SECONDS}-second realist
 - Every scene starts with the pose and object positions at the end of the preceding scene. No new establishing shots or presenter introductions. Keep one steady camera and continuous actions.
 ${CONTINUITY}`;
 
-export async function writeScript(topic: string, category: string, duration: number) {
-  const n = sceneCount(duration);
+export async function writeScript(topic: string, category: string) {
   let text: string;
   try {
-    text = await scriptText(SYSTEM, `Category: ${category}\nTopic: ${topic}\nWrite exactly ${n} scenes.`);
+    text = await scriptText(SYSTEM, `Category: ${category}\nTopic: ${topic}\nWrite only as many teaching steps as this topic needs, at most 18 scenes and 360 spoken words total. Avoid filler or repeated steps. Each narration must contain at most 20 words.`);
   } catch (e) {
     throw friendly((e as { statusCode?: number })?.statusCode ?? 500);
   }
@@ -49,12 +48,14 @@ export async function writeScript(topic: string, category: string, duration: num
   if (!match) throw new Error("ما قدرناش نكتبو السيناريو، عاود المحاولة.");
   const d = JSON.parse(match[0]) as { off_topic?: boolean; title?: string; description?: string; scenes?: { prompt: string; narration: string }[] };
   if (d.off_topic) throw new Error("هاد الموضوع خارج مواضيع المنصة (القهوة، الصيانة، الباريستا، النادل).");
-  const scenes = (d.scenes ?? []).filter((s) => s?.prompt).slice(0, n);
+  const scenes = (d.scenes ?? []).filter((s) => s?.prompt && s.narration?.trim());
   if (!d.title || scenes.length === 0) throw new Error("السيناريو ناقص، عاود المحاولة.");
+  const narration = scenes.map((s) => s.narration).join(" ");
+  const result = await scriptFromManual(topic, category, narration);
   return {
+    ...result,
     title: d.title.slice(0, 140),
     description: (d.description ?? "").slice(0, 500),
-    scenes: scenes.map<Scene>((s) => ({ prompt: s.prompt, narration: s.narration ?? "", job_id: null, path: null, status: "pending" })),
   };
 }
 
@@ -68,9 +69,8 @@ Rules for each prompt (each part is one ${AI_VIDEO_SCENE_SECONDS}-second realist
 ${CONTINUITY}`;
 
 /** Builds scenes from a narration the admin wrote by hand, distributed across the clips. */
-export async function scriptFromManual(topic: string, category: string, duration: number, narration: string) {
-  const n = sceneCount(duration);
-  const parts = splitNarration(narration, n);
+export async function scriptFromManual(topic: string, category: string, narration: string) {
+  const parts = timedNarration(narration);
   const fallbackPrompt = (part: string) =>
     `Realistic cinematic shot in a Moroccan cafe about: ${topic}. A Moroccan presenter in a dark green apron demonstrates the step.` +
     (part ? ` The presenter says in Moroccan Darija: "${part}". Audio: his voice close, soft cafe ambience.` : "") +

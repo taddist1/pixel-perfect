@@ -1,7 +1,25 @@
 import { describe, expect, it } from "vitest";
-import { aiVideoCategories, clampDuration, sceneCount, splitNarration } from "./ai-video-rules";
+import { aiVideoCategories, clampDuration, sceneCount, splitNarration, narrationTiming, timedNarration } from "./ai-video-rules";
 
 describe("ai video rules", () => {
+  it("automatically increases duration with narration length in ten-second clips", () => {
+    expect(narrationTiming("كلمة ".repeat(20)).seconds).toBe(10);
+    expect(narrationTiming("كلمة ".repeat(21)).seconds).toBe(20);
+    expect(narrationTiming("كلمة ".repeat(60)).seconds).toBe(30);
+  });
+  it("rejects scripts over 180 seconds without shortening them silently", () => {
+    expect(narrationTiming("كلمة ".repeat(360))).toMatchObject({ seconds: 180, tooLong: false });
+    expect(narrationTiming("كلمة ".repeat(361)).tooLong).toBe(true);
+    expect(() => timedNarration("كلمة ".repeat(361))).toThrow();
+  });
+  it("fits every narration part into its clip and preserves every word", () => {
+    const text = Array.from({ length: 61 }, (_, i) => `كلمة${i}`).join(" ");
+    const parts = timedNarration(text);
+    expect(parts).toHaveLength(4);
+    expect(parts.every((p) => p.split(/\s+/).length <= 20)).toBe(true);
+    expect(parts.join(" ")).toBe(text);
+    expect(timedNarration("خطوة قصيرة")).toEqual(["خطوة قصيرة"]);
+  });
   it("caps duration at 180 seconds", () => {
     expect(clampDuration(500)).toBe(180);
     expect(sceneCount(500)).toBe(18);
