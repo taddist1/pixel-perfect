@@ -88,11 +88,11 @@ function VideosPage() {
           </div>
         </div>
 
-        {(aiVideos.data?.length ?? 0) > 0 && (
+        {((aiVideos.data?.length ?? 0) > 0 || filtered.some((video) => video.video_path)) && (
           <div className="mt-8">
             <h2 className="text-2xl font-black">فيديوهات من إنتاج <span translate="no" className="notranslate">قهوتي</span></h2>
             <div className="mt-5 grid gap-5 sm:grid-cols-2">
-              {aiVideos.data!.filter((v) => !term(query) || `${v.title} ${v.description}`.toLowerCase().includes(term(query))).map((v) => (
+              {(aiVideos.data ?? []).filter((v) => !term(query) || `${v.title} ${v.description}`.toLowerCase().includes(term(query))).map((v) => (
                 <article key={v.id} className="overflow-hidden rounded-lg border border-border bg-card">
                   <ClipPlayer urls={v.urls} />
                   <div className="p-4">
@@ -105,6 +105,9 @@ function VideosPage() {
                   </div>
                 </article>
               ))}
+              {filtered.filter((video) => video.video_path).map((video) => (
+                <VideoCard key={video.id} video={video} onPlay={setActive} uploadedUrl={video.video_path ? uploadedUrls.data?.[video.video_path] : undefined} />
+              ))}
             </div>
           </div>
         )}
@@ -112,7 +115,7 @@ function VideosPage() {
         {videos.isLoading && <p className="py-16 text-center text-muted-foreground">جاري تحميل الفيديوهات...</p>}
         {videos.isError && <p className="py-16 text-center text-destructive">تعذر تحميل الفيديوهات. حاول مرة أخرى.</p>}
         <div className="mt-7 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((video) => <VideoCard key={video.id} video={video} onPlay={setActive} />)}
+          {filtered.filter((video) => video.youtube_id).map((video) => <VideoCard key={video.id} video={video} onPlay={setActive} />)}
         </div>
       </section>
 
