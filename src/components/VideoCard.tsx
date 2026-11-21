@@ -15,7 +15,7 @@ export function VideoCard({ video, onPlay, uploadedUrl }: { video: Video; onPlay
   if (!youtubeId) {
     return (
       <article className="overflow-hidden rounded-lg border border-border bg-card">
-        {uploadedUrl ? <ClipPlayer urls={[`${uploadedUrl}#t=0.001`]} /> : (
+        {uploadedUrl ? <ClipPlayer urls={[`${uploadedUrl}#t=0.001`]} fillFrame /> : (
           <div className="grid aspect-video place-items-center bg-muted text-sm text-muted-foreground" role="status">جاري تجهيز الفيديو...</div>
         )}
         <div className="p-4">

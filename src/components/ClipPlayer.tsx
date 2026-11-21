@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 /** Plays a list of short clips back to back as one video; replay restarts from part 1. */
-export function ClipPlayer({ urls, autoPlay = false }: { urls: string[]; autoPlay?: boolean }) {
+export function ClipPlayer({ urls, autoPlay = false, fillFrame = false }: { urls: string[]; autoPlay?: boolean; fillFrame?: boolean }) {
   const [i, setI] = useState(0);
   const [play, setPlay] = useState(autoPlay);
   if (!urls.length) return null;
@@ -19,7 +19,7 @@ export function ClipPlayer({ urls, autoPlay = false }: { urls: string[]; autoPla
             if (i + 1 < urls.length) setI(i + 1);
             else { setPlay(false); setI(0); }
           }}
-          className="aspect-video w-full"
+          className={`aspect-video w-full ${fillFrame ? "object-cover" : "object-contain"}`}
         />
         <div className="video-watermark pointer-events-none absolute right-3 top-3 select-none text-right" aria-hidden="true">
           <span translate="no" className="notranslate block text-lg font-black leading-6">قهوتي</span>
