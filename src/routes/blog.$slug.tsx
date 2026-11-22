@@ -4,6 +4,7 @@ import { articles } from "@/lib/articles";
 import { ShareButtons } from "@/components/ShareButtons";
 import { supabase } from "@/integrations/supabase/client";
 import { getArticleImageUrls } from "@/lib/articles.functions";
+import { ArticleContent } from "@/components/ArticleContent";
 
 type PageData =
   | { kind: "static"; article: (typeof articles)[number] }
@@ -43,7 +44,10 @@ function ArticlePage() {
   const draftImage = useQuery({
     queryKey: ["article-image", imagePath],
     enabled: !!imagePath,
-    queryFn: async () => (await getArticleImageUrls({ data: { paths: [imagePath!] } })).urls[imagePath!] ?? null,
+    queryFn: async () => {
+      if (!imagePath) return null;
+      return (await getArticleImageUrls({ data: { paths: [imagePath] } })).urls[imagePath] ?? null;
+    },
   });
 
   return (
@@ -78,9 +82,7 @@ function ArticlePage() {
                 <p className="mt-2 leading-8">{s.p}</p>
               </section>
             ))
-          : data.draft.content.split(/\n{2,}/).map((p, i) => (
-              <p key={i} className="whitespace-pre-wrap leading-8">{p}</p>
-            ))}
+          : <ArticleContent content={data.draft.content} />}
       </article>
       <div className="mt-10 rounded-2xl bg-primary p-6 text-primary-foreground">
         <p className="font-black">واش كتقلب على خدمة ولا على موظفين؟</p>

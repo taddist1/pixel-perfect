@@ -24,3 +24,4 @@
 - Require explicit generation confirmation and per-page in-memory consent before advancing AI jobs, because opening the admin page must not trigger paid clips automatically.
 - Derive new AI video durations from narration using the shared twenty-word-per-ten-second estimator, reject oversized scripts before prompt generation, and store duration from actual scene count; this keeps preview estimates and server enforcement aligned without truncating narration.
 - Display uploaded educational videos with the shared ClipPlayer alongside generated videos using existing signed URLs, so playback, branding and sharing stay consistent without changing storage permissions.
+- Render draft article bodies and admin previews through shared ArticleContent using react-markdown without raw HTML; permit image data URLs only on image sources, because encoded illustrations must render without enabling executable content.

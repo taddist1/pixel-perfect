@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { generateDraft, getArticleImageUrls, setDraftPublished } from "@/lib/articles.functions";
+import { ArticleContent } from "@/components/ArticleContent";
 
 export const Route = createFileRoute("/_authenticated/admin/articles")({
   staticData: { sitemap: false },
@@ -109,7 +110,7 @@ function AdminArticles() {
                   <p><b>عنوان SEO:</b> {d.seo_title}</p>
                   <p className="mt-1"><b>وصف SEO:</b> {d.seo_description}</p>
                 </div>
-                <div className="whitespace-pre-wrap leading-8">{d.content}</div>
+                <ArticleContent content={d.content} />
                 <div className="flex flex-wrap items-center gap-2">
                   <label className="flex items-center gap-2 text-sm font-bold">
                     التصنيف:
