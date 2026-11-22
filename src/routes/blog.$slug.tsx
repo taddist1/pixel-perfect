@@ -43,6 +43,15 @@ function ArticlePage() {
       <Link to="/blog" className="text-sm text-muted-foreground">← المدونة</Link>
       <h1 className="mt-4 text-3xl font-black leading-tight">{title}</h1>
       <p className="mt-3 text-lg text-muted-foreground">{excerpt}</p>
+      {data.kind === "static" && (
+        <img
+          src={data.article.image}
+          alt={title}
+          width={1216}
+          height={640}
+          className="mt-6 w-full rounded-2xl border border-border object-cover"
+        />
+      )}
       <div className="mt-4"><ShareButtons text={title} /></div>
       <article className="mt-8 space-y-6">
         {data.kind === "static"

@@ -1,8 +1,13 @@
-export type Article = { slug: string; title: string; excerpt: string; date: string; category: string; sections: { h: string; p: string }[] };
+import blogBarista from "@/assets/blog-barista.jpg";
+import blogMaintenance from "@/assets/blog-maintenance.jpg";
+import blogOpenCafe from "@/assets/blog-open-cafe.jpg";
+
+export type Article = { slug: string; title: string; excerpt: string; date: string; category: string; image: string; sections: { h: string; p: string }[] };
 
 export const articles: Article[] = [
   {
     slug: "kifach-twli-barista",
+    image: blogBarista,
     title: "كيفاش تولّي باريستا محترف في المغرب",
     excerpt: "الخطوات العملية باش تبدا مسارك كباريستا: المهارات، التكوين، وكيفاش تلقى أول خدمة.",
     date: "2026-10-03",
@@ -16,6 +21,7 @@ export const articles: Article[] = [
   },
   {
     slug: "siyana-alat-qahwa",
+    image: blogMaintenance,
     title: "صيانة آلة القهوة: 6 نصائح كتطوّل عمرها",
     excerpt: "آلة الإسبريسو هي رأس مال المقهى. هادي عادات يومية وأسبوعية كتحميها من الأعطاب.",
     date: "2026-10-03",
@@ -31,6 +37,7 @@ export const articles: Article[] = [
   },
   {
     slug: "kifach-tftah-maqha",
+    image: blogOpenCafe,
     title: "كيفاش تفتح مقهى ناجح: دليل المبتدئ",
     excerpt: "من اختيار المكان حتى توظيف الفريق: النقاط الأساسية قبل ما تفتح مقهاك.",
     date: "2026-10-03",

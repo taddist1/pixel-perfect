@@ -49,11 +49,14 @@ function Blog() {
           </Link>
         ))}
         {staticFiltered.map((a) => (
-          <Link key={a.slug} to="/blog/$slug" params={{ slug: a.slug }} className="rounded-2xl border border-border bg-card p-5 transition hover:border-primary">
-            <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-bold text-primary">{a.category}</span>
-            <h2 className="mt-2 text-lg font-black">{a.title}</h2>
-            <p className="mt-2 text-sm text-muted-foreground">{a.excerpt}</p>
-            <span className="mt-3 inline-block text-sm font-bold text-accent">اقرأ المقال ←</span>
+          <Link key={a.slug} to="/blog/$slug" params={{ slug: a.slug }} className="overflow-hidden rounded-2xl border border-border bg-card transition hover:border-primary">
+            <img src={a.image} alt={a.title} width={1216} height={640} loading="lazy" className="aspect-[19/10] w-full object-cover" />
+            <div className="p-5">
+              <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-bold text-primary">{a.category}</span>
+              <h2 className="mt-2 text-lg font-black">{a.title}</h2>
+              <p className="mt-2 text-sm text-muted-foreground">{a.excerpt}</p>
+              <span className="mt-3 inline-block text-sm font-bold text-accent">اقرأ المقال ←</span>
+            </div>
           </Link>
         ))}
       </div>
