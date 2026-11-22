@@ -91,8 +91,8 @@ function PrivacyPage() {
         </p>
         <p className={p}>
           البريد الإلكتروني:{" "}
-          <a href="mailto:dar.elkahwat@gmail.com?subject=%D8%A7%D8%B3%D8%AA%D9%81%D8%B3%D8%A7%D8%B1%20%D8%AD%D9%88%D9%84%20%D8%A7%D9%84%D8%AE%D8%B5%D9%88%D8%B5%D9%8A%D8%A9" className="font-bold text-primary underline">
-            <span dir="ltr" translate="no" className="notranslate">dar.elkahwat@gmail.com</span>
+          <a href="mailto:kahwaty.online@gmail.com?subject=%D8%A7%D8%B3%D8%AA%D9%81%D8%B3%D8%A7%D8%B1%20%D8%AD%D9%88%D9%84%20%D8%A7%D9%84%D8%AE%D8%B5%D9%88%D8%B5%D9%8A%D8%A9" className="font-bold text-primary underline">
+            <span dir="ltr" translate="no" className="notranslate">kahwaty.online@gmail.com</span>
           </a>
         </p>
 

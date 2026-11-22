@@ -240,8 +240,8 @@ function Index() {
           <div><div translate="no" className="notranslate flex items-center justify-center gap-2 text-2xl font-black sm:justify-start"><Coffee className="size-6" /> قهوتي<span className="text-accent">.</span></div><p className="mt-2 text-sm text-primary-foreground/65">منصة أهل المقاهي والمطاعم في المغرب.</p></div>
           <div className="flex flex-col items-center gap-3 sm:items-start">
             <div className="flex flex-wrap justify-center gap-3 text-sm font-semibold sm:justify-start sm:gap-5"><Link to="/jobs">الوظائف</Link><Link to="/seekers">الكفاءات</Link><Link to="/blog">المدونة</Link><Link to="/privacy">سياسة الخصوصية</Link></div>
-            <a href="mailto:dar.elkahwat@gmail.com?subject=%D8%A7%D8%B3%D8%AA%D9%81%D8%B3%D8%A7%D8%B1" className="text-sm">
-              للاستفسار: <span translate="no" dir="ltr" className="notranslate font-bold underline">dar.elkahwat@gmail.com</span>
+            <a href="mailto:kahwaty.online@gmail.com?subject=%D8%A7%D8%B3%D8%AA%D9%81%D8%B3%D8%A7%D8%B1" className="text-sm">
+              للاستفسار: <span translate="no" dir="ltr" className="notranslate font-bold underline">kahwaty.online@gmail.com</span>
             </a>
           </div>
           <p className="text-xs text-primary-foreground/55">© 2026 <span translate="no" className="notranslate">قهوتي</span> — المغرب</p>
