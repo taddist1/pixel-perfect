@@ -17,7 +17,42 @@ export const generateDraft = createServerFn({ method: "POST" })
       .select()
       .single();
     if (error) throw new Error("تولّدات المسودة ولكن ما تسجلاتش: " + error.message);
-    return row;
+    // Cover image: best effort — the draft stays usable without it.
+    let imagePath: string | null = null;
+    try {
+      const { generateArticleImage } = await import("./article-ai.server");
+      const b64 = await generateArticleImage(draft.title, data.topic);
+      const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+      imagePath = `${row.id}.jpg`;
+      const { error: upErr } = await context.supabase.storage
+        .from("article-images")
+        .upload(imagePath, bytes, { contentType: "image/jpeg", upsert: true });
+      if (upErr) throw upErr;
+      const { error: updErr } = await context.supabase.from("article_drafts").update({ image_path: imagePath }).eq("id", row.id);
+      if (updErr) throw updErr;
+    } catch {
+      imagePath = null;
+    }
+    return { ...row, image_path: imagePath };
+  });
+
+/** Public: temporary links for article cover images (private bucket). */
+export const getArticleImageUrls = createServerFn({ method: "POST" })
+  .inputValidator((d) =>
+    z.object({ paths: z.array(z.string().min(1).max(300).regex(/^[\w./-]+$/)).max(50) }).parse(d),
+  )
+  .handler(async ({ data }) => {
+    if (!data.paths.length) return { urls: {} as Record<string, string> };
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: signed, error } = await supabaseAdmin.storage
+      .from("article-images")
+      .createSignedUrls(data.paths, 60 * 60 * 24);
+    if (error) throw new Error("تعذر تجهيز روابط الصور.");
+    const urls: Record<string, string> = {};
+    (signed ?? []).forEach((s, i) => {
+      if (s?.signedUrl) urls[data.paths[i]!] = s.signedUrl;
+    });
+    return { urls };
   });
 
 export const setDraftPublished = createServerFn({ method: "POST" })

@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { articles } from "@/lib/articles";
 import { supabase } from "@/integrations/supabase/client";
+import { getArticleImageUrls } from "@/lib/articles.functions";
 
 const categories = ["الكل", "القهوة", "الصيانة", "التسيير", "الخدمة", "التكوين"] as const;
 
@@ -19,7 +20,14 @@ function Blog() {
   const published = useQuery({
     queryKey: ["published-drafts"],
     queryFn: async () =>
-      (await supabase.from("article_drafts").select("id, slug, title, seo_description, category, published_at").eq("is_published", true).order("published_at", { ascending: false })).data ?? [],
+      (await supabase.from("article_drafts").select("id, slug, title, seo_description, category, published_at, image_path").eq("is_published", true).order("published_at", { ascending: false })).data ?? [],
+  });
+
+  const imagePaths = (published.data ?? []).map((d) => d.image_path).filter((p): p is string => !!p);
+  const imageUrls = useQuery({
+    queryKey: ["article-image-urls", imagePaths.join(",")],
+    enabled: imagePaths.length > 0,
+    queryFn: async () => (await getArticleImageUrls({ data: { paths: imagePaths } })).urls,
   });
 
   const [cat, setCat] = useState<(typeof categories)[number]>("الكل");
@@ -41,11 +49,16 @@ function Blog() {
       </div>
       <div className="mt-8 grid gap-4 md:grid-cols-2">
         {draftsFiltered.map((d) => (
-          <Link key={d.id} to="/blog/$slug" params={{ slug: d.slug! }} className="rounded-2xl border border-border bg-card p-5 transition hover:border-primary">
-            <span className="rounded-full bg-primary px-2 py-0.5 text-xs font-bold text-primary-foreground">{d.category}</span>
-            <h2 className="mt-2 text-lg font-black">{d.title}</h2>
-            <p className="mt-2 text-sm text-muted-foreground">{d.seo_description}</p>
-            <span className="mt-3 inline-block text-sm font-bold text-accent">اقرأ المقال ←</span>
+          <Link key={d.id} to="/blog/$slug" params={{ slug: d.slug! }} className="overflow-hidden rounded-2xl border border-border bg-card transition hover:border-primary">
+            {d.image_path && imageUrls.data?.[d.image_path] && (
+              <img src={imageUrls.data[d.image_path]} alt={d.title} loading="lazy" className="aspect-[19/10] w-full object-cover" />
+            )}
+            <div className="p-5">
+              <span className="rounded-full bg-primary px-2 py-0.5 text-xs font-bold text-primary-foreground">{d.category}</span>
+              <h2 className="mt-2 text-lg font-black">{d.title}</h2>
+              <p className="mt-2 text-sm text-muted-foreground">{d.seo_description}</p>
+              <span className="mt-3 inline-block text-sm font-bold text-accent">اقرأ المقال ←</span>
+            </div>
           </Link>
         ))}
         {staticFiltered.map((a) => (

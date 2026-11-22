@@ -1,11 +1,13 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { articles } from "@/lib/articles";
 import { ShareButtons } from "@/components/ShareButtons";
 import { supabase } from "@/integrations/supabase/client";
+import { getArticleImageUrls } from "@/lib/articles.functions";
 
 type PageData =
   | { kind: "static"; article: (typeof articles)[number] }
-  | { kind: "draft"; draft: { title: string; seo_description: string; content: string } };
+  | { kind: "draft"; draft: { title: string; seo_description: string; content: string; image_path: string | null } };
 
 export const Route = createFileRoute("/blog/$slug")({
   staticData: { sitemap: true },
@@ -14,7 +16,7 @@ export const Route = createFileRoute("/blog/$slug")({
     if (article) return { kind: "static", article };
     const { data } = await supabase
       .from("article_drafts")
-      .select("title, seo_description, content")
+      .select("title, seo_description, content, image_path")
       .eq("slug", params.slug)
       .eq("is_published", true)
       .maybeSingle();
@@ -37,6 +39,12 @@ function ArticlePage() {
   const data = Route.useLoaderData();
   const title = data.kind === "static" ? data.article.title : data.draft.title;
   const excerpt = data.kind === "static" ? data.article.excerpt : data.draft.seo_description;
+  const imagePath = data.kind === "draft" ? data.draft.image_path : null;
+  const draftImage = useQuery({
+    queryKey: ["article-image", imagePath],
+    enabled: !!imagePath,
+    queryFn: async () => (await getArticleImageUrls({ data: { paths: [imagePath!] } })).urls[imagePath!] ?? null,
+  });
 
   return (
     <main dir="rtl" className="notranslate mx-auto max-w-3xl px-4 py-10" translate="no">
@@ -49,6 +57,15 @@ function ArticlePage() {
           alt={title}
           width={1216}
           height={640}
+          className="mt-6 w-full rounded-2xl border border-border object-cover"
+        />
+      )}
+      {data.kind === "draft" && draftImage.data && (
+        <img
+          src={draftImage.data}
+          alt={title}
+          width={1536}
+          height={1024}
           className="mt-6 w-full rounded-2xl border border-border object-cover"
         />
       )}

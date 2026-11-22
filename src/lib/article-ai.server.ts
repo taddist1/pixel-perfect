@@ -1,5 +1,6 @@
 import { createOpenAI } from "@ai-sdk/openai";
 import { streamText } from "ai";
+import { generateImage, GatewayError } from "@lovable.dev/ai-gateway";
 
 const GATEWAY = "https://ai.gateway.lovable.dev/v1";
 const MODEL = "openai/gpt-6-astra";
@@ -65,6 +66,25 @@ export async function generateArticleDraft(topic: string, signal?: AbortSignal):
     seo_description: (d.seo_description ?? "").slice(0, 160),
     content: d.content,
   };
+}
+
+/** Generates a 16:9 cover image for an article draft; returns base64 PNG. */
+export async function generateArticleImage(title: string, topic: string): Promise<string> {
+  try {
+    const res = await generateImage({
+      model: "openai/gpt-image-2.5-sunburst",
+      prompt: `Warm photorealistic editorial photo for a Moroccan cafe blog article titled "${title}" about: ${topic}. Moroccan cafe setting, natural warm light, brown and cream tones, no text, no logos, no watermarks.`,
+      size: "1536x1024",
+      output_format: "jpeg",
+      quality: "medium",
+    });
+    const b64 = res.data?.[0]?.b64_json;
+    if (!b64) throw new Error("empty");
+    return b64;
+  } catch (e) {
+    if (e instanceof GatewayError) throw toFriendly(e);
+    throw new Error("ما تولّداتش صورة المقال.");
+  }
 }
 
 function toFriendly(error: unknown): Error {

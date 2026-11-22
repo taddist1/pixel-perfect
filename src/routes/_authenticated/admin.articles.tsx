@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { generateDraft, setDraftPublished } from "@/lib/articles.functions";
+import { generateDraft, getArticleImageUrls, setDraftPublished } from "@/lib/articles.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/articles")({
   staticData: { sitemap: false },
@@ -33,6 +33,12 @@ function AdminArticles() {
     queryKey: ["drafts"],
     enabled: role.data === true,
     queryFn: async () => (await supabase.from("article_drafts").select("*").order("created_at", { ascending: false })).data ?? [],
+  });
+  const imagePaths = (drafts.data ?? []).map((d) => d.image_path).filter((p): p is string => !!p);
+  const imageUrls = useQuery({
+    queryKey: ["article-image-urls", imagePaths.join(",")],
+    enabled: imagePaths.length > 0,
+    queryFn: async () => (await getArticleImageUrls({ data: { paths: imagePaths } })).urls,
   });
 
   if (role.isLoading) return <main dir="rtl" className="p-10 text-center">جاري التحقق...</main>;
@@ -96,6 +102,9 @@ function AdminArticles() {
             </button>
             {openId === d.id && (
               <div className="mt-4 space-y-3">
+                {d.image_path && imageUrls.data?.[d.image_path] && (
+                  <img src={imageUrls.data[d.image_path]} alt={d.title} loading="lazy" className="w-full rounded-xl border border-border object-cover" />
+                )}
                 <div className="rounded-xl bg-muted p-3 text-sm">
                   <p><b>عنوان SEO:</b> {d.seo_title}</p>
                   <p className="mt-1"><b>وصف SEO:</b> {d.seo_description}</p>
