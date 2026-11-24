@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { openJobsQueryOptions } from "@/lib/jobs-query";
 
 const CITY_KEY = "qahwati_city";
 const SEEN_KEY = "qahwati_jobs_seen_at";
@@ -51,17 +52,11 @@ function GuestBell() {
     setSeenAt(localStorage.getItem(SEEN_KEY) ?? new Date(Date.now() - 7 * 864e5).toISOString());
   }, []);
 
-  const { data = [] } = useQuery({
-    queryKey: ["job-alerts", city, seenAt],
+  const { data: result, isLoading, isError } = useQuery({
+    ...openJobsQueryOptions(city ?? "", { since: seenAt ?? "", limit: 10 }),
     enabled: !!city && !!seenAt,
-    refetchInterval: 60_000,
-    queryFn: async () => {
-      if (!city || !seenAt) return [];
-      const { data } = await supabase.from("jobs").select("id,title,business_name,created_at").eq("is_filled", false)
-        .eq("city", city).gt("created_at", seenAt).order("created_at", { ascending: false }).limit(10);
-      return data ?? [];
-    },
   });
+  const data = result?.jobs ?? [];
 
   if (!city) return null;
   return (
@@ -69,14 +64,14 @@ function GuestBell() {
       <PopoverTrigger asChild>
       <Button variant="outline" aria-label="الإشعارات" className="relative rounded-full px-3 py-1.5 text-sm font-bold">
         🔔
-        {data.length > 0 && (
-          <span className="absolute -top-1 -left-1 rounded-full bg-accent px-1.5 text-xs text-accent-foreground">{data.length}</span>
+        {(result?.count ?? 0) > 0 && (
+          <span className="absolute -top-1 -left-1 rounded-full bg-accent px-1.5 text-xs text-accent-foreground">{result?.count}</span>
         )}
       </Button>
       </PopoverTrigger>
         <PopoverContent align="end" sideOffset={8} collisionPadding={12} dir="rtl" className="w-72 max-w-[calc(100vw-24px)] max-h-[var(--radix-popover-content-available-height)] overflow-y-auto break-words bg-card p-3 text-card-foreground">
           <p className="mb-2 text-sm font-black">وظائف جديدة فـ {city}</p>
-          {data.length === 0 ? (
+          {isLoading || !seenAt ? <p>...</p> : isError && data.length === 0 ? <p role="alert">تعذّر تحميل الفرص، عاود المحاولة بعد قليل.</p> : data.length === 0 ? (
             <p className="text-sm text-muted-foreground">ما كاين حتى وظيفة جديدة من آخر زيارة.</p>
           ) : (
             <ul className="space-y-2">

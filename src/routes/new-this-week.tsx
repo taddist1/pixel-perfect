@@ -2,7 +2,7 @@ import { useCities } from "@/lib/use-cities";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { openJobsQueryOptions } from "@/lib/jobs-query";
 
 import { whatsappUrl } from "@/lib/whatsapp";
 import { JobAlertsBell, useUserCity, rememberCity } from "@/components/JobAlerts";
@@ -22,15 +22,8 @@ function NewThisWeek() {
   const [city, setCity] = useState("");
   useEffect(() => { if (userCity) setCity(userCity); }, [userCity]);
 
-  const { data = [], isLoading } = useQuery({
-    queryKey: ["jobs-week", city],
-    queryFn: async () => {
-      const since = new Date(Date.now() - 7 * 864e5).toISOString();
-      let q = supabase.from("jobs").select("*").eq("is_filled", false).gt("created_at", since).order("created_at", { ascending: false });
-      if (city) q = q.eq("city", city);
-      return (await q).data ?? [];
-    },
-  });
+  const { data: result, isLoading, isError } = useQuery(openJobsQueryOptions(city, { recentDays: 7 }));
+  const data = result?.jobs ?? [];
 
   return (
     <div className="mx-auto max-w-4xl px-5 py-8">
@@ -46,7 +39,8 @@ function NewThisWeek() {
       </div>
       <div className="mt-6 space-y-4">
         {isLoading && <p>...</p>}
-        {!isLoading && data.length === 0 && <p className="rounded-2xl border p-8 text-center text-muted-foreground">ما تنشرات حتى وظيفة هاد الأسبوع{city ? ` فـ ${city}` : ""}.</p>}
+        {isError && <p role="alert">تعذّر تحميل الفرص، عاود المحاولة بعد قليل.</p>}
+        {!isLoading && !isError && data.length === 0 && <p className="rounded-2xl border p-8 text-center text-muted-foreground">ما تنشرات حتى وظيفة هاد الأسبوع{city ? ` فـ ${city}` : ""}.</p>}
         {data.map((j) => (
           <div key={j.id} className="rounded-2xl border bg-card p-5">
             <h2 className="text-xl font-black">{j.title}</h2>

@@ -1,6 +1,8 @@
 import { useCities } from "@/lib/use-cities";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { professions } from "@/lib/constants";
 import { flushPush } from "@/lib/push.functions";
@@ -246,25 +248,39 @@ function SeekerExtras({ userId, p, avatar }: { userId: string; p: P; avatar: str
 type MyJob = { id: string; title: string; business_name: string; city: string; created_at: string; is_filled: boolean };
 
 function MyJobs({ userId }: { userId: string }) {
-  const [jobs, setJobs] = useState<MyJob[]>([]);
-  const load = () => supabase.from("jobs").select("id,title,business_name,city,created_at,is_filled").eq("owner_id", userId).order("created_at", { ascending: false })
-    .then(({ data }) => setJobs((data ?? []) as MyJob[]));
-  useEffect(() => { load(); }, [userId]);
+  const queryClient = useQueryClient();
+  const [msg, setMsg] = useState("");
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["jobs", "owned", userId],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("jobs").select("id,title,business_name,city,created_at,is_filled").eq("owner_id", userId).order("created_at", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
+    },
+    refetchInterval: 60_000,
+  });
+  const jobs = data ?? [];
+  const count = data?.length ?? (isError ? "—" : "…");
 
   async function toggle(j: MyJob) {
-    await supabase.from("jobs").update({ is_filled: !j.is_filled }).eq("id", j.id);
-    load();
+    const { error } = await supabase.from("jobs").update({ is_filled: !j.is_filled }).eq("id", j.id);
+    if (error) return setMsg("تعذّر تغيير حالة الإعلان، عاود المحاولة.");
+    setMsg("");
+    await queryClient.invalidateQueries({ queryKey: ["jobs"] });
   }
   async function remove(j: MyJob) {
     if (!confirm("واش متأكد بغيتي تحذف هاد الإعلان؟")) return;
-    await supabase.from("jobs").delete().eq("id", j.id);
-    load();
+    const { error } = await supabase.from("jobs").delete().eq("id", j.id);
+    if (error) return setMsg("تعذّر حذف الإعلان، عاود المحاولة.");
+    setMsg("");
+    await queryClient.invalidateQueries({ queryKey: ["jobs"] });
   }
 
   return (
     <section className="mt-6 rounded-3xl border bg-card p-6">
-      <div className="flex items-center justify-between"><h2 className="font-black">وظائفي المنشورة ({jobs.length})</h2><Link to="/post-job" className="text-sm font-bold text-primary underline">+ وظيفة جديدة</Link></div>
-      {jobs.length === 0 ? <p className="mt-3 text-sm text-muted-foreground">مازال ما نشرتي حتى وظيفة.</p> : (
+      <div className="flex items-center justify-between"><h2 className="font-black">وظائفي المنشورة ({count})</h2><Link to="/post-job" className="text-sm font-bold text-primary underline">+ وظيفة جديدة</Link></div>
+      {msg && <p role="alert" className="mt-3 text-sm">{msg}</p>}
+      {isLoading ? <p>...</p> : isError && jobs.length === 0 ? <p role="alert">تعذّر تحميل إعلاناتك، عاود المحاولة بعد قليل.</p> : jobs.length === 0 ? <p className="mt-3 text-sm text-muted-foreground">مازال ما نشرتي حتى وظيفة.</p> : (
         <ul className="mt-3 space-y-3">
           {jobs.map((j) => (
             <li key={j.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border p-3">
@@ -273,10 +289,10 @@ function MyJobs({ userId }: { userId: string }) {
                 <p className="text-xs text-muted-foreground">{j.business_name} · {j.city} · {new Date(j.created_at).toLocaleDateString("ar-MA")}</p>
               </div>
               <div className="flex gap-2">
-                <button onClick={() => toggle(j)} className={`rounded-full px-3 py-1 text-sm font-bold ${j.is_filled ? "bg-primary text-primary-foreground" : "border"}`}>
+                <Button variant={j.is_filled ? "default" : "outline"} onClick={() => toggle(j)} className="rounded-full px-3 py-1 text-sm font-bold">
                   {j.is_filled ? "رجّعها شاغرة" : "✓ لقيت شي واحد"}
-                </button>
-                <button onClick={() => remove(j)} className="rounded-full border border-accent px-3 py-1 text-sm font-bold text-accent">حذف</button>
+                </Button>
+                <Button variant="outline" onClick={() => remove(j)} className="rounded-full border-accent px-3 py-1 text-sm font-bold text-accent">حذف</Button>
               </div>
             </li>
           ))}

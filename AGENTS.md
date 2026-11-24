@@ -9,7 +9,7 @@
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
 
-- Homepage opportunity totals and the jobs list use shared openJobsQueryOptions; count only unfilled jobs, refresh periodically, and never display request failures or loading as zero.
+- Public opportunity totals, city lists, weekly listings and guest alerts use shared openJobsQueryOptions; count only unfilled jobs within each view's filters, refresh periodically, and never display request failures or loading as zero. Successful job creation, closure, reopening and deletion invalidate the jobs query family; owner history and delivered notifications retain closed records.
 
 - Educational videos are stored as validated YouTube IDs and URLs in `educational_videos`; public reads only published rows, while database policies restrict management to admins, because media stays on YouTube and permissions must remain server-enforced.
 - Notifications are rows created by database triggers in `notifications`; push delivery is a queue flushed by the `flushPush` server function (Web Push via @pushforge/builder, VAPID key in secrets) because the Worker runtime has no background jobs.

@@ -1,6 +1,7 @@
 import { useCities } from "@/lib/use-cities";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { professions, schedules } from "@/lib/constants";
 import { flushPush } from "@/lib/push.functions";
@@ -14,7 +15,8 @@ export const Route = createFileRoute("/_authenticated/post-job")({
 function PostJob() {
   const cities = useCities();
   const nav = useNavigate();
-  const [f, setF] = useState({ title: "", business_name: "", city: cities[0]!, role: professions[0]!, schedule: schedules[0]!, salary: "", description: "", phone: "" });
+  const queryClient = useQueryClient();
+  const [f, setF] = useState({ title: "", business_name: "", city: cities[0] ?? "", role: professions[0] ?? "", schedule: schedules[0] ?? "", salary: "", description: "", phone: "" });
   const [msg, setMsg] = useState("");
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => setF({ ...f, [k]: e.target.value });
   const input = "w-full rounded-xl border bg-card px-4 py-3";
@@ -23,6 +25,7 @@ function PostJob() {
     e.preventDefault();
     const { error } = await supabase.from("jobs").insert(f);
     if (error) return setMsg("وقع خطأ، حاول مرة أخرى");
+    await queryClient.invalidateQueries({ queryKey: ["jobs"] });
     flushPush().catch(() => {});
     nav({ to: "/jobs" });
   }

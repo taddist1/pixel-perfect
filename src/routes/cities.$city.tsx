@@ -1,5 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { openJobsQueryOptions } from "@/lib/jobs-query";
 import { supabase } from "@/integrations/supabase/client";
 import { whatsappUrl } from "@/lib/whatsapp";
 import { criteria, type CriterionKey } from "@/lib/trust";
@@ -25,14 +27,15 @@ export const Route = createFileRoute("/cities/$city")({
   component: CityPage,
 });
 
-type Job = { id: string; title: string; business_name: string; role: string; schedule: string; salary: string | null; phone: string | null; description: string | null };
 type Seeker = { id: string; full_name: string | null; profession: string | null; experience_years: number | null; phone: string | null; is_available: boolean | null; skills: string[] | null };
 type Review = { id: string; author_name: string; author_type: "owner" | "seeker" | null; rating: number; comment: string; created_at: string; reply: string | null; quality: number | null; commitment: number | null; communication: number | null; professionalism: number | null; profiles: { full_name: string | null; profession: string | null } | null };
 const REVIEW_SELECT = "id,author_name,author_type,rating,comment,created_at,reply,quality,commitment,communication,professionalism,profiles!inner(full_name,profession,city)";
 
 function CityPage() {
   const { city } = Route.useParams();
-  const [jobs, setJobs] = useState<Job[]>([]);
+  const jobsQuery = useQuery(openJobsQueryOptions(city));
+  const jobs = jobsQuery.data?.jobs ?? [];
+  const jobsCount = jobsQuery.data?.count ?? (jobsQuery.isError ? "—" : "…");
   const [seekers, setSeekers] = useState<Seeker[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [user, setUser] = useState<{ id: string } | null>(null);
@@ -46,7 +49,6 @@ function CityPage() {
   const [tab, setTab] = useState<"jobs" | "seekers" | "reviews">("seekers");
 
   useEffect(() => {
-    supabase.from("jobs").select("id,title,business_name,role,schedule,salary,phone,description").eq("city", city).eq("is_filled", false).order("created_at", { ascending: false }).then(({ data }) => setJobs((data ?? []) as Job[]));
     supabase.from("public_seekers").select("id,full_name,profession,experience_years,phone,is_available,skills").eq("city", city).then(({ data }) => {
       const rows = (data ?? []) as Seeker[];
       setSeekers(rows);
@@ -93,9 +95,9 @@ function CityPage() {
     setReviews((data ?? []) as unknown as Review[]);
   }
 
-  const tabs: [typeof tab, string, number][] = [
+  const tabs: [typeof tab, string, number | string][] = [
     ["seekers", "الكفاءات", seekers.length],
-    ["jobs", "الوظائف", jobs.length],
+    ["jobs", "الوظائف", jobsCount],
     ["reviews", "التقييمات", reviews.length],
   ];
 
@@ -113,7 +115,7 @@ function CityPage() {
           <p className="mt-3 max-w-xl opacity-90">كل كفاءات ووظائف المقاهي والمطاعم في {city} — في مكان واحد.</p>
           <div className="mt-5 flex gap-6 text-sm font-bold">
             <span>{seekers.length} كفاءة</span>
-            <span>{jobs.length} وظيفة</span>
+            <span>{jobsCount} وظيفة</span>
             <span>{reviews.length} تقييم</span>
           </div>
         </div>
@@ -161,7 +163,7 @@ function CityPage() {
         )}
 
         {tab === "jobs" && (
-          jobs.length === 0 ? (
+          jobsQuery.isLoading ? <p>...</p> : jobsQuery.isError && jobs.length === 0 ? <p role="alert">تعذّر تحميل الفرص، عاود المحاولة بعد قليل.</p> : jobs.length === 0 ? (
             <p className="rounded-2xl border p-10 text-center text-muted-foreground">لا توجد وظائف منشورة في {city} بعد.</p>
           ) : (
             <div className="space-y-4">
