@@ -2,7 +2,7 @@ import { useCities } from "@/lib/use-cities";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { openJobsQueryOptions } from "@/lib/jobs-query";
 
 import { whatsappUrl } from "@/lib/whatsapp";
 import { JobAlertsBell } from "@/components/JobAlerts";
@@ -28,18 +28,10 @@ function Jobs() {
     const saved = localStorage.getItem("qahwati_city");
     if (saved && cities.includes(saved)) setCity(saved);
   }, []);
-  const { data, isLoading } = useQuery({
-    queryKey: ["jobs", city],
-    queryFn: async () => {
-      let q = supabase.from("jobs").select("*").eq("is_filled", false).order("created_at", { ascending: false }).limit(100);
-      if (city) q = q.eq("city", city);
-      const { data } = await q;
-      return data ?? [];
-    },
-  });
+  const { data, isLoading, isError } = useQuery(openJobsQueryOptions(city));
 
   const term = search.trim();
-  const filtered = (data ?? []).filter((j) =>
+  const filtered = (data?.jobs ?? []).filter((j) =>
     (!term || [j.title, j.role, j.business_name, j.description ?? ""].join(" ").includes(term))
     && (!role || j.role === role)
     && (!schedule || j.schedule === schedule)
@@ -87,7 +79,8 @@ function Jobs() {
       />
       <div className="mt-6 space-y-4">
         {isLoading && <p>...</p>}
-        {!isLoading && filtered.length === 0 && (
+        {isError && <p role="alert">تعذّر تحميل الفرص، عاود المحاولة بعد قليل.</p>}
+        {!isLoading && !isError && filtered.length === 0 && (
           <div className="rounded-2xl border p-8 text-center text-muted-foreground">
             <p>لا توجد وظائف مطابقة حالياً{city ? ` في ${city}` : ""}. كن أول من ينشر!</p>
             {city && (

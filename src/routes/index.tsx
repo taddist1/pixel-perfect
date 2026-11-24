@@ -1,6 +1,8 @@
 import { useCities } from "@/lib/use-cities";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { openJobsQueryOptions } from "@/lib/jobs-query";
 import { BookOpen, BriefcaseBusiness, ChevronLeft, Coffee, MapPin, Menu, Play, UserRoundSearch, Wrench, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { youtubeThumbnail } from "@/lib/youtube";
@@ -38,7 +40,8 @@ function Index() {
   const cities = useCities();
   const [city, setCity] = useState(cities[0]);
   const [counts, setCounts] = useState<Record<string, number>>({});
-  const [jobsCount, setJobsCount] = useState(0);
+  const jobsQuery = useQuery(openJobsQueryOptions());
+  const jobsCount = jobsQuery.data?.count ?? (jobsQuery.isError ? "—" : "…");
   const [videos, setVideos] = useState<Tables<"educational_videos">[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -51,9 +54,6 @@ function Index() {
         if (p) c[p] = (c[p] ?? 0) + 1;
       }
       setCounts(c);
-    });
-    supabase.from("jobs").select("id", { count: "exact", head: true }).then(({ count }) => {
-      setJobsCount(count ?? 0);
     });
     supabase.from("educational_videos").select("*").eq("is_published", true).order("created_at", { ascending: false }).limit(3).then(({ data }) => {
       setVideos(data ?? []);
