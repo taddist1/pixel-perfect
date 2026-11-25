@@ -31,7 +31,7 @@ export const Route = createFileRoute("/")({
 
 const roles = [
   { t: "تقني آلات القهوة", d: "إصلاح وصيانة عاجلة قريبة منك", match: "تقني" },
-  { t: "بارستا", d: "دوام كامل، جزئي أو ورديات", match: "باريستا" },
+  { t: "بارستا", d: "دوام كامل، جزئي أو ورديات", match: "بارستا" },
   { t: "سرباي / نادل", d: "عمّال خدمة بسمعة موثّقة", match: "نادل" },
   { t: "مهن مساندة", d: "تحميص، نظافة، توصيل، توزيع القهوة، حراسة", match: "" },
 ];
@@ -69,7 +69,7 @@ function Index() {
   const totalSeekers = Object.values(counts).reduce((a, b) => a + b, 0);
   const countFor = (match: string): number => {
     if (!match) return Math.max(0, totalSeekers - roles.slice(0, 3).reduce((a, r) => a + countFor(r.match), 0));
-    return Object.entries(counts).filter(([p]) => p.includes(match)).reduce((a, [, n]) => a + n, 0);
+    return Object.entries(counts).filter(([p]) => p.replace(/ي/g, "").includes(match.replace(/ي/g, ""))).reduce((a, [, n]) => a + n, 0);
   };
 
   return (
