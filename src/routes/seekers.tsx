@@ -85,7 +85,7 @@ function Seekers() {
 
   const term = search.trim();
   const filtered = rows.filter((s) => {
-    if (term && ![s.full_name ?? "", s.profession ?? "", s.city ?? "", (s.skills ?? []).join(" ")].join(" ").includes(term)) return false;
+    if (term && ![s.full_name ?? "", s.profession ?? "", s.city ?? "", (s.skills ?? []).join(" ")].join(" ").replace(/ي/g, "").includes(term.replace(/ي/g, ""))) return false;
     if (avail === "yes" && !s.is_available) return false;
     if (skill && !(s.skills ?? []).includes(skill)) return false;
     if (exp) {
