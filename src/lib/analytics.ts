@@ -6,6 +6,8 @@ declare global {
   interface Window {
     dataLayer: unknown[];
     gtag?: (...args: unknown[]) => void;
+    fbq?: ((...args: unknown[]) => void) & { queue?: unknown[]; callMethod?: (...a: unknown[]) => void };
+    _fbq?: unknown;
   }
 }
 
@@ -23,7 +25,31 @@ export function hasConsent() {
 
 // Consent Mode v2: the tag always loads (so Google can detect it) but
 // stores no cookies until the visitor accepts.
+const META_PIXEL_ID = "29593007480324635";
+let pixelLoaded = false;
+
+function initMetaPixel() {
+  if (pixelLoaded || !PUBLIC_HOSTS.has(window.location.hostname)) return;
+  pixelLoaded = true;
+  const n = function (...args: unknown[]) {
+    if (n.callMethod) n.callMethod(...args);
+    else n.queue!.push(args);
+  } as NonNullable<Window["fbq"]> & { push?: unknown; loaded?: boolean; version?: string };
+  n.queue = [];
+  n.push = n;
+  n.loaded = true;
+  n.version = "2.0";
+  window.fbq = n;
+  window._fbq = n;
+  const t = document.createElement("script");
+  t.async = true;
+  t.src = "https://connect.facebook.net/en_US/fbevents.js";
+  document.head.appendChild(t);
+  window.fbq("init", META_PIXEL_ID);
+}
+
 export function initAnalytics() {
+  if (typeof window !== "undefined") initMetaPixel();
   if (typeof window === "undefined" || !MEASUREMENT_ID || !PUBLIC_HOSTS.has(window.location.hostname)) return;
   if (loaded) {
     if (hasConsent()) window.gtag?.("consent", "update", { analytics_storage: "granted" });
@@ -53,6 +79,7 @@ export function initAnalytics() {
 }
 
 export function trackPageView(path: string) {
+  if (typeof window !== "undefined" && pixelLoaded && lastPagePath !== path) window.fbq?.("track", "PageView");
   if (typeof window === "undefined" || !loaded || !window.gtag || lastPagePath === path) return;
   lastPagePath = path;
   window.gtag("event", "page_view", {
