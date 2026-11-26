@@ -51,10 +51,22 @@ describe("Analytics accuracy", () => {
 
   it.each(["localhost", "id-preview--example.lovable.app"])("excludes %s from live reports", async (hostname) => {
     vi.stubGlobal("location", { hostname, origin: `https://${hostname}` });
-    const { initAnalytics, trackPageView } = await import("./analytics");
+    const { initAnalytics, trackPageView, trackSignUp } = await import("./analytics");
     initAnalytics();
     trackPageView("/");
+    trackSignUp("email");
+    trackSignUp("phone");
     expect(commands()).toEqual([]);
     expect(document.head.querySelectorAll('script[src*="googletagmanager"]')).toHaveLength(0);
+  });
+
+  it.each(["email", "phone"] as const)("sends sign_up with method %s and loads the tag on direct registration", async (method) => {
+    const { trackSignUp } = await import("./analytics");
+    trackSignUp(method);
+    expect(commands().filter(([name, event]) => name === "event" && event === "sign_up")).toEqual([
+      ["event", "sign_up", { method }],
+    ]);
+    expect(commands()).toContainEqual(["config", "G-FSH6HY17ER", { send_page_view: false }]);
+    expect(document.head.querySelectorAll('script[src*="googletagmanager"]')).toHaveLength(1);
   });
 });

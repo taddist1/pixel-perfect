@@ -88,3 +88,10 @@ export function trackPageView(path: string) {
     page_title: document.title,
   });
 }
+
+export function trackSignUp(method: "email" | "phone") {
+  // Initialize here as well so direct visits to registration cannot miss the tag.
+  initAnalytics();
+  if (typeof window === "undefined" || !loaded) return;
+  window.gtag?.("event", "sign_up", { method });
+}

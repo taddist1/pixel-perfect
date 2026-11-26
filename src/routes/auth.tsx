@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { oauthReturnPath } from "@/lib/oauth-return-path";
+import { trackSignUp } from "@/lib/analytics";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/auth")({
@@ -79,12 +80,16 @@ function AuthPage() {
         return;
       }
       if (mode === "up") {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email: phoneEmail(),
           password,
           options: { emailRedirectTo: back(), data: { full_name: name || "مستخدم قهوتي", phone: phoneE164() } },
         });
         if (!error) {
+          if (data.user && data.user.identities?.length !== 0) {
+            trackSignUp("phone");
+            window.__lovableEvents?.track?.("project.sign_up", { method: "phone" });
+          }
           setMsg("تم إنشاء حسابك ✅ جاري تحويلك لإكمال ملفك...");
           nav({ to: "/account" });
         } else if (/registered/i.test(error.message)) setMsg("هذا الرقم مسجّل من قبل — اضغط «عندك حساب؟ دخول».");
@@ -99,12 +104,16 @@ function AuthPage() {
       return;
     }
     if (mode === "up") {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: { emailRedirectTo: back(), data: { full_name: name } },
       });
       if (!error) {
+        if (data.user && data.user.identities?.length !== 0) {
+          trackSignUp("email");
+          window.__lovableEvents?.track?.("project.sign_up", { method: "email" });
+        }
         setMsg("تم إنشاء حسابك ✅ جاري تحويلك لإكمال ملفك...");
         nav({ to: "/account" });
       } else if (error.status === 429) setMsg("انتظر دقيقة واحدة قبل المحاولة من جديد.");
