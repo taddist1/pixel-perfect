@@ -21,8 +21,11 @@ vi.mock("@/lib/analytics", () => ({ trackSignUp: mocks.track }));
 
 import { Route } from "@/routes/auth";
 
-const AuthPage = Route.options.component;
-if (!AuthPage) throw new Error("Registration page is missing");
+function renderAuth() {
+  const AuthPage = Route.options.component;
+  if (!AuthPage) throw new Error("Registration page is missing");
+  return render(<AuthPage />);
+}
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -32,7 +35,7 @@ beforeEach(() => {
 afterEach(cleanup);
 
 function fillRegistration(method: "email" | "phone") {
-  render(<AuthPage />);
+  renderAuth();
   fireEvent.click(screen.getByRole("button", { name: "ما عندكش حساب؟ سجّل الآن" }));
   if (method === "phone") fireEvent.click(screen.getByRole("button", { name: "📱 بالهاتف" }));
   fireEvent.change(screen.getByPlaceholderText("الاسم الكامل"), { target: { value: "Analytics test" } });
@@ -69,10 +72,10 @@ describe("Registration tracking", () => {
   });
 
   it("does not track ordinary login", async () => {
-    render(<AuthPage />);
+    renderAuth();
     fireEvent.change(screen.getByPlaceholderText("email@example.com"), { target: { value: "analytics-test@example.com" } });
     fireEvent.change(screen.getByPlaceholderText("••••••"), { target: { value: "Test-only-password-73" } });
-    fireEvent.click(screen.getByRole("button", { name: "دخول", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: /^دخول$/ }));
     await waitFor(() => expect(mocks.signIn).toHaveBeenCalledTimes(1));
     expect(mocks.signUp).not.toHaveBeenCalled();
     expect(mocks.track).not.toHaveBeenCalled();
